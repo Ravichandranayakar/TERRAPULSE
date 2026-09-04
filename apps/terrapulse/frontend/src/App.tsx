@@ -98,7 +98,7 @@ export default function App() {
   const [statusData, setStatusData] = useState<GeoCell[]>([]);
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
-  const [useMapLibre, setUseMapLibre] = useState(true);
+  const [useMapLibre, setUseMapLibre] = useState(false);
   const [simulationCells, setSimulationCells] = useState<GeoCell[]>([]);
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -414,7 +414,9 @@ export default function App() {
                       <GeospatialViewer
                         cells={displayCells}
                         historicalEvents={geoData?.historical_landslides || []}
+                        nh10Route={geoData?.nh10_route || []}
                         onCellClick={(cell) => setSelectedCellId(cell.location_id)}
+                        initialSelectedCellId={selectedCellId}
                       />
                     ) : (
                       <LandslideMap
@@ -422,7 +424,10 @@ export default function App() {
                         nh10Route={geoData?.nh10_route || []}
                         historicalLandslides={geoData?.historical_landslides || []}
                         selectedCellId={selectedCellId}
-                        onCellSelect={setSelectedCellId}
+                        onCellSelect={(id) => {
+                          setSelectedCellId(id);
+                          setUseMapLibre(true);
+                        }}
                         simulationCells={simulationCells}
                       />
                     )}

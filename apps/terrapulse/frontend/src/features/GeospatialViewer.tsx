@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import Map, { Source, Layer, MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -31,11 +31,15 @@ const mapStyle = `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTI
 export default function GeospatialViewer({ 
   cells = [], 
   historicalEvents = [],
-  onCellClick 
+  nh10Route = [],
+  onCellClick,
+  initialSelectedCellId
 }: { 
   cells?: GeoCell[],
   historicalEvents?: any[],
-  onCellClick?: (cell: GeoCell) => void
+  nh10Route?: any[],
+  onCellClick?: (cell: GeoCell) => void,
+  initialSelectedCellId?: string | null
 }) {
   const mapRef = useRef<MapRef>(null);
   const [viewState, setViewState] = useState({
@@ -48,6 +52,7 @@ export default function GeospatialViewer({
 
   const [selectedCell, setSelectedCell] = useState<GeoCell | null>(null);
   const [is3D, setIs3D] = useState(false);
+  const [saved2DState, setSaved2DState] = useState<any>(null);
 
   // Convert risk cells to GeoJSON
   const riskGeoJSON = React.useMemo(() => {
@@ -55,21 +60,27 @@ export default function GeospatialViewer({
       type: 'FeatureCollection',
       features: cells.map(cell => {
         let color = '#22c55e'; // LOW (Green)
-        if (cell.risk_level === 'MODERATE') color = '#eab308'; // YELLOW
-        if (cell.risk_level === 'HIGH') color = '#f97316'; // ORANGE
-        if (cell.risk_level === 'CRITICAL') color = '#ef4444'; // RED
+        let opacity = 0.3;
+        if (cell.risk_level === 'moderate' || cell.risk_level === 'MODERATE') { color = '#eab308'; opacity = 0.4; }
+        if (cell.risk_level === 'high' || cell.risk_level === 'HIGH') { color = '#f97316'; opacity = 0.55; }
+        if (cell.risk_level === 'critical' || cell.risk_level === 'CRITICAL') { color = '#ef4444'; opacity = 0.75; }
+
+        const lon_min = cell.lon_min;
+        const lon_max = cell.lon_max;
+        const lat_min = cell.lat_min;
+        const lat_max = cell.lat_max;
 
         return {
           type: 'Feature',
-          properties: { ...cell, color },
+          properties: { ...cell, color, opacity },
           geometry: {
             type: 'Polygon',
             coordinates: [[
-              [cell.lon_min, cell.lat_min],
-              [cell.lon_max, cell.lat_min],
-              [cell.lon_max, cell.lat_max],
-              [cell.lon_min, cell.lat_max],
-              [cell.lon_min, cell.lat_min]
+              [lon_min, lat_min],
+              [lon_max, lat_min],
+              [lon_max, lat_max],
+              [lon_min, lat_max],
+              [lon_min, lat_min]
             ]]
           }
         };
@@ -77,16 +88,48 @@ export default function GeospatialViewer({
     };
   }, [cells]);
 
+  const nh10GeoJSON = React.useMemo(() => {
+    return {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        type: 'LineString',
+        coordinates: nh10Route.map(coord => [coord[1], coord[0]]) // [lng, lat]
+      }
+    };
+  }, [nh10Route]);
+
+  const historicalGeoJSON = React.useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: historicalEvents.map(event => ({
+        type: 'Feature',
+        properties: { ...event },
+        geometry: {
+          type: 'Point',
+          coordinates: [event.lon, event.lat]
+        }
+      }))
+    };
+  }, [historicalEvents]);
+
   const handleExplore3D = (cell: GeoCell) => {
     if (!mapRef.current) return;
     
+    // Cache the exact 2D geographic camera state before drill-down
+    setSaved2DState({
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom
+    });
+
     setIs3D(true);
     mapRef.current.flyTo({
       center: [cell.centroid_lon, cell.centroid_lat],
-      zoom: 14,
-      pitch: 75, // High pitch for 3D terrain
+      zoom: 12.5,
+      pitch: 75,
       bearing: 25,
-      duration: 2500, // Smooth 2.5s fly over
+      duration: 2500,
     });
   };
 
@@ -94,14 +137,39 @@ export default function GeospatialViewer({
     if (!mapRef.current) return;
     
     setIs3D(false);
-    setSelectedCell(null);
-    mapRef.current.flyTo({
-      center: [88.5122, 27.3314],
-      zoom: 9,
-      pitch: 0,
-      bearing: 0,
-      duration: 2000,
-    });
+    
+    // Restore the exact 2D camera state
+    if (saved2DState) {
+      mapRef.current.flyTo({
+        center: [saved2DState.longitude, saved2DState.latitude],
+        zoom: saved2DState.zoom,
+        pitch: 0,
+        bearing: 0,
+        duration: 2000,
+      });
+    } else {
+      mapRef.current.flyTo({
+        center: [88.5122, 27.3314],
+        zoom: 9,
+        pitch: 0,
+        bearing: 0,
+        duration: 2000,
+      });
+    }
+  };
+
+  const handleMapLoad = () => {
+    if (initialSelectedCellId && !is3D) {
+      const targetCell = cells.find(c => c.location_id === initialSelectedCellId);
+      if (targetCell) {
+        setSelectedCell(targetCell);
+        
+        // Slight delay to ensure map canvas is fully sized before flying
+        setTimeout(() => {
+          handleExplore3D(targetCell);
+        }, 300);
+      }
+    }
   };
 
   return (
@@ -110,6 +178,7 @@ export default function GeospatialViewer({
       {/* MAPLIBRE GL CANVAS */}
       <Map
         ref={mapRef}
+        onLoad={handleMapLoad}
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
         mapStyle={mapStyle}
@@ -121,6 +190,11 @@ export default function GeospatialViewer({
             if (clickedCell) {
               setSelectedCell(clickedCell);
               if (onCellClick) onCellClick(clickedCell);
+              
+              // Automatically trigger the 3D drill-down when clicked in 2D overview
+              if (!is3D) {
+                handleExplore3D(clickedCell);
+              }
             }
           }
         }}
@@ -134,6 +208,29 @@ export default function GeospatialViewer({
           tileSize={256}
         />
 
+        {/* NH-10 ROUTE */}
+        <Source id="nh10-route" type="geojson" data={nh10GeoJSON as any}>
+          <Layer
+            id="nh10-line-glow"
+            type="line"
+            paint={{
+              'line-color': '#60a5fa',
+              'line-width': 6,
+              'line-opacity': 0.15
+            }}
+          />
+          <Layer
+            id="nh10-line"
+            type="line"
+            paint={{
+              'line-color': '#3b82f6',
+              'line-width': 2.5,
+              'line-opacity': 0.7,
+              'line-dasharray': [2, 2]
+            }}
+          />
+        </Source>
+
         {/* RISK GRID (GeoJSON) */}
         <Source id="risk-data" type="geojson" data={riskGeoJSON as any}>
           <Layer
@@ -141,16 +238,23 @@ export default function GeospatialViewer({
             type="fill"
             paint={{
               'fill-color': ['get', 'color'],
-              'fill-opacity': 0.45,
+              'fill-opacity': ['get', 'opacity'],
             }}
           />
+
+        </Source>
+
+        {/* HISTORICAL MARKERS */}
+        <Source id="historical-data" type="geojson" data={historicalGeoJSON as any}>
           <Layer
-            id="risk-outline"
-            type="line"
+            id="historical-points"
+            type="circle"
             paint={{
-              'line-color': ['get', 'color'],
-              'line-width': 1,
-              'line-opacity': 0.8
+              'circle-radius': 4,
+              'circle-color': '#71717a',
+              'circle-opacity': 0.8,
+              'circle-stroke-width': 1,
+              'circle-stroke-color': '#a1a1aa'
             }}
           />
         </Source>
@@ -202,7 +306,7 @@ export default function GeospatialViewer({
             <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
               <div className="bg-white/5 p-2 rounded">
                 <div className="text-slate-500 mb-1">Slope Angle</div>
-                <div className="font-mono text-white">{selectedCell.slope_angle.toFixed(1)}�</div>
+                <div className="font-mono text-white">{selectedCell.slope_angle.toFixed(1)}?</div>
               </div>
               <div className="bg-white/5 p-2 rounded">
                 <div className="text-slate-500 mb-1">History</div>
