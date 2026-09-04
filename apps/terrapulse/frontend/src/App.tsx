@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './com
 import { Badge } from './components/ui/badge';
 import { Separator } from './components/ui/separator';
 import { LandslideMap } from './features/LandslideMap';
+import GeospatialViewer from './features/GeospatialViewer';
 import { XAIPanel } from './features/XAIPanel';
 import { WarningsPanel } from './features/WarningsPanel';
 import { StormSimulator } from './features/StormSimulator';
@@ -95,6 +96,7 @@ export default function App() {
   const [statusData, setStatusData] = useState<GeoCell[]>([]);
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
+  const [useMapLibre, setUseMapLibre] = useState(true);
   const [simulationCells, setSimulationCells] = useState<GeoCell[]>([]);
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -385,14 +387,34 @@ export default function App() {
                       </div>
                     </Card>
                   ) : (
-                    <LandslideMap
-                      cells={displayCells}
-                      nh10Route={geoData?.nh10_route || []}
-                      historicalLandslides={geoData?.historical_landslides || []}
-                      selectedCellId={selectedCellId}
-                      onCellSelect={setSelectedCellId}
-                      simulationCells={simulationCells}
-                    />
+                    <div className="relative h-full w-full">
+                    <div className="absolute top-2 right-2 z-50">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setUseMapLibre(!useMapLibre)}
+                        className="bg-black/70 backdrop-blur text-[10px] h-6 border-white/20"
+                      >
+                        {useMapLibre ? 'Switch to Fallback (Leaflet)' : 'Switch to 3D Engine (MapLibre)'}
+                      </Button>
+                    </div>
+                    {useMapLibre ? (
+                      <GeospatialViewer
+                        cells={displayCells}
+                        historicalEvents={geoData?.historical_landslides || []}
+                        onCellClick={(cell) => setSelectedCellId(cell.location_id)}
+                      />
+                    ) : (
+                      <LandslideMap
+                        cells={displayCells}
+                        nh10Route={geoData?.nh10_route || []}
+                        historicalLandslides={geoData?.historical_landslides || []}
+                        selectedCellId={selectedCellId}
+                        onCellSelect={setSelectedCellId}
+                        simulationCells={simulationCells}
+                      />
+                    )}
+                  </div>
                   )}
                 </div>
 
