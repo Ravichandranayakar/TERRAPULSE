@@ -88,6 +88,30 @@ export default function GeospatialViewer({
     };
   }, [cells]);
 
+
+  const riskCentroidsGeoJSON = React.useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: cells.map(cell => {
+        let color = '#22c55e';
+        if (cell.risk_level === 'moderate' || cell.risk_level === 'MODERATE') color = '#eab308';
+        if (cell.risk_level === 'high' || cell.risk_level === 'HIGH') color = '#f97316';
+        if (cell.risk_level === 'critical' || cell.risk_level === 'CRITICAL') color = '#ef4444';
+
+        const shortName = cell.name.split(' ').slice(-1)[0];
+
+        return {
+          type: 'Feature',
+          properties: { ...cell, color, shortName },
+          geometry: {
+            type: 'Point',
+            coordinates: [cell.centroid_lon, cell.centroid_lat]
+          }
+        };
+      })
+    };
+  }, [cells]);
+
   const nh10GeoJSON = React.useMemo(() => {
     return {
       type: 'Feature',
@@ -241,7 +265,36 @@ export default function GeospatialViewer({
               'fill-opacity': ['get', 'opacity'],
             }}
           />
+        </Source>
 
+        {/* RISK CENTROIDS & LABELS */}
+        <Source id="risk-centroids" type="geojson" data={riskCentroidsGeoJSON as any}>
+          <Layer
+            id="risk-points"
+            type="circle"
+            paint={{
+              'circle-radius': ['case', ['any', ['==', ['get', 'risk_level'], 'high'], ['==', ['get', 'risk_level'], 'critical']], 5, 3.5],
+              'circle-color': ['get', 'color'],
+              'circle-stroke-width': 1,
+              'circle-stroke-color': '#ffffff'
+            }}
+          />
+          <Layer
+            id="risk-labels"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'shortName'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 11,
+              'text-offset': [0, 1.5],
+              'text-anchor': 'top'
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': 'rgba(0,0,0,0.8)',
+              'text-halo-width': 1
+            }}
+          />
         </Source>
 
         {/* HISTORICAL MARKERS */}
