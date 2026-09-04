@@ -1,6 +1,6 @@
 # TerraPulse.ai
 
-?? **Live Demo:** [https://terrapulse-86te.onrender.com/](https://terrapulse-86te.onrender.com/)
+**Live Demo:** [https://terrapulse-86te.onrender.com/](https://terrapulse-86te.onrender.com/)
 **AI-Based Early Warning and Landslide Risk Monitoring System in the North Eastern Region (NER)**
 
 *SIH 2026 Problem Statement: SIH26001*
