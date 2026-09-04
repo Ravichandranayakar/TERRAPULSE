@@ -1,0 +1,69 @@
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+*.MD
+
+# Logs
+*.log
+logs/
+
+# Virtual environments
+venv/
+env/
+.env
+
+# Node modules (will be installed in container)
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Build artifacts
+frontend/build/
+*.tar.gz
+
+# Batch files (Windows specific)
+*.bat
+
+# Test files
+test_*.py
+*_test.py
+
+# Coverage
+.coverage
+htmlcov/
+
+# Jupyter notebooks
+*.ipynb
+
+# Large files
+*.mp4
+*.avi
+*.mov
+
+commands.txt

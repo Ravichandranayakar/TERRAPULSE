@@ -1,0 +1,30 @@
+services:
+  # 1. Backend API Service
+  - type: web
+    name: terrapulse-backend
+    env: docker
+    region: singapore
+    plan: free
+    dockerContext: apps/terrapulse/backend
+    dockerfilePath: apps/terrapulse/backend/Dockerfile
+    autoDeploy: false
+    envVars:
+      - key: PORT
+        value: 10000
+
+  # 2. Frontend React Service
+  - type: web
+    name: terrapulse-frontend
+    env: docker
+    region: singapore
+    plan: free
+    dockerContext: apps/terrapulse/frontend
+    dockerfilePath: apps/terrapulse/frontend/Dockerfile
+    autoDeploy: false
+    envVars:
+      # Automatically pass the Backend's Render URL into the Frontend build step!
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: terrapulse-backend
+          envVarKey: RENDER_EXTERNAL_URL

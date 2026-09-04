@@ -1,0 +1,2935 @@
+{
+  "timestamp": "2026-09-04T19:09:09.066104",
+  "summary": {
+    "total_cells": 10,
+    "critical": 0,
+    "high": 6,
+    "moderate": 4,
+    "low": 0,
+    "warnings_generated": 6,
+    "nh10_risk_cells": 2
+  },
+  "events": [
+    {
+      "type": "scenario_start",
+      "step": 0,
+      "time_label": "T+0: Normal Conditions",
+      "description": "Baseline state. Pre-monsoon conditions. All monitoring cells stable.",
+      "progress": 5
+    },
+    {
+      "type": "map_update",
+      "step": 0,
+      "time_label": "T+0: Normal Conditions",
+      "cells": [
+        {
+          "location_id": "NSK_01",
+          "name": "Mangan North Ridge",
+          "centroid_lat": 27.545,
+          "centroid_lon": 88.535,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 72,
+              "unit": "%",
+              "raw": 0.72,
+              "raw_unit": "index",
+              "weight": 0.72
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 42,
+              "raw_unit": "\u00b0",
+              "weight": 0.6461538461538462
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 53.3,
+              "unit": "%",
+              "raw": 8,
+              "raw_unit": "events",
+              "weight": 0.5333333333333333
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 21.8,
+              "unit": "%",
+              "raw": 0.22,
+              "raw_unit": "index",
+              "weight": 0.21797776419524129
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 10.4,
+              "unit": "%",
+              "raw": 57.00911247027446,
+              "raw_unit": "mm",
+              "weight": 0.10365293176413538
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 9.348459674536894,
+            "rainfall_3d_mm": 10.083755993068696,
+            "rainfall_7d_mm": 57.00911247027446,
+            "rainfall_intensity": 1.5344296717531807,
+            "soil_moisture_index": 0.21797776419524129,
+            "slope_angle": 42,
+            "elevation_m": 1820,
+            "base_susceptibility": 0.72,
+            "historical_count": 8
+          }
+        },
+        {
+          "location_id": "NSK_02",
+          "name": "Mangan Town Slope",
+          "centroid_lat": 27.51,
+          "centroid_lon": 88.54,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 65,
+              "unit": "%",
+              "raw": 0.65,
+              "raw_unit": "index",
+              "weight": 0.65
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 58.5,
+              "unit": "%",
+              "raw": 38,
+              "raw_unit": "\u00b0",
+              "weight": 0.5846153846153846
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 33.3,
+              "unit": "%",
+              "raw": 5,
+              "raw_unit": "events",
+              "weight": 0.3333333333333333
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 25.5,
+              "unit": "%",
+              "raw": 0.26,
+              "raw_unit": "index",
+              "weight": 0.2551106478010151
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 4.3,
+              "unit": "%",
+              "raw": 23.670237298968384,
+              "raw_unit": "mm",
+              "weight": 0.04303679508903343
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 6.763082789929097,
+            "rainfall_3d_mm": 10.220252850583243,
+            "rainfall_7d_mm": 23.670237298968384,
+            "rainfall_intensity": 2.7320069652159042,
+            "soil_moisture_index": 0.2551106478010151,
+            "slope_angle": 38,
+            "elevation_m": 1650,
+            "base_susceptibility": 0.65,
+            "historical_count": 5
+          }
+        },
+        {
+          "location_id": "NSK_03",
+          "name": "Chungthang Upper Slope",
+          "centroid_lat": 27.605,
+          "centroid_lon": 88.645,
+          "near_nh10": false,
+          "risk_score": 0.2,
+          "risk_level": "moderate",
+          "probability": 0.002,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 81,
+              "unit": "%",
+              "raw": 0.81,
+              "raw_unit": "index",
+              "weight": 0.81
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 11,
+              "raw_unit": "events",
+              "weight": 0.7333333333333333
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 72.3,
+              "unit": "%",
+              "raw": 47,
+              "raw_unit": "\u00b0",
+              "weight": 0.7230769230769231
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 29.2,
+              "unit": "%",
+              "raw": 0.29,
+              "raw_unit": "index",
+              "weight": 0.29154856568391707
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 9.9,
+              "unit": "%",
+              "raw": 37.49218131295606,
+              "raw_unit": "mm",
+              "weight": 0.09866363503409491
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 2.202423887720368,
+            "rainfall_3d_mm": 37.49218131295606,
+            "rainfall_7d_mm": 41.603862123389376,
+            "rainfall_intensity": 0.7340662345428357,
+            "soil_moisture_index": 0.29154856568391707,
+            "slope_angle": 47,
+            "elevation_m": 2210,
+            "base_susceptibility": 0.81,
+            "historical_count": 11
+          }
+        },
+        {
+          "location_id": "NSK_04",
+          "name": "Singhik High Zone",
+          "centroid_lat": 27.645,
+          "centroid_lon": 88.585,
+          "near_nh10": false,
+          "risk_score": 0.2,
+          "risk_level": "low",
+          "probability": 0.002,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 93.3,
+              "unit": "%",
+              "raw": 14,
+              "raw_unit": "events",
+              "weight": 0.9333333333333333
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 87,
+              "unit": "%",
+              "raw": 0.87,
+              "raw_unit": "index",
+              "weight": 0.87
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 78.5,
+              "unit": "%",
+              "raw": 51,
+              "raw_unit": "\u00b0",
+              "weight": 0.7846153846153846
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 22.1,
+              "unit": "%",
+              "raw": 0.22,
+              "raw_unit": "index",
+              "weight": 0.22077003622202312
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 10.5,
+              "unit": "%",
+              "raw": 57.976356398689695,
+              "raw_unit": "mm",
+              "weight": 0.10541155708852672
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 8.820364337680083,
+            "rainfall_3d_mm": 10.829384075091944,
+            "rainfall_7d_mm": 57.976356398689695,
+            "rainfall_intensity": 1.6123976121064145,
+            "soil_moisture_index": 0.22077003622202312,
+            "slope_angle": 51,
+            "elevation_m": 2460,
+            "base_susceptibility": 0.87,
+            "historical_count": 14
+          }
+        },
+        {
+          "location_id": "NSK_05",
+          "name": "Lachen Valley Floor",
+          "centroid_lat": 27.695,
+          "centroid_lon": 88.565,
+          "near_nh10": false,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 38,
+              "unit": "%",
+              "raw": 0.38,
+              "raw_unit": "index",
+              "weight": 0.38
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 27.7,
+              "unit": "%",
+              "raw": 18,
+              "raw_unit": "\u00b0",
+              "weight": 0.27692307692307694
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 24.1,
+              "unit": "%",
+              "raw": 0.24,
+              "raw_unit": "index",
+              "weight": 0.24133678004073933
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 13.3,
+              "unit": "%",
+              "raw": 2,
+              "raw_unit": "events",
+              "weight": 0.13333333333333333
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 10.9,
+              "unit": "%",
+              "raw": 60.00793421005038,
+              "raw_unit": "mm",
+              "weight": 0.10910533492736432
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 8.35278178472565,
+            "rainfall_3d_mm": 13.19689921075383,
+            "rainfall_7d_mm": 60.00793421005038,
+            "rainfall_intensity": 1.4825398199507063,
+            "soil_moisture_index": 0.24133678004073933,
+            "slope_angle": 18,
+            "elevation_m": 2750,
+            "base_susceptibility": 0.38,
+            "historical_count": 2
+          }
+        },
+        {
+          "location_id": "NSK_06",
+          "name": "Tashiding Escarpment",
+          "centroid_lat": 27.325,
+          "centroid_lon": 88.325,
+          "near_nh10": false,
+          "risk_score": 0.1,
+          "risk_level": "low",
+          "probability": 0.001,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 68,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.68
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 67.7,
+              "unit": "%",
+              "raw": 44,
+              "raw_unit": "\u00b0",
+              "weight": 0.676923076923077
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 40,
+              "unit": "%",
+              "raw": 6,
+              "raw_unit": "events",
+              "weight": 0.4
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 16.8,
+              "unit": "%",
+              "raw": 0.17,
+              "raw_unit": "index",
+              "weight": 0.16826692135064242
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 9.8,
+              "unit": "%",
+              "raw": 54.07029055201774,
+              "raw_unit": "mm",
+              "weight": 0.0983096191854868
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 3.0066894298727274,
+            "rainfall_3d_mm": 34.151860873244196,
+            "rainfall_7d_mm": 54.07029055201774,
+            "rainfall_intensity": 1.6938017107120777,
+            "soil_moisture_index": 0.16826692135064242,
+            "slope_angle": 44,
+            "elevation_m": 1580,
+            "base_susceptibility": 0.68,
+            "historical_count": 6
+          }
+        },
+        {
+          "location_id": "NSK_07",
+          "name": "Dikchu NH-10 Section",
+          "centroid_lat": 27.355,
+          "centroid_lon": 88.595,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Slope Angle",
+              "value": 55.4,
+              "unit": "%",
+              "raw": 36,
+              "raw_unit": "\u00b0",
+              "weight": 0.5538461538461539
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 55,
+              "unit": "%",
+              "raw": 0.55,
+              "raw_unit": "index",
+              "weight": 0.55
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 26.7,
+              "unit": "%",
+              "raw": 4,
+              "raw_unit": "events",
+              "weight": 0.26666666666666666
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 18.3,
+              "unit": "%",
+              "raw": 0.18,
+              "raw_unit": "index",
+              "weight": 0.18349385297926685
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 7.6,
+              "unit": "%",
+              "raw": 41.8684753089103,
+              "raw_unit": "mm",
+              "weight": 0.07612450056165508
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 6.5884299332238045,
+            "rainfall_3d_mm": 10.331727477794622,
+            "rainfall_7d_mm": 41.8684753089103,
+            "rainfall_intensity": 0.7131868864288944,
+            "soil_moisture_index": 0.18349385297926685,
+            "slope_angle": 36,
+            "elevation_m": 960,
+            "base_susceptibility": 0.55,
+            "historical_count": 4
+          }
+        },
+        {
+          "location_id": "NSK_08",
+          "name": "Rangpo Entry Zone",
+          "centroid_lat": 27.185,
+          "centroid_lon": 88.545,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Slope Angle",
+              "value": 33.8,
+              "unit": "%",
+              "raw": 22,
+              "raw_unit": "\u00b0",
+              "weight": 0.3384615384615385
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 32,
+              "unit": "%",
+              "raw": 0.32,
+              "raw_unit": "index",
+              "weight": 0.32047522294175107
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 28,
+              "unit": "%",
+              "raw": 0.28,
+              "raw_unit": "index",
+              "weight": 0.28
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 10.5,
+              "unit": "%",
+              "raw": 57.641803743880565,
+              "raw_unit": "mm",
+              "weight": 0.1048032795343283
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 6.7,
+              "unit": "%",
+              "raw": 1,
+              "raw_unit": "events",
+              "weight": 0.06666666666666667
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 8.111046243454503,
+            "rainfall_3d_mm": 11.695381017524657,
+            "rainfall_7d_mm": 57.641803743880565,
+            "rainfall_intensity": 1.5936933140206704,
+            "soil_moisture_index": 0.32047522294175107,
+            "slope_angle": 22,
+            "elevation_m": 620,
+            "base_susceptibility": 0.28,
+            "historical_count": 1
+          }
+        },
+        {
+          "location_id": "NSK_09",
+          "name": "Namchi Hill Station",
+          "centroid_lat": 27.175,
+          "centroid_lon": 88.365,
+          "near_nh10": false,
+          "risk_score": 0.1,
+          "risk_level": "low",
+          "probability": 0.001,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 62,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.62
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 40,
+              "raw_unit": "\u00b0",
+              "weight": 0.6153846153846154
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 46.7,
+              "unit": "%",
+              "raw": 7,
+              "raw_unit": "events",
+              "weight": 0.4666666666666667
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 34.9,
+              "unit": "%",
+              "raw": 0.35,
+              "raw_unit": "index",
+              "weight": 0.3488394482502505
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 8.6,
+              "unit": "%",
+              "raw": 47.422378218728824,
+              "raw_unit": "mm",
+              "weight": 0.08622250585223422
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 11.555031230205422,
+            "rainfall_3d_mm": 20.254230454804546,
+            "rainfall_7d_mm": 47.422378218728824,
+            "rainfall_intensity": 2.6953548034654506,
+            "soil_moisture_index": 0.3488394482502505,
+            "slope_angle": 40,
+            "elevation_m": 1370,
+            "base_susceptibility": 0.62,
+            "historical_count": 7
+          }
+        },
+        {
+          "location_id": "NSK_10",
+          "name": "Gangtok-Dikchu Corridor",
+          "centroid_lat": 27.335,
+          "centroid_lon": 88.615,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 60,
+              "unit": "%",
+              "raw": 9,
+              "raw_unit": "events",
+              "weight": 0.6
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 58,
+              "unit": "%",
+              "raw": 0.58,
+              "raw_unit": "index",
+              "weight": 0.58
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 53.8,
+              "unit": "%",
+              "raw": 35,
+              "raw_unit": "\u00b0",
+              "weight": 0.5384615384615384
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 32.6,
+              "unit": "%",
+              "raw": 0.33,
+              "raw_unit": "index",
+              "weight": 0.3263573885797487
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 10.5,
+              "unit": "%",
+              "raw": 57.57428854278881,
+              "raw_unit": "mm",
+              "weight": 0.10468052462325238
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 11.583894890600176,
+            "rainfall_3d_mm": 27.215730586343057,
+            "rainfall_7d_mm": 57.57428854278881,
+            "rainfall_intensity": 2.559520444585985,
+            "soil_moisture_index": 0.3263573885797487,
+            "slope_angle": 35,
+            "elevation_m": 1540,
+            "base_susceptibility": 0.58,
+            "historical_count": 9
+          }
+        }
+      ],
+      "progress": 10
+    },
+    {
+      "type": "scenario_event",
+      "step": 10,
+      "time_label": "T+10: Rainfall Beginning",
+      "description": "Monsoonal rainfall system approaching. Rainfall intensity increasing over high-elevation zones.",
+      "progress": 25
+    },
+    {
+      "type": "map_update",
+      "step": 10,
+      "time_label": "T+10: Rainfall Increasing",
+      "cells": [
+        {
+          "location_id": "NSK_01",
+          "name": "Mangan North Ridge",
+          "centroid_lat": 27.545,
+          "centroid_lon": 88.535,
+          "near_nh10": true,
+          "risk_score": 0.8,
+          "risk_level": "moderate",
+          "probability": 0.008,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 72,
+              "unit": "%",
+              "raw": 0.72,
+              "raw_unit": "index",
+              "weight": 0.72
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 42,
+              "raw_unit": "\u00b0",
+              "weight": 0.6461538461538462
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 53.3,
+              "unit": "%",
+              "raw": 8,
+              "raw_unit": "events",
+              "weight": 0.5333333333333333
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 39.4,
+              "unit": "%",
+              "raw": 0.39,
+              "raw_unit": "index",
+              "weight": 0.3944117098162478
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 31.6,
+              "unit": "%",
+              "raw": 120.13168343235178,
+              "raw_unit": "mm",
+              "weight": 0.31613600903250466
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 44.0581677399761,
+            "rainfall_3d_mm": 120.13168343235178,
+            "rainfall_7d_mm": 143.32638001770272,
+            "rainfall_intensity": 14.609175346874185,
+            "soil_moisture_index": 0.3944117098162478,
+            "slope_angle": 42,
+            "elevation_m": 1820,
+            "base_susceptibility": 0.72,
+            "historical_count": 8
+          }
+        },
+        {
+          "location_id": "NSK_02",
+          "name": "Mangan Town Slope",
+          "centroid_lat": 27.51,
+          "centroid_lon": 88.54,
+          "near_nh10": true,
+          "risk_score": 0.1,
+          "risk_level": "moderate",
+          "probability": 0.001,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 65,
+              "unit": "%",
+              "raw": 0.65,
+              "raw_unit": "index",
+              "weight": 0.65
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 58.5,
+              "unit": "%",
+              "raw": 38,
+              "raw_unit": "\u00b0",
+              "weight": 0.5846153846153846
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 36.4,
+              "unit": "%",
+              "raw": 0.36,
+              "raw_unit": "index",
+              "weight": 0.36430283568298943
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 33.3,
+              "unit": "%",
+              "raw": 5,
+              "raw_unit": "events",
+              "weight": 0.3333333333333333
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 29.4,
+              "unit": "%",
+              "raw": 58.728642313785954,
+              "raw_unit": "mm",
+              "weight": 0.29364321156892975
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 58.728642313785954,
+            "rainfall_3d_mm": 73.1547410712453,
+            "rainfall_7d_mm": 105.73137677078692,
+            "rainfall_intensity": 7.955903858617427,
+            "soil_moisture_index": 0.36430283568298943,
+            "slope_angle": 38,
+            "elevation_m": 1650,
+            "base_susceptibility": 0.65,
+            "historical_count": 5
+          }
+        },
+        {
+          "location_id": "NSK_03",
+          "name": "Chungthang Upper Slope",
+          "centroid_lat": 27.605,
+          "centroid_lon": 88.645,
+          "near_nh10": false,
+          "risk_score": 0.9,
+          "risk_level": "moderate",
+          "probability": 0.009,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 81,
+              "unit": "%",
+              "raw": 0.81,
+              "raw_unit": "index",
+              "weight": 0.81
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 11,
+              "raw_unit": "events",
+              "weight": 0.7333333333333333
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 72.3,
+              "unit": "%",
+              "raw": 47,
+              "raw_unit": "\u00b0",
+              "weight": 0.7230769230769231
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 43.6,
+              "unit": "%",
+              "raw": 0.44,
+              "raw_unit": "index",
+              "weight": 0.4362248194369056
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 34.8,
+              "unit": "%",
+              "raw": 132.34516738621363,
+              "raw_unit": "mm",
+              "weight": 0.34827675627950955
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 48.147098731665395,
+            "rainfall_3d_mm": 132.34516738621363,
+            "rainfall_7d_mm": 107.44072738766968,
+            "rainfall_intensity": 8.759603512064192,
+            "soil_moisture_index": 0.4362248194369056,
+            "slope_angle": 47,
+            "elevation_m": 2210,
+            "base_susceptibility": 0.81,
+            "historical_count": 11
+          }
+        },
+        {
+          "location_id": "NSK_04",
+          "name": "Singhik High Zone",
+          "centroid_lat": 27.645,
+          "centroid_lon": 88.585,
+          "near_nh10": false,
+          "risk_score": 0.1,
+          "risk_level": "moderate",
+          "probability": 0.001,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 93.3,
+              "unit": "%",
+              "raw": 14,
+              "raw_unit": "events",
+              "weight": 0.9333333333333333
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 87,
+              "unit": "%",
+              "raw": 0.87,
+              "raw_unit": "index",
+              "weight": 0.87
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 78.5,
+              "unit": "%",
+              "raw": 51,
+              "raw_unit": "\u00b0",
+              "weight": 0.7846153846153846
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 35.7,
+              "unit": "%",
+              "raw": 0.36,
+              "raw_unit": "index",
+              "weight": 0.35719184421975725
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 32.2,
+              "unit": "%",
+              "raw": 64.37776237597068,
+              "raw_unit": "mm",
+              "weight": 0.32188881187985335
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 64.37776237597068,
+            "rainfall_3d_mm": 79.80656324160853,
+            "rainfall_7d_mm": 136.94555454163734,
+            "rainfall_intensity": 9.73695129917279,
+            "soil_moisture_index": 0.35719184421975725,
+            "slope_angle": 51,
+            "elevation_m": 2460,
+            "base_susceptibility": 0.87,
+            "historical_count": 14
+          }
+        },
+        {
+          "location_id": "NSK_05",
+          "name": "Lachen Valley Floor",
+          "centroid_lat": 27.695,
+          "centroid_lon": 88.565,
+          "near_nh10": false,
+          "risk_score": 0.1,
+          "risk_level": "low",
+          "probability": 0.001,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 38,
+              "unit": "%",
+              "raw": 0.38,
+              "raw_unit": "index",
+              "weight": 0.38
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 34.9,
+              "unit": "%",
+              "raw": 0.35,
+              "raw_unit": "index",
+              "weight": 0.3489481729610193
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 30.2,
+              "unit": "%",
+              "raw": 114.63658011577753,
+              "raw_unit": "mm",
+              "weight": 0.3016752108309935
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 27.7,
+              "unit": "%",
+              "raw": 18,
+              "raw_unit": "\u00b0",
+              "weight": 0.27692307692307694
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 22.5,
+              "unit": "%",
+              "raw": 44.966618275837625,
+              "raw_unit": "mm",
+              "weight": 0.22483309137918814
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 44.966618275837625,
+            "rainfall_3d_mm": 114.63658011577753,
+            "rainfall_7d_mm": 105.03686379987138,
+            "rainfall_intensity": 8.79451075789265,
+            "soil_moisture_index": 0.3489481729610193,
+            "slope_angle": 18,
+            "elevation_m": 2750,
+            "base_susceptibility": 0.38,
+            "historical_count": 2
+          }
+        },
+        {
+          "location_id": "NSK_06",
+          "name": "Tashiding Escarpment",
+          "centroid_lat": 27.325,
+          "centroid_lon": 88.325,
+          "near_nh10": false,
+          "risk_score": 0.4,
+          "risk_level": "moderate",
+          "probability": 0.004,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 68,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.68
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 67.7,
+              "unit": "%",
+              "raw": 44,
+              "raw_unit": "\u00b0",
+              "weight": 0.676923076923077
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 40,
+              "unit": "%",
+              "raw": 6,
+              "raw_unit": "events",
+              "weight": 0.4
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 31.3,
+              "unit": "%",
+              "raw": 0.31,
+              "raw_unit": "index",
+              "weight": 0.31306641887192604
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 25.4,
+              "unit": "%",
+              "raw": 96.42318888140684,
+              "raw_unit": "mm",
+              "weight": 0.25374523389843906
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 29.737507852756735,
+            "rainfall_3d_mm": 96.42318888140684,
+            "rainfall_7d_mm": 119.84091164742908,
+            "rainfall_intensity": 11.10195236099914,
+            "soil_moisture_index": 0.31306641887192604,
+            "slope_angle": 44,
+            "elevation_m": 1580,
+            "base_susceptibility": 0.68,
+            "historical_count": 6
+          }
+        },
+        {
+          "location_id": "NSK_07",
+          "name": "Dikchu NH-10 Section",
+          "centroid_lat": 27.355,
+          "centroid_lon": 88.595,
+          "near_nh10": true,
+          "risk_score": 0.2,
+          "risk_level": "moderate",
+          "probability": 0.002,
+          "contributing_factors": [
+            {
+              "factor": "Slope Angle",
+              "value": 55.4,
+              "unit": "%",
+              "raw": 36,
+              "raw_unit": "\u00b0",
+              "weight": 0.5538461538461539
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 55,
+              "unit": "%",
+              "raw": 0.55,
+              "raw_unit": "index",
+              "weight": 0.55
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 32.4,
+              "unit": "%",
+              "raw": 0.32,
+              "raw_unit": "index",
+              "weight": 0.3235424236512702
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 27.8,
+              "unit": "%",
+              "raw": 55.61677707674088,
+              "raw_unit": "mm",
+              "weight": 0.27808388538370443
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 26.7,
+              "unit": "%",
+              "raw": 4,
+              "raw_unit": "events",
+              "weight": 0.26666666666666666
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 55.61677707674088,
+            "rainfall_3d_mm": 76.93570711338799,
+            "rainfall_7d_mm": 94.34005031410413,
+            "rainfall_intensity": 5.072118140350471,
+            "soil_moisture_index": 0.3235424236512702,
+            "slope_angle": 36,
+            "elevation_m": 960,
+            "base_susceptibility": 0.55,
+            "historical_count": 4
+          }
+        },
+        {
+          "location_id": "NSK_08",
+          "name": "Rangpo Entry Zone",
+          "centroid_lat": 27.185,
+          "centroid_lon": 88.545,
+          "near_nh10": true,
+          "risk_score": 0,
+          "risk_level": "low",
+          "probability": 0,
+          "contributing_factors": [
+            {
+              "factor": "Soil Moisture",
+              "value": 43,
+              "unit": "%",
+              "raw": 0.43,
+              "raw_unit": "index",
+              "weight": 0.43045297150035466
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 33.8,
+              "unit": "%",
+              "raw": 22,
+              "raw_unit": "\u00b0",
+              "weight": 0.3384615384615385
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 28,
+              "unit": "%",
+              "raw": 0.28,
+              "raw_unit": "index",
+              "weight": 0.28
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 25.1,
+              "unit": "%",
+              "raw": 50.21982803883654,
+              "raw_unit": "mm",
+              "weight": 0.25109914019418267
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 21.3,
+              "unit": "%",
+              "raw": 80.80061640288797,
+              "raw_unit": "mm",
+              "weight": 0.2126332010602315
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 50.21982803883654,
+            "rainfall_3d_mm": 80.80061640288797,
+            "rainfall_7d_mm": 116.37233505627273,
+            "rainfall_intensity": 9.088464885323402,
+            "soil_moisture_index": 0.43045297150035466,
+            "slope_angle": 22,
+            "elevation_m": 620,
+            "base_susceptibility": 0.28,
+            "historical_count": 1
+          }
+        },
+        {
+          "location_id": "NSK_09",
+          "name": "Namchi Hill Station",
+          "centroid_lat": 27.175,
+          "centroid_lon": 88.365,
+          "near_nh10": false,
+          "risk_score": 0.7,
+          "risk_level": "moderate",
+          "probability": 0.007,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 62,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.62
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 40,
+              "raw_unit": "\u00b0",
+              "weight": 0.6153846153846154
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 47.3,
+              "unit": "%",
+              "raw": 0.47,
+              "raw_unit": "index",
+              "weight": 0.4730802021129561
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 46.7,
+              "unit": "%",
+              "raw": 7,
+              "raw_unit": "events",
+              "weight": 0.4666666666666667
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 30.5,
+              "unit": "%",
+              "raw": 116.07145876830782,
+              "raw_unit": "mm",
+              "weight": 0.30545120728502057
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 55.45631197998518,
+            "rainfall_3d_mm": 116.07145876830782,
+            "rainfall_7d_mm": 127.69724294952405,
+            "rainfall_intensity": 7.203139163390027,
+            "soil_moisture_index": 0.4730802021129561,
+            "slope_angle": 40,
+            "elevation_m": 1370,
+            "base_susceptibility": 0.62,
+            "historical_count": 7
+          }
+        },
+        {
+          "location_id": "NSK_10",
+          "name": "Gangtok-Dikchu Corridor",
+          "centroid_lat": 27.335,
+          "centroid_lon": 88.615,
+          "near_nh10": true,
+          "risk_score": 0.3,
+          "risk_level": "moderate",
+          "probability": 0.003,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 60,
+              "unit": "%",
+              "raw": 9,
+              "raw_unit": "events",
+              "weight": 0.6
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 58,
+              "unit": "%",
+              "raw": 0.58,
+              "raw_unit": "index",
+              "weight": 0.58
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 53.8,
+              "unit": "%",
+              "raw": 35,
+              "raw_unit": "\u00b0",
+              "weight": 0.5384615384615384
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 49.3,
+              "unit": "%",
+              "raw": 0.49,
+              "raw_unit": "index",
+              "weight": 0.492614354035238
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 31.9,
+              "unit": "%",
+              "raw": 63.7624106337533,
+              "raw_unit": "mm",
+              "weight": 0.3188120531687665
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 63.7624106337533,
+            "rainfall_3d_mm": 104.27402712196354,
+            "rainfall_7d_mm": 144.95645605788866,
+            "rainfall_intensity": 11.04932990997437,
+            "soil_moisture_index": 0.492614354035238,
+            "slope_angle": 35,
+            "elevation_m": 1540,
+            "base_susceptibility": 0.58,
+            "historical_count": 9
+          }
+        }
+      ],
+      "progress": 35
+    },
+    {
+      "type": "scenario_event",
+      "step": 20,
+      "time_label": "T+20: Heavy Monsoonal Rainfall",
+      "description": "Intense rainfall continuing. Antecedent saturation accumulating on steep slopes. Soil moisture index elevated.",
+      "progress": 50
+    },
+    {
+      "type": "map_update",
+      "step": 20,
+      "time_label": "T+20: Soil Saturation Elevated",
+      "cells": [
+        {
+          "location_id": "NSK_01",
+          "name": "Mangan North Ridge",
+          "centroid_lat": 27.545,
+          "centroid_lon": 88.535,
+          "near_nh10": true,
+          "risk_score": 73.3,
+          "risk_level": "high",
+          "probability": 0.733,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 72,
+              "unit": "%",
+              "raw": 0.72,
+              "raw_unit": "index",
+              "weight": 0.72
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 70.3,
+              "unit": "%",
+              "raw": 267.17794649705894,
+              "raw_unit": "mm",
+              "weight": 0.7030998592027867
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 42,
+              "raw_unit": "\u00b0",
+              "weight": 0.6461538461538462
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 60.8,
+              "unit": "%",
+              "raw": 0.61,
+              "raw_unit": "index",
+              "weight": 0.6076119132727484
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 57.7,
+              "unit": "%",
+              "raw": 115.38190840290744,
+              "raw_unit": "mm",
+              "weight": 0.5769095420145373
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 115.38190840290744,
+            "rainfall_3d_mm": 267.17794649705894,
+            "rainfall_7d_mm": 244.30590639989333,
+            "rainfall_intensity": 35.01916863941682,
+            "soil_moisture_index": 0.6076119132727484,
+            "slope_angle": 42,
+            "elevation_m": 1820,
+            "base_susceptibility": 0.72,
+            "historical_count": 8
+          }
+        },
+        {
+          "location_id": "NSK_02",
+          "name": "Mangan Town Slope",
+          "centroid_lat": 27.51,
+          "centroid_lon": 88.54,
+          "near_nh10": true,
+          "risk_score": 75.8,
+          "risk_level": "high",
+          "probability": 0.758,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 74,
+              "unit": "%",
+              "raw": 147.94960923138473,
+              "raw_unit": "mm",
+              "weight": 0.7397480461569237
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 65,
+              "unit": "%",
+              "raw": 0.65,
+              "raw_unit": "index",
+              "weight": 0.65
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 59.2,
+              "unit": "%",
+              "raw": 0.59,
+              "raw_unit": "index",
+              "weight": 0.5915370522233407
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 58.5,
+              "unit": "%",
+              "raw": 38,
+              "raw_unit": "\u00b0",
+              "weight": 0.5846153846153846
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 49.2,
+              "unit": "%",
+              "raw": 187.05548057361426,
+              "raw_unit": "mm",
+              "weight": 0.49225126466740593
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 147.94960923138473,
+            "rainfall_3d_mm": 187.05548057361426,
+            "rainfall_7d_mm": 208.37303052291497,
+            "rainfall_intensity": 35.36044226486557,
+            "soil_moisture_index": 0.5915370522233407,
+            "slope_angle": 38,
+            "elevation_m": 1650,
+            "base_susceptibility": 0.65,
+            "historical_count": 5
+          }
+        },
+        {
+          "location_id": "NSK_03",
+          "name": "Chungthang Upper Slope",
+          "centroid_lat": 27.605,
+          "centroid_lon": 88.645,
+          "near_nh10": false,
+          "risk_score": 97.8,
+          "risk_level": "high",
+          "probability": 0.978,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 81,
+              "unit": "%",
+              "raw": 0.81,
+              "raw_unit": "index",
+              "weight": 0.81
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 11,
+              "raw_unit": "events",
+              "weight": 0.7333333333333333
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 72.3,
+              "unit": "%",
+              "raw": 47,
+              "raw_unit": "\u00b0",
+              "weight": 0.7230769230769231
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 68.3,
+              "unit": "%",
+              "raw": 136.66402836755722,
+              "raw_unit": "mm",
+              "weight": 0.6833201418377861
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 65.6,
+              "unit": "%",
+              "raw": 0.66,
+              "raw_unit": "index",
+              "weight": 0.6559540343774631
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 136.66402836755722,
+            "rainfall_3d_mm": 246.85389993345714,
+            "rainfall_7d_mm": 185.33412695265065,
+            "rainfall_intensity": 24.581476317982478,
+            "soil_moisture_index": 0.6559540343774631,
+            "slope_angle": 47,
+            "elevation_m": 2210,
+            "base_susceptibility": 0.81,
+            "historical_count": 11
+          }
+        },
+        {
+          "location_id": "NSK_04",
+          "name": "Singhik High Zone",
+          "centroid_lat": 27.645,
+          "centroid_lon": 88.585,
+          "near_nh10": false,
+          "risk_score": 98.5,
+          "risk_level": "high",
+          "probability": 0.985,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 93.3,
+              "unit": "%",
+              "raw": 14,
+              "raw_unit": "events",
+              "weight": 0.9333333333333333
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 87,
+              "unit": "%",
+              "raw": 0.87,
+              "raw_unit": "index",
+              "weight": 0.87
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 78.5,
+              "unit": "%",
+              "raw": 51,
+              "raw_unit": "\u00b0",
+              "weight": 0.7846153846153846
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 70.7,
+              "unit": "%",
+              "raw": 141.43928506640515,
+              "raw_unit": "mm",
+              "weight": 0.7071964253320258
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.6151226666719101
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 141.43928506640515,
+            "rainfall_3d_mm": 183.992343089613,
+            "rainfall_7d_mm": 203.74150888002853,
+            "rainfall_intensity": 31.989678817188434,
+            "soil_moisture_index": 0.6151226666719101,
+            "slope_angle": 51,
+            "elevation_m": 2460,
+            "base_susceptibility": 0.87,
+            "historical_count": 14
+          }
+        },
+        {
+          "location_id": "NSK_05",
+          "name": "Lachen Valley Floor",
+          "centroid_lat": 27.695,
+          "centroid_lon": 88.565,
+          "near_nh10": false,
+          "risk_score": 0.3,
+          "risk_level": "moderate",
+          "probability": 0.003,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 57.4,
+              "unit": "%",
+              "raw": 114.72636374177557,
+              "raw_unit": "mm",
+              "weight": 0.5736318187088778
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 53.1,
+              "unit": "%",
+              "raw": 201.77537527504722,
+              "raw_unit": "mm",
+              "weight": 0.5309878296711769
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 48.7,
+              "unit": "%",
+              "raw": 0.49,
+              "raw_unit": "index",
+              "weight": 0.48682093402383253
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 38,
+              "unit": "%",
+              "raw": 0.38,
+              "raw_unit": "index",
+              "weight": 0.38
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 31.9,
+              "unit": "%",
+              "raw": 175.27198229221648,
+              "raw_unit": "mm",
+              "weight": 0.3186763314403936
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 114.72636374177557,
+            "rainfall_3d_mm": 201.77537527504722,
+            "rainfall_7d_mm": 175.27198229221648,
+            "rainfall_intensity": 18.491315559775295,
+            "soil_moisture_index": 0.48682093402383253,
+            "slope_angle": 18,
+            "elevation_m": 2750,
+            "base_susceptibility": 0.38,
+            "historical_count": 2
+          }
+        },
+        {
+          "location_id": "NSK_06",
+          "name": "Tashiding Escarpment",
+          "centroid_lat": 27.325,
+          "centroid_lon": 88.325,
+          "near_nh10": false,
+          "risk_score": 69.3,
+          "risk_level": "high",
+          "probability": 0.693,
+          "contributing_factors": [
+            {
+              "factor": "Geological Susceptibility",
+              "value": 68,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.68
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 67.7,
+              "unit": "%",
+              "raw": 44,
+              "raw_unit": "\u00b0",
+              "weight": 0.676923076923077
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 63.8,
+              "unit": "%",
+              "raw": 242.54669389120858,
+              "raw_unit": "mm",
+              "weight": 0.6382807733979173
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 57.6,
+              "unit": "%",
+              "raw": 115.11374430082802,
+              "raw_unit": "mm",
+              "weight": 0.5755687215041401
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 55.8,
+              "unit": "%",
+              "raw": 0.56,
+              "raw_unit": "index",
+              "weight": 0.5583674119387297
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 115.11374430082802,
+            "rainfall_3d_mm": 242.54669389120858,
+            "rainfall_7d_mm": 179.87719237391082,
+            "rainfall_intensity": 31.43335856208393,
+            "soil_moisture_index": 0.5583674119387297,
+            "slope_angle": 44,
+            "elevation_m": 1580,
+            "base_susceptibility": 0.68,
+            "historical_count": 6
+          }
+        },
+        {
+          "location_id": "NSK_07",
+          "name": "Dikchu NH-10 Section",
+          "centroid_lat": 27.355,
+          "centroid_lon": 88.595,
+          "near_nh10": true,
+          "risk_score": 1.5,
+          "risk_level": "moderate",
+          "probability": 0.015,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 76.2,
+              "unit": "%",
+              "raw": 152.42952442321945,
+              "raw_unit": "mm",
+              "weight": 0.7621476221160972
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 58.6,
+              "unit": "%",
+              "raw": 222.57087286167882,
+              "raw_unit": "mm",
+              "weight": 0.5857128233202075
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 55.4,
+              "unit": "%",
+              "raw": 36,
+              "raw_unit": "\u00b0",
+              "weight": 0.5538461538461539
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 55,
+              "unit": "%",
+              "raw": 0.55,
+              "raw_unit": "index",
+              "weight": 0.55
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 46.6,
+              "unit": "%",
+              "raw": 0.47,
+              "raw_unit": "index",
+              "weight": 0.4662767736207938
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 152.42952442321945,
+            "rainfall_3d_mm": 222.57087286167882,
+            "rainfall_7d_mm": 207.92691011688552,
+            "rainfall_intensity": 23.26160087903622,
+            "soil_moisture_index": 0.4662767736207938,
+            "slope_angle": 36,
+            "elevation_m": 960,
+            "base_susceptibility": 0.55,
+            "historical_count": 4
+          }
+        },
+        {
+          "location_id": "NSK_08",
+          "name": "Rangpo Entry Zone",
+          "centroid_lat": 27.185,
+          "centroid_lon": 88.545,
+          "near_nh10": true,
+          "risk_score": 0.6,
+          "risk_level": "moderate",
+          "probability": 0.006,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 64.3,
+              "unit": "%",
+              "raw": 128.54517787816025,
+              "raw_unit": "mm",
+              "weight": 0.6427258893908012
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 59.5,
+              "unit": "%",
+              "raw": 0.6,
+              "raw_unit": "index",
+              "weight": 0.595061453490551
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 51.4,
+              "unit": "%",
+              "raw": 195.2376197637709,
+              "raw_unit": "mm",
+              "weight": 0.5137832099046603
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 33.8,
+              "unit": "%",
+              "raw": 22,
+              "raw_unit": "\u00b0",
+              "weight": 0.3384615384615385
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 32.9,
+              "unit": "%",
+              "raw": 181.21407980576313,
+              "raw_unit": "mm",
+              "weight": 0.3294801451013875
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 128.54517787816025,
+            "rainfall_3d_mm": 195.2376197637709,
+            "rainfall_7d_mm": 181.21407980576313,
+            "rainfall_intensity": 22.13527134383193,
+            "soil_moisture_index": 0.595061453490551,
+            "slope_angle": 22,
+            "elevation_m": 620,
+            "base_susceptibility": 0.28,
+            "historical_count": 1
+          }
+        },
+        {
+          "location_id": "NSK_09",
+          "name": "Namchi Hill Station",
+          "centroid_lat": 27.175,
+          "centroid_lon": 88.365,
+          "near_nh10": false,
+          "risk_score": 73.1,
+          "risk_level": "high",
+          "probability": 0.731,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 82.7,
+              "unit": "%",
+              "raw": 165.3684605052532,
+              "raw_unit": "mm",
+              "weight": 0.826842302526266
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 69.7,
+              "unit": "%",
+              "raw": 0.7,
+              "raw_unit": "index",
+              "weight": 0.696658766142107
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 66.8,
+              "unit": "%",
+              "raw": 253.8439337250872,
+              "raw_unit": "mm",
+              "weight": 0.6680103519081242
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 62,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.62
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 40,
+              "raw_unit": "\u00b0",
+              "weight": 0.6153846153846154
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 165.3684605052532,
+            "rainfall_3d_mm": 253.8439337250872,
+            "rainfall_7d_mm": 200.64950893714894,
+            "rainfall_intensity": 28.72706376862976,
+            "soil_moisture_index": 0.696658766142107,
+            "slope_angle": 40,
+            "elevation_m": 1370,
+            "base_susceptibility": 0.62,
+            "historical_count": 7
+          }
+        },
+        {
+          "location_id": "NSK_10",
+          "name": "Gangtok-Dikchu Corridor",
+          "centroid_lat": 27.335,
+          "centroid_lon": 88.615,
+          "near_nh10": true,
+          "risk_score": 90.7,
+          "risk_level": "high",
+          "probability": 0.907,
+          "contributing_factors": [
+            {
+              "factor": "Soil Moisture",
+              "value": 66.8,
+              "unit": "%",
+              "raw": 0.67,
+              "raw_unit": "index",
+              "weight": 0.6679573165305932
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 65.3,
+              "unit": "%",
+              "raw": 130.5329397512998,
+              "raw_unit": "mm",
+              "weight": 0.652664698756499
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 64.9,
+              "unit": "%",
+              "raw": 246.43839455417807,
+              "raw_unit": "mm",
+              "weight": 0.6485220909320476
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 60,
+              "unit": "%",
+              "raw": 9,
+              "raw_unit": "events",
+              "weight": 0.6
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 58,
+              "unit": "%",
+              "raw": 0.58,
+              "raw_unit": "index",
+              "weight": 0.58
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 130.5329397512998,
+            "rainfall_3d_mm": 246.43839455417807,
+            "rainfall_7d_mm": 211.07526379164105,
+            "rainfall_intensity": 25.444118715733236,
+            "soil_moisture_index": 0.6679573165305932,
+            "slope_angle": 35,
+            "elevation_m": 1540,
+            "base_susceptibility": 0.58,
+            "historical_count": 9
+          }
+        }
+      ],
+      "progress": 60
+    },
+    {
+      "type": "scenario_event",
+      "step": 30,
+      "time_label": "T+30: Critical Risk Threshold Reached",
+      "description": "AI model detects critical risk on steep slopes. Warning thresholds crossed. Triggering early warning protocol.",
+      "progress": 72
+    },
+    {
+      "type": "map_update",
+      "step": 30,
+      "time_label": "T+30: Warnings Triggered",
+      "cells": [
+        {
+          "location_id": "NSK_01",
+          "name": "Mangan North Ridge",
+          "centroid_lat": 27.545,
+          "centroid_lon": 88.535,
+          "near_nh10": true,
+          "risk_score": 99.3,
+          "risk_level": "high",
+          "probability": 0.993,
+          "contributing_factors": [
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 79.8,
+              "unit": "%",
+              "raw": 303.21644981238745,
+              "raw_unit": "mm",
+              "weight": 0.7979380258220723
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 72,
+              "unit": "%",
+              "raw": 0.72,
+              "raw_unit": "index",
+              "weight": 0.72
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 68.4,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.6837970214314262
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 67.6,
+              "unit": "%",
+              "raw": 135.13303499445405,
+              "raw_unit": "mm",
+              "weight": 0.6756651749722703
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 42,
+              "raw_unit": "\u00b0",
+              "weight": 0.6461538461538462
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 135.13303499445405,
+            "rainfall_3d_mm": 303.21644981238745,
+            "rainfall_7d_mm": 266.2484236815231,
+            "rainfall_intensity": 43.5336538091928,
+            "soil_moisture_index": 0.6837970214314262,
+            "slope_angle": 42,
+            "elevation_m": 1820,
+            "base_susceptibility": 0.72,
+            "historical_count": 8
+          }
+        },
+        {
+          "location_id": "NSK_02",
+          "name": "Mangan Town Slope",
+          "centroid_lat": 27.51,
+          "centroid_lon": 88.54,
+          "near_nh10": true,
+          "risk_score": 21.8,
+          "risk_level": "moderate",
+          "probability": 0.218,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 92.1,
+              "unit": "%",
+              "raw": 184.12337996504706,
+              "raw_unit": "mm",
+              "weight": 0.9206168998252353
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 65,
+              "unit": "%",
+              "raw": 0.65,
+              "raw_unit": "index",
+              "weight": 0.65
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 0.65,
+              "raw_unit": "index",
+              "weight": 0.6456240939592988
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 58.9,
+              "unit": "%",
+              "raw": 223.80238111873865,
+              "raw_unit": "mm",
+              "weight": 0.5889536345229964
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 58.5,
+              "unit": "%",
+              "raw": 38,
+              "raw_unit": "\u00b0",
+              "weight": 0.5846153846153846
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 184.12337996504706,
+            "rainfall_3d_mm": 223.80238111873865,
+            "rainfall_7d_mm": 249.19190134151694,
+            "rainfall_intensity": 44.998846679253134,
+            "soil_moisture_index": 0.6456240939592988,
+            "slope_angle": 38,
+            "elevation_m": 1650,
+            "base_susceptibility": 0.65,
+            "historical_count": 5
+          }
+        },
+        {
+          "location_id": "NSK_03",
+          "name": "Chungthang Upper Slope",
+          "centroid_lat": 27.605,
+          "centroid_lon": 88.645,
+          "near_nh10": false,
+          "risk_score": 99.3,
+          "risk_level": "high",
+          "probability": 0.993,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 83.5,
+              "unit": "%",
+              "raw": 166.98825602094718,
+              "raw_unit": "mm",
+              "weight": 0.8349412801047359
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 81,
+              "unit": "%",
+              "raw": 0.81,
+              "raw_unit": "index",
+              "weight": 0.81
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 78.2,
+              "unit": "%",
+              "raw": 297.2501666448396,
+              "raw_unit": "mm",
+              "weight": 0.7822372806443147
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 76.7,
+              "unit": "%",
+              "raw": 0.77,
+              "raw_unit": "index",
+              "weight": 0.7665662708147272
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 11,
+              "raw_unit": "events",
+              "weight": 0.7333333333333333
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 166.98825602094718,
+            "rainfall_3d_mm": 297.2501666448396,
+            "rainfall_7d_mm": 234.70740436796396,
+            "rainfall_intensity": 36.41805464544451,
+            "soil_moisture_index": 0.7665662708147272,
+            "slope_angle": 47,
+            "elevation_m": 2210,
+            "base_susceptibility": 0.81,
+            "historical_count": 11
+          }
+        },
+        {
+          "location_id": "NSK_04",
+          "name": "Singhik High Zone",
+          "centroid_lat": 27.645,
+          "centroid_lon": 88.585,
+          "near_nh10": false,
+          "risk_score": 97.6,
+          "risk_level": "high",
+          "probability": 0.976,
+          "contributing_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 93.3,
+              "unit": "%",
+              "raw": 14,
+              "raw_unit": "events",
+              "weight": 0.9333333333333333
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 87,
+              "unit": "%",
+              "raw": 0.87,
+              "raw_unit": "index",
+              "weight": 0.87
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 81.4,
+              "unit": "%",
+              "raw": 162.78400664074263,
+              "raw_unit": "mm",
+              "weight": 0.8139200332037132
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 78.5,
+              "unit": "%",
+              "raw": 51,
+              "raw_unit": "\u00b0",
+              "weight": 0.7846153846153846
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 68.1,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.6812489310677896
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 162.78400664074263,
+            "rainfall_3d_mm": 226.49116908741865,
+            "rainfall_7d_mm": 234.630007210156,
+            "rainfall_intensity": 53.38970267673723,
+            "soil_moisture_index": 0.6812489310677896,
+            "slope_angle": 51,
+            "elevation_m": 2460,
+            "base_susceptibility": 0.87,
+            "historical_count": 14
+          }
+        },
+        {
+          "location_id": "NSK_05",
+          "name": "Lachen Valley Floor",
+          "centroid_lat": 27.695,
+          "centroid_lon": 88.565,
+          "near_nh10": false,
+          "risk_score": 0.5,
+          "risk_level": "moderate",
+          "probability": 0.005,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 62.3,
+              "unit": "%",
+              "raw": 124.69246623897521,
+              "raw_unit": "mm",
+              "weight": 0.623462331194876
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 61.6,
+              "unit": "%",
+              "raw": 233.97146269784218,
+              "raw_unit": "mm",
+              "weight": 0.6157143755206373
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 52.7,
+              "unit": "%",
+              "raw": 0.53,
+              "raw_unit": "index",
+              "weight": 0.5272123700800485
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 38,
+              "unit": "%",
+              "raw": 0.38,
+              "raw_unit": "index",
+              "weight": 0.38
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 37,
+              "unit": "%",
+              "raw": 203.54305107731977,
+              "raw_unit": "mm",
+              "weight": 0.37007827468603594
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 124.69246623897521,
+            "rainfall_3d_mm": 233.97146269784218,
+            "rainfall_7d_mm": 203.54305107731977,
+            "rainfall_intensity": 26.15455260904712,
+            "soil_moisture_index": 0.5272123700800485,
+            "slope_angle": 18,
+            "elevation_m": 2750,
+            "base_susceptibility": 0.38,
+            "historical_count": 2
+          }
+        },
+        {
+          "location_id": "NSK_06",
+          "name": "Tashiding Escarpment",
+          "centroid_lat": 27.325,
+          "centroid_lon": 88.325,
+          "near_nh10": false,
+          "risk_score": 96.7,
+          "risk_level": "high",
+          "probability": 0.967,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 146.67475207097073,
+              "raw_unit": "mm",
+              "weight": 0.7333737603548536
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 73.2,
+              "unit": "%",
+              "raw": 278.1423619467003,
+              "raw_unit": "mm",
+              "weight": 0.731953584070264
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 68,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.68
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 67.7,
+              "unit": "%",
+              "raw": 44,
+              "raw_unit": "\u00b0",
+              "weight": 0.676923076923077
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 60.3,
+              "unit": "%",
+              "raw": 0.6,
+              "raw_unit": "index",
+              "weight": 0.6027069880417494
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 146.67475207097073,
+            "rainfall_3d_mm": 278.1423619467003,
+            "rainfall_7d_mm": 225.93938192254183,
+            "rainfall_intensity": 41.575636055375995,
+            "soil_moisture_index": 0.6027069880417494,
+            "slope_angle": 44,
+            "elevation_m": 1580,
+            "base_susceptibility": 0.68,
+            "historical_count": 6
+          }
+        },
+        {
+          "location_id": "NSK_07",
+          "name": "Dikchu NH-10 Section",
+          "centroid_lat": 27.355,
+          "centroid_lon": 88.595,
+          "near_nh10": true,
+          "risk_score": 14.1,
+          "risk_level": "moderate",
+          "probability": 0.141,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 87.5,
+              "unit": "%",
+              "raw": 174.91595481275226,
+              "raw_unit": "mm",
+              "weight": 0.8745797740637613
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 68.6,
+              "unit": "%",
+              "raw": 260.78958097998924,
+              "raw_unit": "mm",
+              "weight": 0.6862883709999716
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 55.4,
+              "unit": "%",
+              "raw": 36,
+              "raw_unit": "\u00b0",
+              "weight": 0.5538461538461539
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 55,
+              "unit": "%",
+              "raw": 0.55,
+              "raw_unit": "index",
+              "weight": 0.55
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 51.7,
+              "unit": "%",
+              "raw": 0.52,
+              "raw_unit": "index",
+              "weight": 0.5171064780345486
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 174.91595481275226,
+            "rainfall_3d_mm": 260.78958097998924,
+            "rainfall_7d_mm": 243.80928547799323,
+            "rainfall_intensity": 40.214800974015844,
+            "soil_moisture_index": 0.5171064780345486,
+            "slope_angle": 36,
+            "elevation_m": 960,
+            "base_susceptibility": 0.55,
+            "historical_count": 4
+          }
+        },
+        {
+          "location_id": "NSK_08",
+          "name": "Rangpo Entry Zone",
+          "centroid_lat": 27.185,
+          "centroid_lon": 88.545,
+          "near_nh10": true,
+          "risk_score": 1.3,
+          "risk_level": "moderate",
+          "probability": 0.013,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 68.7,
+              "unit": "%",
+              "raw": 137.4644802232706,
+              "raw_unit": "mm",
+              "weight": 0.687322401116353
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 63.8,
+              "unit": "%",
+              "raw": 0.64,
+              "raw_unit": "index",
+              "weight": 0.6383210528562305
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 61.6,
+              "unit": "%",
+              "raw": 234.10990716746804,
+              "raw_unit": "mm",
+              "weight": 0.6160787030722843
+            },
+            {
+              "factor": "Antecedent Rainfall (7-Day)",
+              "value": 38.3,
+              "unit": "%",
+              "raw": 210.72698004495763,
+              "raw_unit": "mm",
+              "weight": 0.38313996371810477
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 33.8,
+              "unit": "%",
+              "raw": 22,
+              "raw_unit": "\u00b0",
+              "weight": 0.3384615384615385
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 137.4644802232706,
+            "rainfall_3d_mm": 234.10990716746804,
+            "rainfall_7d_mm": 210.72698004495763,
+            "rainfall_intensity": 27.54548599852717,
+            "soil_moisture_index": 0.6383210528562305,
+            "slope_angle": 22,
+            "elevation_m": 620,
+            "base_susceptibility": 0.28,
+            "historical_count": 1
+          }
+        },
+        {
+          "location_id": "NSK_09",
+          "name": "Namchi Hill Station",
+          "centroid_lat": 27.175,
+          "centroid_lon": 88.365,
+          "near_nh10": false,
+          "risk_score": 96.7,
+          "risk_level": "high",
+          "probability": 0.967,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 91.8,
+              "unit": "%",
+              "raw": 183.63695290591212,
+              "raw_unit": "mm",
+              "weight": 0.9181847645295607
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 82.5,
+              "unit": "%",
+              "raw": 313.65719410427783,
+              "raw_unit": "mm",
+              "weight": 0.825413668695468
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 74.9,
+              "unit": "%",
+              "raw": 0.75,
+              "raw_unit": "index",
+              "weight": 0.7493405070708834
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 62,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.62
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 40,
+              "raw_unit": "\u00b0",
+              "weight": 0.6153846153846154
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 183.63695290591212,
+            "rainfall_3d_mm": 313.65719410427783,
+            "rainfall_7d_mm": 231.08676340295608,
+            "rainfall_intensity": 46.79180827851728,
+            "soil_moisture_index": 0.7493405070708834,
+            "slope_angle": 40,
+            "elevation_m": 1370,
+            "base_susceptibility": 0.62,
+            "historical_count": 7
+          }
+        },
+        {
+          "location_id": "NSK_10",
+          "name": "Gangtok-Dikchu Corridor",
+          "centroid_lat": 27.335,
+          "centroid_lon": 88.615,
+          "near_nh10": true,
+          "risk_score": 99,
+          "risk_level": "high",
+          "probability": 0.99,
+          "contributing_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 79.8,
+              "unit": "%",
+              "raw": 159.68920051341092,
+              "raw_unit": "mm",
+              "weight": 0.7984460025670547
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 79.4,
+              "unit": "%",
+              "raw": 301.77053429541365,
+              "raw_unit": "mm",
+              "weight": 0.7941329849879307
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 75,
+              "unit": "%",
+              "raw": 0.75,
+              "raw_unit": "index",
+              "weight": 0.7498117782151877
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 60,
+              "unit": "%",
+              "raw": 9,
+              "raw_unit": "events",
+              "weight": 0.6
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 58,
+              "unit": "%",
+              "raw": 0.58,
+              "raw_unit": "index",
+              "weight": 0.58
+            }
+          ],
+          "rainfall": {
+            "rainfall_24h_mm": 159.68920051341092,
+            "rainfall_3d_mm": 301.77053429541365,
+            "rainfall_7d_mm": 244.86206729732925,
+            "rainfall_intensity": 42.389531572663444,
+            "soil_moisture_index": 0.7498117782151877,
+            "slope_angle": 35,
+            "elevation_m": 1540,
+            "base_susceptibility": 0.58,
+            "historical_count": 9
+          }
+        }
+      ],
+      "warnings": [
+        {
+          "id": 15,
+          "location_id": "NSK_01",
+          "location_name": "Mangan North Ridge",
+          "risk_level": "high",
+          "risk_score": 99.3,
+          "trigger_factors": [
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 79.8,
+              "unit": "%",
+              "raw": 303.21644981238745,
+              "raw_unit": "mm",
+              "weight": 0.7979380258220723
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 72,
+              "unit": "%",
+              "raw": 0.72,
+              "raw_unit": "index",
+              "weight": 0.72
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 68.4,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.6837970214314262
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 67.6,
+              "unit": "%",
+              "raw": 135.13303499445405,
+              "raw_unit": "mm",
+              "weight": 0.6756651749722703
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 64.6,
+              "unit": "%",
+              "raw": 42,
+              "raw_unit": "\u00b0",
+              "weight": 0.6461538461538462
+            }
+          ],
+          "affected_infrastructure": [
+            "NH-10 Highway Corridor"
+          ]
+        },
+        {
+          "id": 16,
+          "location_id": "NSK_03",
+          "location_name": "Chungthang Upper Slope",
+          "risk_level": "high",
+          "risk_score": 99.3,
+          "trigger_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 83.5,
+              "unit": "%",
+              "raw": 166.98825602094718,
+              "raw_unit": "mm",
+              "weight": 0.8349412801047359
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 81,
+              "unit": "%",
+              "raw": 0.81,
+              "raw_unit": "index",
+              "weight": 0.81
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 78.2,
+              "unit": "%",
+              "raw": 297.2501666448396,
+              "raw_unit": "mm",
+              "weight": 0.7822372806443147
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 76.7,
+              "unit": "%",
+              "raw": 0.77,
+              "raw_unit": "index",
+              "weight": 0.7665662708147272
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 11,
+              "raw_unit": "events",
+              "weight": 0.7333333333333333
+            }
+          ],
+          "affected_infrastructure": []
+        },
+        {
+          "id": 17,
+          "location_id": "NSK_04",
+          "location_name": "Singhik High Zone",
+          "risk_level": "high",
+          "risk_score": 97.6,
+          "trigger_factors": [
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 93.3,
+              "unit": "%",
+              "raw": 14,
+              "raw_unit": "events",
+              "weight": 0.9333333333333333
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 87,
+              "unit": "%",
+              "raw": 0.87,
+              "raw_unit": "index",
+              "weight": 0.87
+            },
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 81.4,
+              "unit": "%",
+              "raw": 162.78400664074263,
+              "raw_unit": "mm",
+              "weight": 0.8139200332037132
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 78.5,
+              "unit": "%",
+              "raw": 51,
+              "raw_unit": "\u00b0",
+              "weight": 0.7846153846153846
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 68.1,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.6812489310677896
+            }
+          ],
+          "affected_infrastructure": []
+        },
+        {
+          "id": 18,
+          "location_id": "NSK_06",
+          "location_name": "Tashiding Escarpment",
+          "risk_level": "high",
+          "risk_score": 96.7,
+          "trigger_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 73.3,
+              "unit": "%",
+              "raw": 146.67475207097073,
+              "raw_unit": "mm",
+              "weight": 0.7333737603548536
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 73.2,
+              "unit": "%",
+              "raw": 278.1423619467003,
+              "raw_unit": "mm",
+              "weight": 0.731953584070264
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 68,
+              "unit": "%",
+              "raw": 0.68,
+              "raw_unit": "index",
+              "weight": 0.68
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 67.7,
+              "unit": "%",
+              "raw": 44,
+              "raw_unit": "\u00b0",
+              "weight": 0.676923076923077
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 60.3,
+              "unit": "%",
+              "raw": 0.6,
+              "raw_unit": "index",
+              "weight": 0.6027069880417494
+            }
+          ],
+          "affected_infrastructure": []
+        },
+        {
+          "id": 19,
+          "location_id": "NSK_09",
+          "location_name": "Namchi Hill Station",
+          "risk_level": "high",
+          "risk_score": 96.7,
+          "trigger_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 91.8,
+              "unit": "%",
+              "raw": 183.63695290591212,
+              "raw_unit": "mm",
+              "weight": 0.9181847645295607
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 82.5,
+              "unit": "%",
+              "raw": 313.65719410427783,
+              "raw_unit": "mm",
+              "weight": 0.825413668695468
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 74.9,
+              "unit": "%",
+              "raw": 0.75,
+              "raw_unit": "index",
+              "weight": 0.7493405070708834
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 62,
+              "unit": "%",
+              "raw": 0.62,
+              "raw_unit": "index",
+              "weight": 0.62
+            },
+            {
+              "factor": "Slope Angle",
+              "value": 61.5,
+              "unit": "%",
+              "raw": 40,
+              "raw_unit": "\u00b0",
+              "weight": 0.6153846153846154
+            }
+          ],
+          "affected_infrastructure": []
+        },
+        {
+          "id": 20,
+          "location_id": "NSK_10",
+          "location_name": "Gangtok-Dikchu Corridor",
+          "risk_level": "high",
+          "risk_score": 99,
+          "trigger_factors": [
+            {
+              "factor": "Recent Rainfall (24h)",
+              "value": 79.8,
+              "unit": "%",
+              "raw": 159.68920051341092,
+              "raw_unit": "mm",
+              "weight": 0.7984460025670547
+            },
+            {
+              "factor": "3-Day Accumulated Rainfall",
+              "value": 79.4,
+              "unit": "%",
+              "raw": 301.77053429541365,
+              "raw_unit": "mm",
+              "weight": 0.7941329849879307
+            },
+            {
+              "factor": "Soil Moisture",
+              "value": 75,
+              "unit": "%",
+              "raw": 0.75,
+              "raw_unit": "index",
+              "weight": 0.7498117782151877
+            },
+            {
+              "factor": "Historical Landslide Activity",
+              "value": 60,
+              "unit": "%",
+              "raw": 9,
+              "raw_unit": "events",
+              "weight": 0.6
+            },
+            {
+              "factor": "Geological Susceptibility",
+              "value": 58,
+              "unit": "%",
+              "raw": 0.58,
+              "raw_unit": "index",
+              "weight": 0.58
+            }
+          ],
+          "affected_infrastructure": [
+            "NH-10 Highway Corridor"
+          ]
+        }
+      ],
+      "progress": 80
+    },
+    {
+      "type": "infrastructure_alert",
+      "step": 40,
+      "time_label": "T+40: Infrastructure Impact Detected",
+      "description": "Critical risk zones intersecting NH-10 corridor. 2 cell(s) pose direct highway risk. Recommended: Alert BRO clearing crews and NDMA.",
+      "affected_cells": [
+        "NSK_01",
+        "NSK_10"
+      ],
+      "recommended_actions": [
+        "Alert Border Roads Organisation (BRO) clearing teams on NH-10",
+        "Notify NDMA State EOC \u2014 North Sikkim district",
+        "Issue traffic advisory: Reduce speed / stop non-essential traffic on NH-10",
+        "Dispatch drone survey team to critical slope areas",
+        "Alert Mangan district disaster management cell",
+        "Initiate field verification by SDRF teams"
+      ],
+      "progress": 90
+    },
+    {
+      "type": "simulation_complete",
+      "step": 50,
+      "time_label": "T+50: Simulation Complete",
+      "description": "Extreme monsoon scenario simulation complete. Risk assessment saved to database. Awaiting field verification.",
+      "summary": {
+        "total_cells": 10,
+        "critical": 0,
+        "high": 6,
+        "moderate": 4,
+        "low": 0,
+        "warnings_generated": 6,
+        "nh10_risk_cells": 2
+      },
+      "progress": 100
+    }
+  ]
+}

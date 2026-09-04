@@ -1,0 +1,22 @@
+[
+  {
+    "zone_id": "A",
+    "name": "North Wall",
+    "geometry": {"type": "Polygon", "coordinates": [[[0,0], [10,0], [10,10], [0,10], [0,0]]]},
+    "thresholds": {
+      "displacement_mm": 5.0,
+      "vibration_mm_s": 10.0,
+      "risk_score": 7.5
+    }
+  },
+  {
+    "zone_id": "B",
+    "name": "East Portal",
+    "geometry": {"type": "Polygon", "coordinates": [[[20,0], [30,0], [30,10], [20,10], [20,0]]]},
+    "thresholds": {
+      "displacement_mm": 3.0,
+      "vibration_mm_s": 15.0,
+      "risk_score": 6.0
+    }
+  }
+]
