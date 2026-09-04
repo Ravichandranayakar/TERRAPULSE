@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
-import Map, { Source, Layer, MapRef } from 'react-map-gl/maplibre';
+import Map, { Source, Layer, MapRef, NavigationControl } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
