@@ -16,6 +16,8 @@ import {
   X,
   Shield,
   Settings,
+  Globe,
+  Layers,
 } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card';
@@ -388,14 +390,24 @@ export default function App() {
                     </Card>
                   ) : (
                     <div className="relative h-full w-full">
-                    <div className="absolute top-2 right-2 z-50">
+                    <div className="absolute bottom-6 left-6 z-[999] group">
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => setUseMapLibre(!useMapLibre)}
-                        className="bg-black/70 backdrop-blur text-[10px] h-6 border-white/20"
+                        className="bg-black/70 backdrop-blur h-8 w-8 p-0 flex items-center justify-center border-white/20 overflow-hidden transition-all duration-300 hover:w-auto hover:px-3"
                       >
-                        {useMapLibre ? 'Switch to Fallback (Leaflet)' : 'Switch to 3D Engine (MapLibre)'}
+                        {useMapLibre ? (
+                          <>
+                            <Layers className="h-4 w-4 shrink-0 text-slate-300" />
+                            <span className="hidden group-hover:inline-block ml-2 text-[10px] whitespace-nowrap">Switch to 2D Fallback</span>
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="h-4 w-4 shrink-0 text-teal-400" />
+                            <span className="hidden group-hover:inline-block ml-2 text-[10px] whitespace-nowrap">Switch to 3D Engine</span>
+                          </>
+                        )}
                       </Button>
                     </div>
                     {useMapLibre ? (
