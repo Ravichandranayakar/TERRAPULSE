@@ -349,7 +349,7 @@ export function StormSimulator({ onSimulationUpdate, onWarningsUpdate }: StormMo
         <Card className="bg-[#131313] border-border/20 rounded-xl overflow-hidden shadow-xl">
           <div className="relative h-48 w-full">
             <img
-              src="https://images.unsplash.com/photo-1623910271000-4b553e414c7f?auto=format&fit=crop&q=80&w=800"
+              src="/assets/231854574217558.jpg"
               alt="Site View"
               className="absolute inset-0 w-full h-full object-cover"
             />
