@@ -67,3 +67,6 @@ htmlcov/
 *.mov
 
 commands.txt
+.jobs
+.pki
+.tmp

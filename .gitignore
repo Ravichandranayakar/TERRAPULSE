@@ -76,3 +76,6 @@ yarn-error.log*
 
 commands.txt
 screenshots
+.jobs
+.pki
+.tmp

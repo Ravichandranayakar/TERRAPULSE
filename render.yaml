@@ -1,5 +1,5 @@
 services:
-  # 1. Backend API Service
+  # 1. Backend API Service (Runs your Python AI / ML models)
   - type: web
     name: terrapulse-backend
     env: docker
@@ -10,16 +10,15 @@ services:
     autoDeploy: false
     envVars:
       - key: PORT
-        value: 10000
+        value: "10000"
 
-  # 2. Frontend React Service
-  - type: web
+  # 2. Frontend React Service (Hosted 100% FREE as a Static Site)
+  - type: static
     name: terrapulse-frontend
-    env: docker
     region: singapore
-    plan: free
-    dockerContext: apps/terrapulse/frontend
-    dockerfilePath: apps/terrapulse/frontend/Dockerfile
+    rootDir: apps/terrapulse/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
     autoDeploy: false
     envVars:
       # Automatically pass the Backend's Render URL into the Frontend build step!
@@ -28,3 +27,9 @@ services:
           type: web
           name: terrapulse-backend
           envVarKey: RENDER_EXTERNAL_URL
+    
+    # Crucial for React Router so sub-pages don't 404 on refresh
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
