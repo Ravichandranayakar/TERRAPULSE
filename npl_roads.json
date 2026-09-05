@@ -1,0 +1,517 @@
+{
+    "source_name": "osm",
+    "snapshot_label": "2026-08-09",
+    "dataset_source": "OpenStreetMap (Geofabrik NPL 2026-08-09)",
+    "generated_utc": "2026-08-09T15:56:54Z",
+    "oex_version": "0.4.7",
+    "license_label": "hdx-odc-odbl",
+    "license_url": "https://opendatacommons.org/licenses/odbl/1-0/",
+    "pcode_source_date": "2025-07-29",
+    "boundary": "geoBoundaries CGAZ ADM0",
+    "metadata": {
+        "feature_count": 610111,
+        "geometry_types": {
+            "LINESTRING": 605023,
+            "POINT": 4895,
+            "POLYGON": 193
+        },
+        "bbox": [
+            80.0576413,
+            26.3474541,
+            88.2543258,
+            30.4334339
+        ],
+        "columns": [
+            {
+                "name": "id",
+                "type": "VARCHAR",
+                "null_count": 0,
+                "null_percent": 0.0,
+                "distinct_count": 610111,
+                "top_values": []
+            },
+            {
+                "name": "name",
+                "type": "VARCHAR",
+                "null_count": 589598,
+                "null_percent": 96.64,
+                "distinct_count": 9835,
+                "top_values": []
+            },
+            {
+                "name": "name_en",
+                "type": "VARCHAR",
+                "null_count": 606718,
+                "null_percent": 99.44,
+                "distinct_count": 1595,
+                "top_values": []
+            },
+            {
+                "name": "name_ne",
+                "type": "VARCHAR",
+                "null_count": 606732,
+                "null_percent": 99.45,
+                "distinct_count": 1342,
+                "top_values": []
+            },
+            {
+                "name": "highway",
+                "type": "VARCHAR",
+                "null_count": 0,
+                "null_percent": 0.0,
+                "distinct_count": 54,
+                "top_values": [
+                    {
+                        "value": "path",
+                        "count": 261938
+                    },
+                    {
+                        "value": "residential",
+                        "count": 111615
+                    },
+                    {
+                        "value": "track",
+                        "count": 89748
+                    },
+                    {
+                        "value": "unclassified",
+                        "count": 86797
+                    },
+                    {
+                        "value": "service",
+                        "count": 20046
+                    }
+                ]
+            },
+            {
+                "name": "surface",
+                "type": "VARCHAR",
+                "null_count": 539106,
+                "null_percent": 88.36,
+                "distinct_count": 79,
+                "top_values": [
+                    {
+                        "value": "ground",
+                        "count": 39477
+                    },
+                    {
+                        "value": "unpaved",
+                        "count": 18094
+                    },
+                    {
+                        "value": "asphalt",
+                        "count": 3817
+                    },
+                    {
+                        "value": "dirt",
+                        "count": 2056
+                    },
+                    {
+                        "value": "gravel",
+                        "count": 2043
+                    }
+                ]
+            },
+            {
+                "name": "smoothness",
+                "type": "VARCHAR",
+                "null_count": 602836,
+                "null_percent": 98.81,
+                "distinct_count": 13,
+                "top_values": [
+                    {
+                        "value": "bad",
+                        "count": 3853
+                    },
+                    {
+                        "value": "intermediate",
+                        "count": 1348
+                    },
+                    {
+                        "value": "very_bad",
+                        "count": 879
+                    },
+                    {
+                        "value": "good",
+                        "count": 521
+                    },
+                    {
+                        "value": "horrible",
+                        "count": 251
+                    }
+                ]
+            },
+            {
+                "name": "width",
+                "type": "VARCHAR",
+                "null_count": 604463,
+                "null_percent": 99.07,
+                "distinct_count": 126,
+                "top_values": [
+                    {
+                        "value": "3",
+                        "count": 964
+                    },
+                    {
+                        "value": "4",
+                        "count": 790
+                    },
+                    {
+                        "value": "7",
+                        "count": 571
+                    },
+                    {
+                        "value": "5",
+                        "count": 515
+                    },
+                    {
+                        "value": "6",
+                        "count": 506
+                    }
+                ]
+            },
+            {
+                "name": "lanes",
+                "type": "VARCHAR",
+                "null_count": 602374,
+                "null_percent": 98.73,
+                "distinct_count": 7,
+                "top_values": [
+                    {
+                        "value": "2",
+                        "count": 6274
+                    },
+                    {
+                        "value": "1",
+                        "count": 1244
+                    },
+                    {
+                        "value": "4",
+                        "count": 172
+                    },
+                    {
+                        "value": "3",
+                        "count": 26
+                    },
+                    {
+                        "value": "6",
+                        "count": 10
+                    }
+                ]
+            },
+            {
+                "name": "oneway",
+                "type": "VARCHAR",
+                "null_count": 606161,
+                "null_percent": 99.35,
+                "distinct_count": 3,
+                "top_values": [
+                    {
+                        "value": "no",
+                        "count": 2347
+                    },
+                    {
+                        "value": "yes",
+                        "count": 1600
+                    },
+                    {
+                        "value": "-1",
+                        "count": 3
+                    }
+                ]
+            },
+            {
+                "name": "bridge",
+                "type": "VARCHAR",
+                "null_count": 592882,
+                "null_percent": 97.18,
+                "distinct_count": 18,
+                "top_values": [
+                    {
+                        "value": "yes",
+                        "count": 17119
+                    },
+                    {
+                        "value": "low_water_crossing",
+                        "count": 29
+                    },
+                    {
+                        "value": "boardwalk",
+                        "count": 23
+                    },
+                    {
+                        "value": "cantilever",
+                        "count": 17
+                    },
+                    {
+                        "value": "aqueduct",
+                        "count": 7
+                    }
+                ]
+            },
+            {
+                "name": "layer",
+                "type": "VARCHAR",
+                "null_count": 592663,
+                "null_percent": 97.14,
+                "distinct_count": 10,
+                "top_values": [
+                    {
+                        "value": "1",
+                        "count": 16758
+                    },
+                    {
+                        "value": "-1",
+                        "count": 638
+                    },
+                    {
+                        "value": "2",
+                        "count": 38
+                    },
+                    {
+                        "value": "4",
+                        "count": 3
+                    },
+                    {
+                        "value": "-3",
+                        "count": 3
+                    }
+                ]
+            },
+            {
+                "name": "source",
+                "type": "VARCHAR",
+                "null_count": 610111,
+                "null_percent": 100.0,
+                "distinct_count": 0,
+                "top_values": []
+            },
+            {
+                "name": "adm0_pcode",
+                "type": "VARCHAR",
+                "null_count": 0,
+                "null_percent": 0.0,
+                "distinct_count": 1,
+                "top_values": [
+                    {
+                        "value": "NPL",
+                        "count": 610111
+                    }
+                ]
+            },
+            {
+                "name": "adm0_name",
+                "type": "VARCHAR",
+                "null_count": 0,
+                "null_percent": 0.0,
+                "distinct_count": 1,
+                "top_values": [
+                    {
+                        "value": "Nepal",
+                        "count": 610111
+                    }
+                ]
+            },
+            {
+                "name": "adm1_pcode",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 7,
+                "top_values": [
+                    {
+                        "value": "NP03",
+                        "count": 160878
+                    },
+                    {
+                        "value": "NP01",
+                        "count": 120379
+                    },
+                    {
+                        "value": "NP05",
+                        "count": 85757
+                    },
+                    {
+                        "value": "NP04",
+                        "count": 73365
+                    },
+                    {
+                        "value": "NP02",
+                        "count": 71365
+                    }
+                ]
+            },
+            {
+                "name": "adm1_name",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 7,
+                "top_values": [
+                    {
+                        "value": "Bagmati",
+                        "count": 160878
+                    },
+                    {
+                        "value": "Koshi",
+                        "count": 120379
+                    },
+                    {
+                        "value": "Lumbini",
+                        "count": 85757
+                    },
+                    {
+                        "value": "Gandaki",
+                        "count": 73365
+                    },
+                    {
+                        "value": "Madhesh",
+                        "count": 71365
+                    }
+                ]
+            },
+            {
+                "name": "adm2_pcode",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 77,
+                "top_values": [
+                    {
+                        "value": "NP0327",
+                        "count": 28876
+                    },
+                    {
+                        "value": "NP0104",
+                        "count": 27006
+                    },
+                    {
+                        "value": "NP0105",
+                        "count": 25749
+                    },
+                    {
+                        "value": "NP0331",
+                        "count": 20131
+                    },
+                    {
+                        "value": "NP0335",
+                        "count": 17799
+                    }
+                ]
+            },
+            {
+                "name": "adm2_name",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 77,
+                "top_values": [
+                    {
+                        "value": "Kathmandu",
+                        "count": 28876
+                    },
+                    {
+                        "value": "Jhapa",
+                        "count": 27006
+                    },
+                    {
+                        "value": "Morang",
+                        "count": 25749
+                    },
+                    {
+                        "value": "Makwanpur",
+                        "count": 20131
+                    },
+                    {
+                        "value": "Chitawan",
+                        "count": 17799
+                    }
+                ]
+            },
+            {
+                "name": "adm3_pcode",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 774,
+                "top_values": [
+                    {
+                        "value": "NP0327101",
+                        "count": 10063
+                    },
+                    {
+                        "value": "NP0335101",
+                        "count": 9431
+                    },
+                    {
+                        "value": "NP0439101",
+                        "count": 9267
+                    },
+                    {
+                        "value": "NP0548303",
+                        "count": 5459
+                    },
+                    {
+                        "value": "NP0331201",
+                        "count": 4691
+                    }
+                ]
+            },
+            {
+                "name": "adm3_name",
+                "type": "VARCHAR",
+                "null_count": 103,
+                "null_percent": 0.02,
+                "distinct_count": 728,
+                "top_values": [
+                    {
+                        "value": "Kathmandu",
+                        "count": 10063
+                    },
+                    {
+                        "value": "Bharatpur",
+                        "count": 9431
+                    },
+                    {
+                        "value": "Pokhara",
+                        "count": 9267
+                    },
+                    {
+                        "value": "Tilottama",
+                        "count": 5459
+                    },
+                    {
+                        "value": "Godawari",
+                        "count": 5033
+                    }
+                ]
+            },
+            {
+                "name": "adm4_pcode",
+                "type": "VARCHAR",
+                "null_count": 610111,
+                "null_percent": 100.0,
+                "distinct_count": 0,
+                "top_values": []
+            },
+            {
+                "name": "adm4_name",
+                "type": "VARCHAR",
+                "null_count": 610111,
+                "null_percent": 100.0,
+                "distinct_count": 0,
+                "top_values": []
+            },
+            {
+                "name": "name_latin",
+                "type": "VARCHAR",
+                "null_count": 588858,
+                "null_percent": 96.52,
+                "distinct_count": 10217,
+                "top_values": []
+            }
+        ],
+        "summary": "610,111 features. geometry types: 605,023 LINESTRING, 4,895 POINT, 193 POLYGON. 14 of 24 columns are >=50% null (name, name_en, name_ne, surface, smoothness, width, lanes, oneway, bridge, layer, source, adm4_pcode, adm4_name, name_latin).",
+        "temporal": null
+    }
+}

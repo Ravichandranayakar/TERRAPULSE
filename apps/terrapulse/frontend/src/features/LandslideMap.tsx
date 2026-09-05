@@ -90,6 +90,15 @@ export function LandslideMap({
   onCellSelect,
   simulationCells,
 }: LandslideMapProps) {
+  const [zoom, setZoom] = React.useState(1);
+  const handleZoomIn = () => setZoom(z => Math.min(z + 0.5, 3));
+  const handleZoomOut = () => setZoom(z => Math.max(z - 0.5, 1));
+
+  const isNepal = cells && cells.length > 0 && cells[0].centroid_lon < 86;
+  const mapTitle = isNepal ? "Rasuwa District - Landslide Risk Map" : "North Sikkim - Landslide Risk Map";
+  const mapSubtitle = isNepal ? "HIMALAYAS - NEPAL" : "NER - INDIA";
+  const svgOverlayTitle = isNepal ? "Langtang Region, Rasuwa" : "Mangan District, North Sikkim";
+
   const activeCells = simulationCells && simulationCells.length > 0 ? simulationCells : cells;
 
   const MAP_BOUNDS = React.useMemo(() => {
@@ -143,9 +152,9 @@ export function LandslideMap({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="font-heading flex items-center gap-2 text-base">
             <MapPin className="h-5 w-5 text-primary" />
-            North Sikkim — Landslide Risk Map
+            {mapTitle}
             <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider ml-1">
-              NER · India
+              {mapSubtitle}
             </Badge>
           </CardTitle>
           <div className="flex gap-2 flex-wrap">
@@ -160,7 +169,7 @@ export function LandslideMap({
         <div className="flex gap-3 mt-1 text-[10px] font-medium text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="inline-block h-2 w-4 border border-blue-400/60 bg-blue-400/20" />
-            NH-10 Highway
+            {isNepal ? 'H01 Trishuli Highway' : 'NH-10 Highway'}
           </span>
           <span className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-zinc-400/50 border border-zinc-400" />
@@ -170,6 +179,15 @@ export function LandslideMap({
       </CardHeader>
 
       <CardContent className="flex-1 p-0 relative overflow-hidden min-h-[420px]">
+        {/* Map Controls */}
+        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+          <button onClick={handleZoomIn} className="bg-slate-800/80 hover:bg-slate-700 text-white p-2 rounded border border-slate-600 backdrop-blur-sm" title="Zoom In">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <button onClick={handleZoomOut} className="bg-slate-800/80 hover:bg-slate-700 text-white p-2 rounded border border-slate-600 backdrop-blur-sm" title="Zoom Out">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
         {/* Terrain background */}
         <div
           className="absolute inset-0"
@@ -184,6 +202,7 @@ export function LandslideMap({
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="xMidYMid meet"
         >
+          <g style={{ transform: `scale(${zoom})`, transformOrigin: 'center', transition: 'transform 0.3s ease' }}>
           {/* Reference grid */}
           <g opacity="0.07">
             {latLines.map(lat => (
@@ -217,9 +236,9 @@ export function LandslideMap({
               <polyline
                 points={nh10Route.map(([lat, lon]) => `${projectLon(lon, MAP_BOUNDS)},${projectLat(lat, MAP_BOUNDS)}`).join(' ')}
                 fill="none"
-                stroke="#60a5fa"
-                strokeWidth="6"
-                strokeOpacity="0.15"
+                stroke={routeSafety === 'CRITICAL' ? '#ef4444' : routeSafety === 'HIGH_RISK' ? '#f97316' : routeSafety === 'CAUTION' ? '#eab308' : '#60a5fa'}
+                strokeWidth="3"
+                strokeOpacity="0.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -227,24 +246,22 @@ export function LandslideMap({
               <polyline
                 points={nh10Route.map(([lat, lon]) => `${projectLon(lon, MAP_BOUNDS)},${projectLat(lat, MAP_BOUNDS)}`).join(' ')}
                 fill="none"
-                stroke="#3b82f6"
-                strokeWidth="2.5"
-                strokeOpacity="0.7"
+                stroke={routeSafety === 'CRITICAL' ? '#b91c1c' : routeSafety === 'HIGH_RISK' ? '#c2410c' : routeSafety === 'CAUTION' ? '#a16207' : '#3b82f6'}
+                strokeWidth="3.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeDasharray="8 3"
+                strokeDasharray={routeSafety === 'CRITICAL' ? '4 4' : '0'}
               />
-              {/* NH-10 label */}
+              {/* Route label */}
               <text
-                x={projectLon(88.45, MAP_BOUNDS)}
-                y={projectLat(27.30, MAP_BOUNDS) - 6}
+                x={projectLon(nh10Route[Math.floor(nh10Route.length/2)][1], MAP_BOUNDS)}
+                y={projectLat(nh10Route[Math.floor(nh10Route.length/2)][0], MAP_BOUNDS) - 6}
                 fill="#93c5fd"
                 fontSize="8"
                 fontWeight="bold"
-                fontFamily="monospace"
                 opacity="0.8"
               >
-                NH-10
+                Regional Route
               </text>
             </>
           )}
@@ -271,49 +288,70 @@ export function LandslideMap({
                 className="cursor-pointer"
                 onClick={() => onCellSelect(cell.location_id)}
               >
-                {/* Risk fill rectangle */}
-                <rect
-                  x={Math.min(x1, x2)}
-                  y={Math.min(y1, y2)}
-                  width={w}
-                  height={h}
-                  fill={color}
-                  fillOpacity={isSelected ? Math.min(opacity + 0.25, 0.95) : opacity}
-                  rx="3"
-                  stroke={isSelected ? '#ffffff' : color}
-                  strokeOpacity={isSelected ? 0.9 : 0.4}
-                  strokeWidth={isSelected ? 2 : 1}
-                />
+                {isSelected ? (
+                  <>
+                    {/* Risk fill rectangle */}
+                    <rect
+                      x={Math.min(x1, x2)}
+                      y={Math.min(y1, y2)}
+                      width={w}
+                      height={h}
+                      fill={color}
+                      fillOpacity={Math.min(opacity + 0.25, 0.95)}
+                      rx="3"
+                      stroke="#ffffff"
+                      strokeOpacity="0.9"
+                      strokeWidth="2"
+                    />
 
-                {/* Pulsing ring for critical cells */}
-                {isCritical && (
-                  <rect
-                    x={Math.min(x1, x2) - 3}
-                    y={Math.min(y1, y2) - 3}
-                    width={w + 6}
-                    height={h + 6}
-                    fill="none"
-                    stroke={color}
-                    strokeOpacity="0.4"
-                    strokeWidth="2"
-                    rx="5"
-                  >
-                    <animate attributeName="stroke-opacity" values="0.5;0.0;0.5" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="stroke-width" values="2;4;2" dur="2s" repeatCount="indefinite" />
-                  </rect>
+                    {/* Pulsing ring for critical cells */}
+                    {isCritical && (
+                      <rect
+                        x={Math.min(x1, x2) - 3}
+                        y={Math.min(y1, y2) - 3}
+                        width={w + 6}
+                        height={h + 6}
+                        fill="none"
+                        stroke={color}
+                        strokeOpacity="0.4"
+                        strokeWidth="2"
+                        rx="5"
+                      >
+                        <animate attributeName="stroke-opacity" values="0.5;0.0;0.5" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="stroke-width" values="2;4;2" dur="2s" repeatCount="indefinite" />
+                      </rect>
+                    )}
+
+                    {/* Center dot for selected */}
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={isHighRisk ? 5 : 3.5}
+                      fill="#ffffff"
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Unselected circle shape with gray outer ring and risk color inner fill */}
+                    <circle 
+                      cx={cx} 
+                      cy={cy} 
+                      r={9} 
+                      fill={color} 
+                      fillOpacity="0.85"
+                      stroke="#64748b" 
+                      strokeWidth="2.5" 
+                    />
+                    
+                    {/* Pulsing ring for critical cells even when unselected */}
+                    {isCritical && (
+                      <circle cx={cx} cy={cy} r={13} fill="none" stroke={color} strokeOpacity="0.5" strokeWidth="2">
+                        <animate attributeName="r" values="13;17;13" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="stroke-opacity" values="0.5;0.0;0.5" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                    )}
+                  </>
                 )}
-
-                {/* Center dot */}
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={isHighRisk ? 5 : 3.5}
-                  fill={color}
-                  fillOpacity="0.95"
-                  stroke="#ffffff"
-                  strokeOpacity="0.6"
-                  strokeWidth="0.8"
-                />
 
                 {/* NH-10 warning indicator */}
                 {cell.near_nh10 && isHighRisk && (
@@ -354,7 +392,7 @@ export function LandslideMap({
             return (
               <g key={ls.id} className="cursor-pointer" title={ls.type}>
                 <circle cx={cx} cy={cy} r="5" fill="#71717a" fillOpacity="0.5" stroke="#a1a1aa" strokeWidth="1" />
-                <text x={cx} y={cy + 1} textAnchor="middle" fill="#ffffff" fontSize="6" opacity="0.7">✕</text>
+                
               </g>
             );
           })}
@@ -370,11 +408,12 @@ export function LandslideMap({
 
           {/* Map title overlay */}
           <text x={10} y={18} fill="#e2e8f0" fontSize="11" fontWeight="bold" fontFamily="system-ui" opacity="0.8">
-            Mangan District, North Sikkim
+            {svgOverlayTitle}
           </text>
           <text x={10} y={30} fill="#94a3b8" fontSize="8" fontFamily="system-ui" opacity="0.7">
-            Landslide Risk Surface · Click any cell to inspect
+            Landslide Risk Surface - Click any cell to inspect
           </text>
+          </g>
         </svg>
       </CardContent>
     </Card>

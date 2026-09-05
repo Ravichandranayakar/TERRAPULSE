@@ -130,6 +130,8 @@ export default function App() {
       ]);
       setGeoData(geo);
       setForecastData(null); // Clear forecast when region changes so it re-fetches
+      setSelectedCellId(null); // Clear selected cell when region changes
+      setUseMapLibre(false); // Always reset to 2D when switching region
       // Normalize: Nepal returns {cells, route_safety, nh10_route}, NER returns flat array
       if (status && Array.isArray(status)) {
         setStatusData(status);
@@ -503,7 +505,6 @@ export default function App() {
                         selectedCellId={selectedCellId}
                         onCellSelect={(id) => {
                           setSelectedCellId(id);
-                          setUseMapLibre(true);
                         }}
                         simulationCells={simulationCells}
                       />

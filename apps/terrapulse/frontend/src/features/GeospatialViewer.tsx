@@ -26,12 +26,13 @@ interface GeoCell {
 
 // Temporary Free MapTiler DEM & Basemap Source for Prototype
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || 'get_your_own_key'; // We will need to replace this if it hits limits, or use a public style
-const mapStyle = `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTILER_KEY}`;
+const mapStyle = `https://api.maptiler.com/maps/hybrid/style.json?key=${MAPTILER_KEY}`;
 
 export default function GeospatialViewer({ 
   cells = [], 
   historicalEvents = [],
   nh10Route = [],
+  routeSafety,
   onCellClick,
   initialSelectedCellId
 }: { 
@@ -44,17 +45,34 @@ export default function GeospatialViewer({
   routeSafety?: string,
 }) {
   const mapRef = useRef<MapRef>(null);
+  const isNepal = cells && cells.length > 0 && cells[0].centroid_lon < 86;
+  const defaultCenter = isNepal ? { lon: 85.3, lat: 28.1, zoom: 9 } : { lon: 88.5122, lat: 27.3314, zoom: 11 };
+
   const [viewState, setViewState] = useState({
-    longitude: 88.5122,
-    latitude: 27.3314, // North Sikkim Center
-    zoom: 9,
+    longitude: defaultCenter.lon,
+    latitude: defaultCenter.lat,
+    zoom: defaultCenter.zoom,
     pitch: 0,
     bearing: 0
   });
+  
+  // Re-center map if region changes
+  React.useEffect(() => {
+    setViewState(prev => ({
+      ...prev,
+      longitude: defaultCenter.lon,
+      latitude: defaultCenter.lat,
+      zoom: defaultCenter.zoom
+    }));
+  }, [isNepal]);
+
 
   const [selectedCell, setSelectedCell] = useState<GeoCell | null>(null);
   const [is3D, setIs3D] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [saved2DState, setSaved2DState] = useState<any>(null);
+  const resolvedRoute = nh10Route && nh10Route.length > 0 ? nh10Route : [];
+  const regionState = { region: cells[0]?.centroid_lon < 86 ? 'nepal_case' : 'sih_demo' };
 
   // Convert risk cells to GeoJSON
   const riskGeoJSON = React.useMemo(() => {
@@ -176,7 +194,7 @@ export default function GeospatialViewer({
     } else {
       mapRef.current.flyTo({
         center: [88.5122, 27.3314],
-        zoom: 9,
+        zoom: 11,
         pitch: 0,
         bearing: 0,
         duration: 2000,
@@ -201,6 +219,20 @@ export default function GeospatialViewer({
   return (
     <div className="relative w-full h-[600px] bg-slate-900 rounded-xl overflow-hidden border border-border/20 shadow-2xl">
       
+      
+      {is3D && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button 
+            onClick={handleReturnTo2D}
+            variant="outline"
+            className="bg-black/80 backdrop-blur-md border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white font-medium text-xs h-8 shadow-lg"
+          >
+            <Navigation className="w-3.5 h-3.5 mr-2 rotate-180" />
+            RETURN TO 2D OVERVIEW
+          </Button>
+        </div>
+      )}
+
       {/* MAPLIBRE GL CANVAS */}
       <Map
         ref={mapRef}
@@ -224,7 +256,7 @@ export default function GeospatialViewer({
             }
           }
         }}
-        interactiveLayerIds={['risk-fill']}
+        interactiveLayerIds={['risk-fill', 'risk-circle-outer', 'risk-circle-inner']}
       >
         {/* TERRAIN SOURCE (DEM) */}
         <Source
@@ -389,104 +421,8 @@ export default function GeospatialViewer({
 
       {/* OVERLAY UI */}
 
-      {/* MOCK UI FOR CANDIDATE SLOPE SCANNING (matches user image) */}
-      {routeSafety && routeSafety !== 'UNKNOWN' && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 pointer-events-none flex flex-col items-center gap-2">
-          {/* Main Candidate details */}
-          <div className="bg-black/80 backdrop-blur-md border border-white/10 rounded-full pl-3 pr-1 py-1 flex items-center gap-3 shadow-xl shadow-red-900/20">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <div className="text-[10px] font-bold tracking-wide text-white leading-tight">
-                Candidate slope near {regionState.region === 'nepal_case' ? 'Langtang Corridor' : 'NH-10'}<br/>
-                <span className="text-red-400">HIGH - 85/100 - {regionState.region === 'nepal_case' ? '528.4' : '112.5'} km path</span>
-              </div>
-            </div>
-            <div className="bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full cursor-pointer pointer-events-auto transition-colors">
-              Details
-            </div>
-            <div className="bg-transparent hover:bg-white/10 text-white w-6 h-6 flex items-center justify-center rounded-full cursor-pointer pointer-events-auto">
-              <span className="text-xs text-slate-400">&times;</span>
-            </div>
-          </div>
-          
-          {/* Scan this area button */}
-          <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 cursor-pointer pointer-events-auto hover:bg-emerald-500/30 transition-colors shadow-lg shadow-emerald-900/20">
-            <span className="w-2.5 h-2.5 border-2 border-emerald-400 rounded-[2px]" /> Scan this area
-          </div>
-          
-          {/* Detected count */}
-          <div className="bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full text-[9px] font-bold text-white tracking-widest mt-1">
-            25 candidate slopes detected in view
-          </div>
-        </div>
-      )}
-
-      <div className="absolute top-4 left-4 z-10 space-y-2 pointer-events-none">
-        <Badge className="bg-black/80 text-white backdrop-blur-sm border-white/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wider">
-          {is3D ? (
-            <span className="flex items-center text-blue-400 gap-1.5"><Navigation className="w-3.5 h-3.5" /> 3D Drill-Down Active</span>
-          ) : (
-            <span className="flex items-center text-teal-400 gap-1.5"><MapPin className="w-3.5 h-3.5" /> Regional 2D Overview</span>
-          )}
-        </Badge>
-      </div>
-
       {/* SELECTED CELL DETAILS PANEL */}
-      {selectedCell && (
-        <Card className="absolute bottom-6 right-6 w-80 bg-black/90 border-border/30 backdrop-blur-md shadow-2xl z-10 animate-in slide-in-from-right-8 pointer-events-auto">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
-              {selectedCell.name}
-              <Badge className={cn(
-                "font-bold",
-                selectedCell.risk_level === 'CRITICAL' ? "bg-red-500/20 text-red-500" :
-                selectedCell.risk_level === 'HIGH' ? "bg-orange-500/20 text-orange-500" :
-                selectedCell.risk_level === 'MODERATE' ? "bg-yellow-500/20 text-yellow-500" :
-                "bg-green-500/20 text-green-500"
-              )}>
-                {selectedCell.risk_level || 'LOW'}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-300">
-              <div className="bg-white/5 p-2 rounded">
-                <div className="text-slate-500 mb-1">Slope Angle</div>
-                <div className="font-mono text-white">{selectedCell.slope_angle.toFixed(1)}?</div>
-              </div>
-              <div className="bg-white/5 p-2 rounded">
-                <div className="text-slate-500 mb-1">History</div>
-                <div className="font-mono text-white">{selectedCell.historical_count} Events</div>
-              </div>
-            </div>
-            
-            {selectedCell.near_nh10 && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-2 rounded flex items-start gap-2">
-                <div className="mt-0.5">??</div>
-                <div>Critical Infrastructure (NH-10) intersecting this risk cell.</div>
-              </div>
-            )}
-
-            {!is3D ? (
-              <Button 
-                onClick={() => handleExplore3D(selectedCell)}
-                className="w-full bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs h-8"
-              >
-                <Navigation className="w-3.5 h-3.5 mr-2" />
-                EXPLORE 3D TERRAIN
-              </Button>
-            ) : (
-              <Button 
-                onClick={handleReturnTo2D}
-                variant="outline"
-                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white font-medium text-xs h-8"
-              >
-                RETURN TO 2D OVERVIEW
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      
 
     </div>
   );

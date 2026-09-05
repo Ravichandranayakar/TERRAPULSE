@@ -1,0 +1,466 @@
+{
+  "grid_cells": [
+    {
+      "location_id": "NPL_RASUWA_01",
+      "name": "Rasuwagadhi Border Crossing",
+      "district": "Rasuwa",
+      "state": "Bagmati",
+      "lat_min": 28.16,
+      "lat_max": 28.28,
+      "lon_min": 85.19,
+      "lon_max": 85.38,
+      "centroid_lat": 28.22,
+      "centroid_lon": 85.285,
+      "slope_angle": 37.4,
+      "elevation_m": 2503,
+      "aspect": "NE",
+      "soil_type": "Colluvial",
+      "rock_type": "Gneiss",
+      "base_susceptibility": 0.87,
+      "near_nh10": true,
+      "historical_count": 8,
+      "in_flood_zone": false,
+      "description": "Real data: Rasuwa district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_RASUWA_02",
+      "name": "Dhunche-Trishuli Upper Corridor",
+      "district": "Rasuwa",
+      "state": "Bagmati",
+      "lat_min": 28.05,
+      "lat_max": 28.18,
+      "lon_min": 85.15,
+      "lon_max": 85.3,
+      "centroid_lat": 28.115,
+      "centroid_lon": 85.225,
+      "slope_angle": 52.7,
+      "elevation_m": 3052,
+      "aspect": "W",
+      "soil_type": "Colluvial",
+      "rock_type": "Gneiss",
+      "base_susceptibility": 0.87,
+      "near_nh10": true,
+      "historical_count": 8,
+      "in_flood_zone": false,
+      "description": "Real data: Rasuwa district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_RASUWA_03",
+      "name": "Betrawati Junction",
+      "district": "Rasuwa",
+      "state": "Bagmati",
+      "lat_min": 28.05,
+      "lat_max": 28.18,
+      "lon_min": 84.95,
+      "lon_max": 85.12,
+      "centroid_lat": 28.115,
+      "centroid_lon": 85.035,
+      "slope_angle": 50.7,
+      "elevation_m": 2566,
+      "aspect": "NW",
+      "soil_type": "Colluvial",
+      "rock_type": "Gneiss",
+      "base_susceptibility": 0.87,
+      "near_nh10": true,
+      "historical_count": 8,
+      "in_flood_zone": false,
+      "description": "Real data: Rasuwa district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_NUWAKOT_01",
+      "name": "Bidur Urban-Floodplain",
+      "district": "Nuwakot",
+      "state": "Bagmati",
+      "lat_min": 27.93,
+      "lat_max": 28.06,
+      "lon_min": 85.0,
+      "lon_max": 85.18,
+      "centroid_lat": 27.995,
+      "centroid_lon": 85.09,
+      "slope_angle": 40.0,
+      "elevation_m": 1345,
+      "aspect": "SE",
+      "soil_type": "Alluvial",
+      "rock_type": "Schist",
+      "base_susceptibility": 0.72,
+      "near_nh10": true,
+      "historical_count": 5,
+      "in_flood_zone": false,
+      "description": "Real data: Nuwakot district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_NUWAKOT_02",
+      "name": "Trishuli Gorge Section",
+      "district": "Nuwakot",
+      "state": "Bagmati",
+      "lat_min": 27.9,
+      "lat_max": 28.02,
+      "lon_min": 84.8,
+      "lon_max": 84.98,
+      "centroid_lat": 27.96,
+      "centroid_lon": 84.89,
+      "slope_angle": 25.1,
+      "elevation_m": 788,
+      "aspect": "S",
+      "soil_type": "Alluvial",
+      "rock_type": "Schist",
+      "base_susceptibility": 0.72,
+      "near_nh10": false,
+      "historical_count": 5,
+      "in_flood_zone": false,
+      "description": "Real data: Nuwakot district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_NUWAKOT_03",
+      "name": "Kakani Ridgeline Zone",
+      "district": "Nuwakot",
+      "state": "Bagmati",
+      "lat_min": 27.93,
+      "lat_max": 28.04,
+      "lon_min": 85.18,
+      "lon_max": 85.35,
+      "centroid_lat": 27.985,
+      "centroid_lon": 85.265,
+      "slope_angle": 41.3,
+      "elevation_m": 1194,
+      "aspect": "NW",
+      "soil_type": "Alluvial",
+      "rock_type": "Schist",
+      "base_susceptibility": 0.72,
+      "near_nh10": false,
+      "historical_count": 5,
+      "in_flood_zone": false,
+      "description": "Real data: Nuwakot district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_DHADING_01",
+      "name": "Malekhu-Prithvi Highway Section",
+      "district": "Dhading",
+      "state": "Bagmati",
+      "lat_min": 27.85,
+      "lat_max": 27.95,
+      "lon_min": 84.8,
+      "lon_max": 85.0,
+      "centroid_lat": 27.9,
+      "centroid_lon": 84.9,
+      "slope_angle": 34.9,
+      "elevation_m": 631,
+      "aspect": "S",
+      "soil_type": "Colluvial",
+      "rock_type": "Sedimentary",
+      "base_susceptibility": 0.65,
+      "near_nh10": true,
+      "historical_count": 4,
+      "in_flood_zone": false,
+      "description": "Real data: Dhading district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_DHADING_02",
+      "name": "Dhading Besi District HQ",
+      "district": "Dhading",
+      "state": "Bagmati",
+      "lat_min": 27.85,
+      "lat_max": 27.97,
+      "lon_min": 84.6,
+      "lon_max": 84.8,
+      "centroid_lat": 27.91,
+      "centroid_lon": 84.7,
+      "slope_angle": 27.6,
+      "elevation_m": 1498,
+      "aspect": "SW",
+      "soil_type": "Colluvial",
+      "rock_type": "Sedimentary",
+      "base_susceptibility": 0.65,
+      "near_nh10": false,
+      "historical_count": 4,
+      "in_flood_zone": false,
+      "description": "Real data: Dhading district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_SINDHU_01",
+      "name": "Melamchi Valley Upper Reach",
+      "district": "Sindhupalchowk",
+      "state": "Bagmati",
+      "lat_min": 27.97,
+      "lat_max": 28.12,
+      "lon_min": 85.48,
+      "lon_max": 85.65,
+      "centroid_lat": 28.045,
+      "centroid_lon": 85.565,
+      "slope_angle": 48.1,
+      "elevation_m": 2499,
+      "aspect": "NE",
+      "soil_type": "Gneiss",
+      "rock_type": "Phyllite",
+      "base_susceptibility": 0.8,
+      "near_nh10": true,
+      "historical_count": 12,
+      "in_flood_zone": false,
+      "description": "Real data: Sindhupalchowk district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_GORKHA_01",
+      "name": "Arughat-Tsum Valley Entry",
+      "district": "Gorkha",
+      "state": "Gandaki",
+      "lat_min": 28.05,
+      "lat_max": 28.22,
+      "lon_min": 84.62,
+      "lon_max": 84.82,
+      "centroid_lat": 28.135,
+      "centroid_lon": 84.72,
+      "slope_angle": 40.8,
+      "elevation_m": 634,
+      "aspect": "S",
+      "soil_type": "Schist",
+      "rock_type": "Limestone",
+      "base_susceptibility": 0.68,
+      "near_nh10": false,
+      "historical_count": 6,
+      "in_flood_zone": false,
+      "description": "Real data: Gorkha district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_CHITAWAN_01",
+      "name": "Narayanghat Flood Basin",
+      "district": "Chitawan",
+      "state": "Bagmati",
+      "lat_min": 27.8,
+      "lat_max": 27.94,
+      "lon_min": 84.3,
+      "lon_max": 84.6,
+      "centroid_lat": 27.87,
+      "centroid_lon": 84.45,
+      "slope_angle": 12.0,
+      "elevation_m": 142,
+      "aspect": "S",
+      "soil_type": "Alluvial",
+      "rock_type": "Sedimentary",
+      "base_susceptibility": 0.35,
+      "near_nh10": true,
+      "historical_count": 2,
+      "in_flood_zone": false,
+      "description": "Real data: Chitawan district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    },
+    {
+      "location_id": "NPL_CHITAWAN_02",
+      "name": "Mugling Confluence",
+      "district": "Chitawan",
+      "state": "Bagmati",
+      "lat_min": 27.83,
+      "lat_max": 27.93,
+      "lon_min": 84.5,
+      "lon_max": 84.65,
+      "centroid_lat": 27.88,
+      "centroid_lon": 84.575,
+      "slope_angle": 8.3,
+      "elevation_m": 313,
+      "aspect": "SW",
+      "soil_type": "Alluvial",
+      "rock_type": "Sedimentary",
+      "base_susceptibility": 0.35,
+      "near_nh10": true,
+      "historical_count": 2,
+      "in_flood_zone": false,
+      "description": "Real data: Chitawan district. Flood corridor: Near. Source: HOT/UNOSAT/ICIMOD."
+    }
+  ],
+  "nh10_route": [
+    [
+      27.7933,
+      84.56
+    ],
+    [
+      27.8577,
+      84.65
+    ],
+    [
+      27.87,
+      84.75
+    ],
+    [
+      27.91,
+      84.85
+    ],
+    [
+      27.93,
+      84.92
+    ],
+    [
+      27.955,
+      85.0
+    ],
+    [
+      27.97,
+      85.08
+    ],
+    [
+      28.0,
+      85.15
+    ],
+    [
+      28.05,
+      85.18
+    ],
+    [
+      28.1,
+      85.22
+    ],
+    [
+      28.15,
+      85.28
+    ]
+  ],
+  "historical_events": [
+    {
+      "id": "NPL_EVT_2026_001",
+      "lat": 28.075,
+      "lon": 85.275,
+      "date": "2026-08-26",
+      "type": "Flash Flood",
+      "trigger": "Intense monsoon rainfall + upstream glacier melt",
+      "impact": "Bhote Koshi-Trishuli corridor infrastructure damage",
+      "location_ref": "NPL_RASUWA_02",
+      "source": "ICIMOD / Reuters / HOT",
+      "event_type": "flood",
+      "verified": true
+    },
+    {
+      "id": "NPL_LS_2015_001",
+      "lat": 28.675556839,
+      "lon": 83.936516458,
+      "date": "2015-04-25",
+      "type": "Landslide",
+      "trigger": "Gorkha earthquake M7.8",
+      "impact": "Khangsar, Manang District",
+      "location_ref": "historical",
+      "source": "UNOSAT / HDX",
+      "event_type": "landslide",
+      "verified": true
+    },
+    {
+      "id": "NPL_LS_2015_002",
+      "lat": 28.572033358,
+      "lon": 84.186872123,
+      "date": "2015-04-25",
+      "type": "Landslide",
+      "trigger": "Gorkha earthquake M7.8",
+      "impact": "Bhratang, Manang District",
+      "location_ref": "historical",
+      "source": "UNOSAT / HDX",
+      "event_type": "landslide",
+      "verified": true
+    },
+    {
+      "id": "NPL_LS_2015_003",
+      "lat": 28.525809789,
+      "lon": 84.440847637,
+      "date": "2015-04-25",
+      "type": "Landslide",
+      "trigger": "Gorkha earthquake M7.8",
+      "impact": "Dharapani. Manang District",
+      "location_ref": "historical",
+      "source": "UNOSAT / HDX",
+      "event_type": "landslide",
+      "verified": true
+    },
+    {
+      "id": "NPL_LS_2015_004",
+      "lat": 28.552229006,
+      "lon": 84.791664958,
+      "date": "2015-04-25",
+      "type": "Landslide",
+      "trigger": "Gorkha earthquake M7.8",
+      "impact": "Prok, Gorkha District",
+      "location_ref": "historical",
+      "source": "UNOSAT / HDX",
+      "event_type": "landslide",
+      "verified": true
+    }
+  ],
+  "infrastructure": {
+    "highways": [
+      {
+        "name": "Prithvi Highway H01",
+        "description": "Kathmandu-Pokhara via Trishuli corridor",
+        "route": [
+          [
+            27.7933,
+            84.56
+          ],
+          [
+            27.8577,
+            84.65
+          ],
+          [
+            27.87,
+            84.75
+          ],
+          [
+            27.91,
+            84.85
+          ],
+          [
+            27.93,
+            84.92
+          ],
+          [
+            27.955,
+            85.0
+          ],
+          [
+            27.97,
+            85.08
+          ],
+          [
+            28.0,
+            85.15
+          ],
+          [
+            28.05,
+            85.18
+          ],
+          [
+            28.1,
+            85.22
+          ],
+          [
+            28.15,
+            85.28
+          ]
+        ],
+        "critical": true
+      }
+    ],
+    "settlements": [
+      {
+        "name": "Bidur",
+        "lat": 27.95,
+        "lon": 85.15,
+        "population": 26000,
+        "critical": true
+      },
+      {
+        "name": "Dhunche",
+        "lat": 28.1,
+        "lon": 85.3,
+        "population": 2500,
+        "critical": true
+      },
+      {
+        "name": "Narayanghat",
+        "lat": 27.706,
+        "lon": 84.406,
+        "population": 96000,
+        "critical": true
+      }
+    ]
+  },
+  "region_name": "Nepal (Bhote Koshi / Trishuli Corridor)",
+  "region_id": "nepal_case",
+  "data_sources": {
+    "flood_polygon": "HOT Nepal Flood 2026 (90.11 sq km verified polygon)",
+    "landslides": "UNOSAT Nepal Landslides 2015 via HDX",
+    "terrain": "ICIMOD published Himalayan geology research"
+  }
+}
