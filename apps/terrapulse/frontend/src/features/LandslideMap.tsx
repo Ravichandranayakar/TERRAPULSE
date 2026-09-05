@@ -33,6 +33,7 @@ interface HistoricalLandslide {
 interface LandslideMapProps {
   cells: GeoCell[];
   nh10Route: number[][];
+  routeSafety?: string;
   historicalLandslides: HistoricalLandslide[];
   selectedCellId: string | null;
   onCellSelect: (id: string) => void;
@@ -59,23 +60,17 @@ const RISK_FILL_OPACITY: Record<string, number> = {
 // This gives real geographic positions without requiring a Leaflet tile server
 // ---------------------------------------------------------------------------
 
-const MAP_BOUNDS = {
-  lat_min: 27.10,
-  lat_max: 27.75,
-  lon_min: 88.25,
-  lon_max: 88.70,
-};
-
 const SVG_W = 900;
 const SVG_H = 550;
 
-function projectLon(lon: number): number {
-  return ((lon - MAP_BOUNDS.lon_min) / (MAP_BOUNDS.lon_max - MAP_BOUNDS.lon_min)) * SVG_W;
+function projectLon(lon: number, bounds: any): number {
+  if (!bounds || bounds.lon_max === bounds.lon_min) return SVG_W / 2;
+  return ((lon - bounds.lon_min) / (bounds.lon_max - bounds.lon_min)) * SVG_W;
 }
 
-function projectLat(lat: number): number {
-  // Invert Y axis (higher lat = higher on screen)
-  return SVG_H - ((lat - MAP_BOUNDS.lat_min) / (MAP_BOUNDS.lat_max - MAP_BOUNDS.lat_min)) * SVG_H;
+function projectLat(lat: number, bounds: any): number {
+  if (!bounds || bounds.lat_max === bounds.lat_min) return SVG_H / 2;
+  return SVG_H - ((lat - bounds.lat_min) / (bounds.lat_max - bounds.lat_min)) * SVG_H;
 }
 
 function getRiskColor(level: string | undefined): string {
@@ -89,12 +84,52 @@ function getRiskFillOpacity(level: string | undefined): number {
 export function LandslideMap({
   cells,
   nh10Route,
+  routeSafety,
   historicalLandslides,
   selectedCellId,
   onCellSelect,
   simulationCells,
 }: LandslideMapProps) {
   const activeCells = simulationCells && simulationCells.length > 0 ? simulationCells : cells;
+
+  const MAP_BOUNDS = React.useMemo(() => {
+    if (!cells || cells.length === 0) return { lat_min: 27.10, lat_max: 27.75, lon_min: 88.25, lon_max: 88.70 };
+    const lats = cells.map(c => c.centroid_lat);
+    const lons = cells.map(c => c.centroid_lon);
+    
+    // Calculate precise bounding box
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    
+    // Add margin (roughly 10% of the range)
+    const latMargin = Math.max(0.05, (maxLat - minLat) * 0.15);
+    const lonMargin = Math.max(0.05, (maxLon - minLon) * 0.15);
+    
+    return { 
+      lat_min: minLat - latMargin, 
+      lat_max: maxLat + latMargin, 
+      lon_min: minLon - lonMargin, 
+      lon_max: maxLon + lonMargin 
+    };
+  }, [cells]);
+  
+  // Dynamic grid lines based on bounds
+  const latLines = React.useMemo(() => {
+    const lines = [];
+    const step = (MAP_BOUNDS.lat_max - MAP_BOUNDS.lat_min) / 5;
+    for(let i=1; i<5; i++) lines.push(MAP_BOUNDS.lat_min + (step * i));
+    return lines;
+  }, [MAP_BOUNDS]);
+
+  const lonLines = React.useMemo(() => {
+    const lines = [];
+    const step = (MAP_BOUNDS.lon_max - MAP_BOUNDS.lon_min) / 5;
+    for(let i=1; i<5; i++) lines.push(MAP_BOUNDS.lon_min + (step * i));
+    return lines;
+  }, [MAP_BOUNDS]);
+
 
   // Merge risk data from simulationCells into cells when simulation is running
   const mergedCells = cells.map(cell => {
@@ -151,27 +186,27 @@ export function LandslideMap({
         >
           {/* Reference grid */}
           <g opacity="0.07">
-            {[27.1, 27.2, 27.3, 27.4, 27.5, 27.6, 27.7].map(lat => (
+            {latLines.map(lat => (
               <line key={lat}
-                x1={0} y1={projectLat(lat)}
-                x2={SVG_W} y2={projectLat(lat)}
+                x1={0} y1={projectLat(lat, MAP_BOUNDS)}
+                x2={SVG_W} y2={projectLat(lat, MAP_BOUNDS)}
                 stroke="#6ee7b7" strokeWidth="1" />
             ))}
-            {[88.25, 88.35, 88.45, 88.55, 88.65].map(lon => (
+            {lonLines.map(lon => (
               <line key={lon}
-                x1={projectLon(lon)} y1={0}
-                x2={projectLon(lon)} y2={SVG_H}
+                x1={projectLon(lon, MAP_BOUNDS)} y1={0}
+                x2={projectLon(lon, MAP_BOUNDS)} y2={SVG_H}
                 stroke="#6ee7b7" strokeWidth="1" />
             ))}
           </g>
 
           {/* Coordinate labels */}
           <g fill="#6ee7b7" opacity="0.25" fontSize="9" fontFamily="monospace">
-            {[27.2, 27.4, 27.6].map(lat => (
-              <text key={lat} x={4} y={projectLat(lat) - 2}>{lat.toFixed(1)}°N</text>
+            {latLines.map(lat => (
+              <text key={lat} x={4} y={projectLat(lat, MAP_BOUNDS) - 2}>{lat.toFixed(2)}°N</text>
             ))}
-            {[88.3, 88.5, 88.65].map(lon => (
-              <text key={lon} x={projectLon(lon) + 2} y={SVG_H - 4}>{lon.toFixed(1)}°E</text>
+            {lonLines.map(lon => (
+              <text key={lon} x={projectLon(lon, MAP_BOUNDS) + 2} y={SVG_H - 4}>{lon.toFixed(2)}°E</text>
             ))}
           </g>
 
@@ -180,7 +215,7 @@ export function LandslideMap({
             <>
               {/* Glow effect */}
               <polyline
-                points={nh10Route.map(([lat, lon]) => `${projectLon(lon)},${projectLat(lat)}`).join(' ')}
+                points={nh10Route.map(([lat, lon]) => `${projectLon(lon, MAP_BOUNDS)},${projectLat(lat, MAP_BOUNDS)}`).join(' ')}
                 fill="none"
                 stroke="#60a5fa"
                 strokeWidth="6"
@@ -190,7 +225,7 @@ export function LandslideMap({
               />
               {/* Main route */}
               <polyline
-                points={nh10Route.map(([lat, lon]) => `${projectLon(lon)},${projectLat(lat)}`).join(' ')}
+                points={nh10Route.map(([lat, lon]) => `${projectLon(lon, MAP_BOUNDS)},${projectLat(lat, MAP_BOUNDS)}`).join(' ')}
                 fill="none"
                 stroke="#3b82f6"
                 strokeWidth="2.5"
@@ -201,8 +236,8 @@ export function LandslideMap({
               />
               {/* NH-10 label */}
               <text
-                x={projectLon(88.45)}
-                y={projectLat(27.30) - 6}
+                x={projectLon(88.45, MAP_BOUNDS)}
+                y={projectLat(27.30, MAP_BOUNDS) - 6}
                 fill="#93c5fd"
                 fontSize="8"
                 fontWeight="bold"
@@ -216,12 +251,12 @@ export function LandslideMap({
 
           {/* Risk Surface — Geographic Grid Cells */}
           {mergedCells.map(cell => {
-            const x1 = projectLon(cell.lon_min ?? cell.centroid_lon - 0.02);
-            const x2 = projectLon(cell.lon_max ?? cell.centroid_lon + 0.02);
-            const y1 = projectLat(cell.lat_max ?? cell.centroid_lat + 0.02);
-            const y2 = projectLat(cell.lat_min ?? cell.centroid_lat - 0.02);
-            const cx = projectLon(cell.centroid_lon);
-            const cy = projectLat(cell.centroid_lat);
+            const x1 = projectLon(cell.lon_min ?? cell.centroid_lon - 0.02, MAP_BOUNDS);
+            const x2 = projectLon(cell.lon_max ?? cell.centroid_lon + 0.02, MAP_BOUNDS);
+            const y1 = projectLat(cell.lat_max ?? cell.centroid_lat + 0.02, MAP_BOUNDS);
+            const y2 = projectLat(cell.lat_min ?? cell.centroid_lat - 0.02, MAP_BOUNDS);
+            const cx = projectLon(cell.centroid_lon, MAP_BOUNDS);
+            const cy = projectLat(cell.centroid_lat, MAP_BOUNDS);
             const w = Math.abs(x2 - x1);
             const h = Math.abs(y2 - y1);
             const color = getRiskColor(cell.risk_level);
@@ -314,8 +349,8 @@ export function LandslideMap({
 
           {/* Historical Landslide Markers */}
           {historicalLandslides?.map(ls => {
-            const cx = projectLon(ls.lon);
-            const cy = projectLat(ls.lat);
+            const cx = projectLon(ls.lon, MAP_BOUNDS);
+            const cy = projectLat(ls.lat, MAP_BOUNDS);
             return (
               <g key={ls.id} className="cursor-pointer" title={ls.type}>
                 <circle cx={cx} cy={cy} r="5" fill="#71717a" fillOpacity="0.5" stroke="#a1a1aa" strokeWidth="1" />

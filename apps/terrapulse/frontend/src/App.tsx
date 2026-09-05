@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { rpcCall } from './api';
+import { useRegion } from './contexts/RegionContext';
+import { EventReplay } from './features/EventReplay';
 import { cn } from './lib/utils';
 import {
   LayoutDashboard,
   Map as MapIcon,
+  Clock,
   AlertTriangle,
   Activity,
   ShieldCheck,
   Menu,
   ChevronRight,
   Database,
-  Clock,
   Zap,
   Info,
   X,
   Shield,
   Settings,
+  Timer,
   Globe,
   Layers,
 } from 'lucide-react';
@@ -26,6 +29,7 @@ import { Separator } from './components/ui/separator';
 import { LandslideMap } from './features/LandslideMap';
 import GeospatialViewer from './features/GeospatialViewer';
 import { XAIPanel } from './features/XAIPanel';
+import { ForecastDashboard } from './features/ForecastDashboard';
 import { WarningsPanel } from './features/WarningsPanel';
 import { StormSimulator } from './features/StormSimulator';
 import {
@@ -93,13 +97,18 @@ function getRiskDot(level: string | undefined) {
 // APP
 // ---------------------------------------------------------------------------
 export default function App() {
+  const { state: regionState, setMode } = useRegion();
   const [activeView, setActiveView] = useState<'overview' | 'simulation' | 'warnings' | 'curator'>('overview');
   const [geoData, setGeoData] = useState<any>(null);
   const [statusData, setStatusData] = useState<GeoCell[]>([]);
+  const [routeSafety, setRouteSafety] = useState<string>('UNKNOWN');
+  const [nh10Route, setNh10Route] = useState<any[]>([]);
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
   const [useMapLibre, setUseMapLibre] = useState(false);
   const [simulationCells, setSimulationCells] = useState<GeoCell[]>([]);
+  const [forecastData, setForecastData] = useState<any>(null);
+  const [forecastHourIdx, setForecastHourIdx] = useState(0);
   const [pendingVerifications, setPendingVerifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -115,37 +124,46 @@ export default function App() {
   const fetchAll = useCallback(async () => {
     try {
       const [geo, status, activeWarnings] = await Promise.all([
-        rpcCall({ func: 'get_geo_data' }),
-        rpcCall({ func: 'get_latest_status' }),
-        rpcCall({ func: 'get_active_warnings' }),
+        rpcCall({ func: 'get_geo_data', args: { region_id: regionState.region } }),
+        rpcCall({ func: 'get_latest_status', args: { region_id: regionState.region } }),
+        rpcCall({ func: 'get_active_warnings', args: { region_id: regionState.region } }),
       ]);
       setGeoData(geo);
-      setStatusData(status);
+      setForecastData(null); // Clear forecast when region changes so it re-fetches
+      // Normalize: Nepal returns {cells, route_safety, nh10_route}, NER returns flat array
+      if (status && Array.isArray(status)) {
+        setStatusData(status);
+        setRouteSafety('UNKNOWN');
+      } else if (status && status.cells) {
+        setStatusData(status.cells);
+        setRouteSafety(status.route_safety || 'UNKNOWN');
+        setNh10Route(status.nh10_route || []);
+      }
       setWarnings(activeWarnings);
       setLoading(false);
     } catch (err) {
       console.error('[TERRAPULSE] Failed to fetch initial data', err);
       setLoading(false);
     }
-  }, []);
+  }, [regionState.region]);
 
   const fetchWarnings = useCallback(async () => {
     try {
-      const w = await rpcCall({ func: 'get_active_warnings' });
+      const w = await rpcCall({ func: 'get_active_warnings', args: { region_id: regionState.region } });
       setWarnings(w);
     } catch (err) {
       console.error('[TERRAPULSE] Failed to fetch warnings', err);
     }
-  }, []);
+  }, [regionState.region]);
 
   const fetchPendingVerifications = useCallback(async () => {
     try {
-      const v = await rpcCall({ func: 'get_pending_verifications' });
+      const v = await rpcCall({ func: 'get_pending_verifications', args: { region_id: regionState.region } });
       setPendingVerifications(v);
     } catch (err) {
       console.error('[TERRAPULSE] Failed to fetch verifications', err);
     }
-  }, []);
+  }, [regionState.region]);
 
   const fetchModelInfo = useCallback(async () => {
     try {
@@ -159,18 +177,41 @@ export default function App() {
   useEffect(() => {
     fetchAll();
     fetchModelInfo();
-    console.log('[TERRAPULSE] Dashboard mounted — SIH 2026 TerraPulse.ai');
+    console.log('[TERRAPULSE] Dashboard mounted â€” SIH 2026 TerraPulse.ai');
   }, [fetchAll, fetchModelInfo]);
 
   useEffect(() => {
     if (activeView === 'curator') fetchPendingVerifications();
   }, [activeView, fetchPendingVerifications]);
 
+  // Fetch forecast data when tab is opened
+  useEffect(() => {
+    if (activeView === 'forecast' && !forecastData) {
+      fetch(`http://localhost:5000/api/forecast?region_id=${regionState.region}`)
+        .then(res => res.json())
+        .then(data => setForecastData(data))
+        .catch(err => console.error("Failed to fetch forecast:", err));
+    }
+  }, [activeView, forecastData]);
+
   // Merge simulation cells with base status
-  const displayCells: GeoCell[] = statusData.map(cell => {
-    const simCell = simulationCells.find(s => s.location_id === cell.location_id);
-    return simCell ? { ...cell, ...simCell } : cell;
-  });
+  const displayCells: GeoCell[] = activeView === 'forecast' && forecastData && forecastData.cells ? 
+    statusData.map(cell => {
+      const fCell = forecastData.cells.find((c: any) => c.cell_id === cell.location_id);
+      if (fCell && fCell.predictions && fCell.predictions[forecastHourIdx]) {
+        return { 
+          ...cell, 
+          risk_score: fCell.predictions[forecastHourIdx].risk_score,
+          risk_level: fCell.predictions[forecastHourIdx].risk_level,
+          rainfall_24h: fCell.predictions[forecastHourIdx].precipitation_mm
+        };
+      }
+      return cell;
+    })
+    : statusData.map(cell => {
+      const simCell = simulationCells.find(s => s.location_id === cell.location_id);
+      return simCell ? { ...cell, ...simCell } : cell;
+    });
 
   const selectedCell = displayCells.find(c => c.location_id === selectedCellId);
   const criticalCount = warnings.filter(w => w.risk_level === 'critical').length;
@@ -181,7 +222,8 @@ export default function App() {
 
   const navItems = [
     { id: 'overview' as const, label: 'Risk Map', icon: MapIcon },
-    { id: 'simulation' as const, label: 'Storm Simulator', icon: Zap },
+    { id: 'forecast' as const, label: '24h Forecast', icon: Clock },
+      { id: 'simulation' as const, label: 'Storm Simulator', icon: Zap },
     { id: 'warnings' as const, label: 'Early Warnings', icon: AlertTriangle, badge: warnings.length },
     { id: 'curator' as const, label: 'Curator', icon: ShieldCheck, badge: pendingVerifications.length },
   ];
@@ -260,7 +302,7 @@ export default function App() {
         </nav>
       </aside>
 
-      {/* ── MOBILE HEADER ────────────────────────────────────────────────────── */}
+      {/* â”€â”€ MOBILE HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 border-b border-border/40 bg-[#09090b]/95 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
@@ -301,15 +343,46 @@ export default function App() {
         </div>
       )}
 
-      {/* ── MAIN CONTENT ─────────────────────────────────────────────────────── */}
+      {/* â”€â”€ MAIN CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <main className="flex-1 overflow-y-auto flex flex-col relative pt-[57px] md:pt-0">
         
         {/* Header from Screenshot */}
-        <header className="flex items-center justify-between px-5 md:px-8 py-5 border-b border-border/20 flex-shrink-0">
-          <div className="flex items-center gap-3 text-[11px] font-bold tracking-widest text-muted-foreground uppercase">
-            <span>NORTH SIKKIM CORRIDOR</span>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-white">{navItems.find(i => i.id === activeView)?.label}</span>
+        <header className="flex items-center justify-between px-5 md:px-8 py-4 border-b border-border/20 flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 text-[11px] font-bold tracking-widest text-muted-foreground uppercase min-w-[250px]">
+              <span className={regionState.mode === 'case-study' ? 'text-amber-500' : 'text-primary'}>
+                {regionState.mode === 'sih-demo' ? 'SIH DEMO - NER / INDIA' : 'REAL-WORLD CASE - NEPAL'}
+              </span>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-white">{navItems.find(i => i.id === activeView)?.label}</span>
+            </div>
+            <div className="hidden lg:flex items-center ml-2 border border-border/30 bg-card/20 px-2 py-0.5 rounded text-[9px] font-mono tracking-widest text-muted-foreground uppercase">
+              DATA MODE: {regionState.data_status}
+            </div>
+            
+                        {/* Glassmorphism Mode Switcher */}
+            <div className="hidden md:flex items-center bg-white/5 backdrop-blur-md border border-white/10 rounded-full p-1 ml-4">
+              <button
+                onClick={() => setMode('sih-demo')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider transition-all duration-300 ${
+                  regionState.mode === 'sih-demo' 
+                    ? 'bg-primary text-black shadow-[0_0_15px_rgba(249,115,22,0.4)]' 
+                    : 'text-muted-foreground hover:text-white hover:bg-white/5'
+                }`}
+              >
+                SIH DEMO
+              </button>
+              <button
+                onClick={() => setMode('case-study')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider transition-all duration-300 ${
+                  regionState.mode === 'case-study' 
+                    ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]' 
+                    : 'text-muted-foreground hover:text-white hover:bg-white/5'
+                }`}
+              >
+                NEPAL (LIVE)
+              </button>
+            </div>
           </div>
           <div className="hidden sm:flex items-center gap-5">
             <div className="text-right flex flex-col items-end">
@@ -330,11 +403,12 @@ export default function App() {
         {/* Content area */}
         <div className="flex-1 p-4 md:p-6 space-y-6 animate-in fade-in duration-400 pt-[70px] md:pt-4">
 
-          {/* ── OVERVIEW — Risk Map ────────────────────────────────────────── */}
-          {activeView === 'overview' && (
+          {/* â”€â”€ OVERVIEW â€” Risk Map â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {(activeView === 'overview' || activeView === 'forecast') && (
             <div className="space-y-6">
               {/* Stats bar */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {activeView === 'overview' && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   {
                     label: 'Monitored Zones', value: displayCells.length || '--',
@@ -376,11 +450,12 @@ export default function App() {
                   </Card>
                 ))}
               </div>
+              )}
 
               {/* Map + Detail Panel */}
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Map takes 2/3 */}
-                <div className="xl:col-span-2 min-h-[480px]">
+                <div className="xl:col-span-2 lg:h-[600px] min-h-[480px]">
                   {loading ? (
                     <Card className="h-full border-border/40 bg-card/40 flex items-center justify-center min-h-[480px]">
                       <div className="text-center space-y-3 text-muted-foreground">
@@ -413,16 +488,18 @@ export default function App() {
                     {useMapLibre ? (
                       <GeospatialViewer
                         cells={displayCells}
-                        historicalEvents={geoData?.historical_landslides || []}
-                        nh10Route={geoData?.nh10_route || []}
+              routeSafety={routeSafety}
+                        historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
+                        nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
                         onCellClick={(cell) => setSelectedCellId(cell.location_id)}
                         initialSelectedCellId={selectedCellId}
                       />
                     ) : (
                       <LandslideMap
                         cells={displayCells}
-                        nh10Route={geoData?.nh10_route || []}
-                        historicalLandslides={geoData?.historical_landslides || []}
+                        routeSafety={routeSafety}
+                        nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
+                        historicalLandslides={geoData?.historical_landslides || geoData?.historical_events || []}
                         selectedCellId={selectedCellId}
                         onCellSelect={(id) => {
                           setSelectedCellId(id);
@@ -436,7 +513,8 @@ export default function App() {
                 </div>
 
                 {/* Right: XAI Panel or select prompt */}
-                <div className="xl:col-span-1">
+                <div className="xl:col-span-1 lg:h-[600px]">
+
                   {selectedCell ? (
                     <Card className="h-full bg-card/60 backdrop-blur-sm border-border/40 overflow-hidden">
                       <CardHeader className="pb-2">
@@ -493,15 +571,26 @@ export default function App() {
                 </div>
               </div>
 
+              {activeView === 'forecast' && (
+                <div className="mt-6 w-full">
+                  <ForecastDashboard 
+                    forecastData={forecastData}
+                    onTimeScrub={setForecastHourIdx}
+                    currentHourIndex={forecastHourIdx}
+                    displayCells={displayCells}
+                  />
+                </div>
+              )}
+
               {/* Historical Landslide Inventory Strip */}
-              {geoData?.historical_landslides?.length > 0 && (
+              {activeView === 'overview' && (geoData?.historical_landslides || geoData?.historical_events)?.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     <Info className="h-3.5 w-3.5" />
-                    Historical Landslide Inventory (Reference — GSI/ISRO NER Records)
+                    Historical Landslide Inventory (Reference â€” GSI/ISRO NER Records)
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {geoData.historical_landslides.slice(0, 3).map((ls: any) => (
+                    {(geoData.historical_landslides || geoData.historical_events || []).slice(0, 3).map((ls: any) => (
                       <div key={ls.id} className="rounded-xl border border-border/30 bg-card/40 p-3 space-y-1.5">
                         <div className="flex items-center justify-between">
                           <Badge variant="outline" className="text-[10px] font-mono">{ls.id}</Badge>
@@ -510,7 +599,7 @@ export default function App() {
                         <div className="text-xs font-bold">{ls.type}</div>
                         <div className="text-[11px] text-muted-foreground leading-relaxed">{ls.impact}</div>
                         <div className="text-[10px] text-blue-400/80">
-                          {ls.lat.toFixed(3)}°N, {ls.lon.toFixed(3)}°E
+                          {ls.lat.toFixed(3)}Â°N, {ls.lon.toFixed(3)}Â°E
                         </div>
                       </div>
                     ))}
@@ -520,7 +609,9 @@ export default function App() {
             </div>
           )}
 
-          {/* ── SIMULATION VIEW ────────────────────────────────────────────── */}
+          {/* â”€â”€ SIMULATION VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+
+
           {activeView === 'simulation' && (
             <StormSimulator
               onSimulationUpdate={handleSimulationUpdate}
@@ -528,20 +619,26 @@ export default function App() {
             />
           )}
 
-          {/* ── WARNINGS VIEW ──────────────────────────────────────────────── */}
+          {/* â”€â”€ WARNINGS VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeView === 'warnings' && (
             <div className="space-y-5">
               <div>
                 <h2 className="font-heading text-xl font-bold">Early Warning Board</h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Active landslide early warnings · Acknowledge → Field Verification → Curator Approval
+                  Active landslide early warnings Â· Acknowledge â†’ Field Verification â†’ Curator Approval
                 </p>
               </div>
               <WarningsPanel warnings={warnings} onResolved={fetchWarnings} />
             </div>
           )}
 
-          {/* ── CURATOR VIEW ───────────────────────────────────────────────── */}
+          {/* â”€â”€ CURATOR VIEW â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          
+          {/* EVENT REPLAY */}
+          {activeView === 'replay' && (
+            <EventReplay />
+          )}
+
           {activeView === 'curator' && (
             <div className="space-y-5">
               <div>
@@ -574,12 +671,12 @@ export default function App() {
                                 variant={v.outcome === 'confirmed' ? 'destructive' : 'secondary'}
                                 className="text-[10px] font-bold"
                               >
-                                {v.outcome === 'confirmed' ? '🔴 Confirmed' : '🟢 False Alarm'}
+                                {v.outcome === 'confirmed' ? 'ðŸ”´ Confirmed' : 'ðŸŸ¢ False Alarm'}
                               </Badge>
                             </div>
                             <div className="font-bold">{v.location_name}</div>
                             <div className="text-xs text-muted-foreground">
-                              Verified by: <strong>{v.verified_by}</strong> · {new Date(v.reported_at).toLocaleString()}
+                              Verified by: <strong>{v.verified_by}</strong> Â· {new Date(v.reported_at).toLocaleString()}
                             </div>
                           </div>
                           <Button
@@ -597,7 +694,7 @@ export default function App() {
                           </div>
                         )}
                         <div className="text-[10px] text-muted-foreground/60">
-                          Warning #{v.warning_id} · Risk Level: {v.risk_level} · Score: {v.risk_score?.toFixed(1)}
+                          Warning #{v.warning_id} Â· Risk Level: {v.risk_level} Â· Score: {v.risk_score?.toFixed(1)}
                         </div>
                       </CardContent>
                     </Card>
@@ -614,7 +711,7 @@ export default function App() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     In production ML systems, unvalidated field reports can corrupt the training dataset.
                     The curator stage ensures a senior scientist reviews each field report before it enters
-                    the training buffer — preventing noisy, incorrect, or politically-motivated false data
+                    the training buffer â€” preventing noisy, incorrect, or politically-motivated false data
                     from degrading model performance.
                   </p>
                   <div className="text-[10px] text-muted-foreground/60">
@@ -628,7 +725,7 @@ export default function App() {
         </div>
       </main>
 
-      {/* ── MOBILE BOTTOM NAV ────────────────────────────────────────────────── */}
+      {/* â”€â”€ MOBILE BOTTOM NAV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border/40 bg-background/95 backdrop-blur-lg flex justify-around py-2 z-50">
         {navItems.map(item => (
           <button
@@ -652,3 +749,4 @@ export default function App() {
     </div>
   );
 }
+
