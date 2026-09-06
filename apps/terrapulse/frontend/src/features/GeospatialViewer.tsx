@@ -25,26 +25,7 @@ interface GeoCell {
 }
 
 const MAPTILER_KEY = (import.meta as any).env?.VITE_MAPTILER_KEY || "get_your_own_key";
-const MAP_STYLE_2D: any = {
-  version: 8,
-  sources: {
-    osm: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "&copy; OpenStreetMap Contributors"
-    }
-  },
-  layers: [
-    {
-      id: "osm",
-      type: "raster",
-      source: "osm",
-      minzoom: 0,
-      maxzoom: 19
-    }
-  ]
-};
+const MAP_STYLE_2D = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
 const MAP_STYLE_3D = `https://api.maptiler.com/maps/hybrid/style.json?key=${MAPTILER_KEY}`;
 
 function Compass({ bearing }: { bearing: number }) {
@@ -139,7 +120,7 @@ export default function GeospatialViewer({
     features: historicalEvents.map(ev => ({ type: "Feature", properties: { ...ev }, geometry: { type: "Point", coordinates: [ev.lon, ev.lat] } })),
   }), [historicalEvents]);
 
-  const handleExplore3D = useCallback((cell: GeoCell) => {
+  const handleExplore3D = useCallback((cell?: GeoCell | null) => {
     if (!mapRef.current) return;
     setSaved2DState({ longitude: viewState.longitude, latitude: viewState.latitude, zoom: viewState.zoom });
     setIs3D(true);
@@ -285,7 +266,7 @@ export default function GeospatialViewer({
           </button>
         ) : (
           <button
-            onClick={() => handleExplore3D(selectedCell || cells[0])}
+            onClick={() => handleExplore3D(selectedCell)}
             className="bg-slate-700/95 hover:bg-slate-600 backdrop-blur-md border border-slate-500/50 text-white font-bold tracking-widest uppercase px-5 py-2.5 rounded-full text-[11px] flex items-center gap-2 transition-all shadow-xl"
           >
             <Globe className="w-4 h-4" />
