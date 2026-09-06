@@ -21,6 +21,9 @@ import {
   Timer,
   Globe,
   Layers,
+  MapPin,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card';
@@ -96,6 +99,13 @@ function getRiskDot(level: string | undefined) {
 // ---------------------------------------------------------------------------
 // APP
 // ---------------------------------------------------------------------------
+const RISK_COLORS: Record<string, string> = {
+  low: "#10b981", // Emerald
+  moderate: "#f59e0b", // Amber
+  high: "#ef4444", // Red
+  critical: "#7f1d1d" // Dark Red
+};
+
 export default function App() {
   const { state: regionState, setMode } = useRegion();
   const [activeView, setActiveView] = useState<'overview' | 'simulation' | 'warnings' | 'curator'>('overview');
@@ -105,7 +115,7 @@ export default function App() {
   const [nh10Route, setNh10Route] = useState<any[]>([]);
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
-  const [useMapLibre, setUseMapLibre] = useState(false);
+    const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [simulationCells, setSimulationCells] = useState<GeoCell[]>([]);
   const [forecastData, setForecastData] = useState<any>(null);
   const [forecastHourIdx, setForecastHourIdx] = useState(0);
@@ -131,7 +141,7 @@ export default function App() {
       setGeoData(geo);
       setForecastData(null); // Clear forecast when region changes so it re-fetches
       setSelectedCellId(null); // Clear selected cell when region changes
-      setUseMapLibre(false); // Always reset to 2D when switching region
+      
       // Normalize: Nepal returns {cells, route_safety, nh10_route}, NER returns flat array
       if (status && Array.isArray(status)) {
         setStatusData(status);
@@ -454,123 +464,96 @@ export default function App() {
               </div>
               )}
 
-              {/* Map + Detail Panel */}
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Map takes 2/3 */}
-                <div className="xl:col-span-2 lg:h-[600px] min-h-[480px]">
-                  {loading ? (
-                    <Card className="h-full border-border/40 bg-card/40 flex items-center justify-center min-h-[480px]">
-                      <div className="text-center space-y-3 text-muted-foreground">
-                        <Activity className="h-8 w-8 animate-spin mx-auto opacity-30" />
-                        <p className="text-sm">Loading geographic data...</p>
-                      </div>
-                    </Card>
-                  ) : (
-                    <div className="relative h-full w-full">
-                    <div className="absolute bottom-6 left-6 z-[999] group">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => setUseMapLibre(!useMapLibre)}
-                        className="bg-black/70 backdrop-blur h-8 w-8 p-0 flex items-center justify-center border-white/20 overflow-hidden transition-all duration-300 hover:w-auto hover:px-3"
-                      >
-                        {useMapLibre ? (
-                          <>
-                            <Layers className="h-4 w-4 shrink-0 text-slate-300" />
-                            <span className="hidden group-hover:inline-block ml-2 text-[10px] whitespace-nowrap">Switch to 2D Fallback</span>
-                          </>
-                        ) : (
-                          <>
-                            <Globe className="h-4 w-4 shrink-0 text-teal-400" />
-                            <span className="hidden group-hover:inline-block ml-2 text-[10px] whitespace-nowrap">Switch to 3D Engine</span>
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    {useMapLibre ? (
-                      <GeospatialViewer
-                        cells={displayCells}
-              routeSafety={routeSafety}
-                        historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
-                        nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
-                        onCellClick={(cell) => setSelectedCellId(cell.location_id)}
-                        initialSelectedCellId={selectedCellId}
-                      />
-                    ) : (
-                      <LandslideMap
-                        cells={displayCells}
-                        routeSafety={routeSafety}
-                        nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
-                        historicalLandslides={geoData?.historical_landslides || geoData?.historical_events || []}
-                        selectedCellId={selectedCellId}
-                        onCellSelect={(id) => {
-                          setSelectedCellId(id);
-                        }}
-                        simulationCells={simulationCells}
-                      />
-                    )}
-                  </div>
-                  )}
-                </div>
+              {/* Map + Detail Panel — supports fullscreen mode */}
+              {!isMapFullscreen && (
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                  {/* Map takes 2/3 */}
+                  <div className="xl:col-span-2 lg:h-[700px] min-h-[480px]">
+                    <Card className="relative h-full w-full rounded-lg overflow-hidden border border-border/40 flex flex-col bg-card/60">
+                      
+                      {/* LEGEND HEADER RESTORED */}
+                      <CardHeader className="pb-3 pt-4 px-5 shrink-0 bg-[#09090b]/80 backdrop-blur-md border-b border-border/20 z-10 relative flex flex-col gap-2">
+                        {/* TOP ROW: Title & Legends */}
+                        <div className="flex items-center justify-between w-full overflow-x-auto no-scrollbar">
+                          <div className="flex items-center gap-4 w-full">
+                            {/* Title block */}
+                            <div className="flex items-center gap-2 text-white shrink-0">
+                              <MapPin className="h-4 w-4 text-orange-500 shrink-0" />
+                              <h2 className="text-[13px] font-bold tracking-wide whitespace-nowrap">
+                                {regionState.mode === 'sih-demo' ? 'North Sikkim' : 'Rasuwa District'} - Landslide Risk Map
+                              </h2>
+                            </div>
 
-                {/* Right: XAI Panel or select prompt */}
-                <div className="xl:col-span-1 lg:h-[600px]">
+                            {/* Region Badge */}
+                            <div className="px-2 py-0.5 rounded border border-white/10 bg-white/5 text-[9px] font-bold tracking-wider text-slate-300 shrink-0 uppercase">
+                              {regionState.mode === 'sih-demo' ? 'NER - INDIA' : 'NEPAL'}
+                            </div>
 
-                  {selectedCell ? (
-                    <Card className="h-full bg-card/60 backdrop-blur-sm border-border/40 overflow-hidden">
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm font-bold uppercase tracking-widest">Cell Analysis</CardTitle>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setSelectedCellId(null)}>
-                            <X className="h-3.5 w-3.5 mr-1" /> Clear
-                          </Button>
+                            {/* Risk Badges */}
+                            <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                              {(['Low', 'Moderate', 'High', 'Critical'] as const).map(level => (
+                                <div key={level} className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/60 border border-white/5 text-[9px] uppercase font-bold tracking-wider text-slate-200 shrink-0">
+                                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: RISK_COLORS[level.toLowerCase()] }} />
+                                  {level}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* BOTTOM ROW: Map Features */}
+                        <div className="flex items-center gap-4 text-[10px] text-slate-400 font-medium pl-6">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-1 bg-blue-500/80 rounded-full" /> 
+                            NH-10 Highway
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full border-[1.5px] border-zinc-400/80 bg-zinc-400/20" /> 
+                            Historical Landslide
+                          </div>
                         </div>
                       </CardHeader>
-                      <CardContent className="overflow-y-auto max-h-[560px]">
-                        <XAIPanel
-                          locationName={selectedCell.name}
-                          riskLevel={selectedCell.risk_level || 'low'}
-                          riskScore={selectedCell.risk_score || 0}
-                          contributingFactors={selectedCell.contributing_factors || []}
-                          slopeAngle={selectedCell.slope_angle}
-                          elevation={selectedCell.elevation_m}
-                          soilType={selectedCell.soil_type}
-                          nearNH10={selectedCell.near_nh10}
-                          historicalCount={selectedCell.historical_count}
+
+                      {/* Actual Map Area */}
+                      <div className="relative flex-1 w-full">
+                        <GeospatialViewer
+                          cells={displayCells}
+                          routeSafety={routeSafety}
+                          historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
+                          nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
+                          onCellClick={(cell) => setSelectedCellId(cell ? cell.location_id : null)}
+                          initialSelectedCellId={selectedCellId}
                         />
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card className="h-full border-2 border-dashed border-border/40 bg-muted/10 flex items-center justify-center min-h-[300px]">
-                      <div className="text-center space-y-4 p-8">
-                        <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary/30 mx-auto">
-                          <MapIcon className="h-8 w-8" />
-                        </div>
-                        <div>
-                          <h3 className="font-heading text-base font-bold">Select a Zone</h3>
-                          <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                            Click any coloured cell on the map to view the XAI risk breakdown
-                          </p>
-                        </div>
-                        {/* Quick zone shortcuts */}
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {displayCells.filter(c => c.risk_level === 'high' || c.risk_level === 'critical').slice(0, 3).map(cell => (
-                            <Button
-                              key={cell.location_id}
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-7 border-border/40"
-                              onClick={() => setSelectedCellId(cell.location_id)}
-                            >
-                              {cell.name.split(' ').slice(-1)[0]}
-                            </Button>
-                          ))}
-                        </div>
+                        
+                        {/* Fullscreen button — top-right of map */}
+                        <button 
+                          onClick={() => setIsMapFullscreen(true)}
+                          className="absolute top-4 right-14 z-[999] bg-black/70 hover:bg-black/90 backdrop-blur border border-white/20 text-white rounded p-1.5 transition-all hover:scale-105 shadow-xl"
+                          title="Fullscreen"
+                        >
+                          <Maximize2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </Card>
-                  )}
+                  </div>
+                  
+                  {/* Right: XAI Panel or select prompt */}
+                  <div className="xl:col-span-1 lg:h-[700px] overflow-y-auto custom-scrollbar relative p-4">
+                      {selectedCell ? (
+                        <XAIPanel cell={selectedCell} />
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-muted-foreground bg-card/20 rounded-lg border border-border/20 border-dashed p-6 text-center">
+                        <div className="bg-orange-500/10 p-5 rounded-full mb-4">
+                            <MapIcon className="h-10 w-10 text-orange-500 opacity-60" />
+                          </div>
+                          <p className="font-bold text-white mb-2 text-xl">Select a Zone</p>
+                          <p className="text-sm text-muted-foreground max-w-[200px] mb-6">Click any coloured cell on the map to view the XAI risk breakdown</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+              
 
               {activeView === 'forecast' && (
                 <div className="mt-6 w-full">
@@ -745,9 +728,50 @@ export default function App() {
               </span>
             )}
           </button>
-        ))}
-      </nav>
+        ))}</nav>
+            {isMapFullscreen && (
+        <div className="fixed inset-0 w-screen h-screen z-[1000] bg-[#09090b]" style={{top:0,left:0,right:0,bottom:0}}>
+          <style>{`
+            .maplibregl-ctrl-top-right {
+              top: 60px !important;
+              right: ${selectedCell ? '360px' : '16px'} !important;
+              transition: right 0.3s ease;
+            }
+          `}</style>
+          <div className="absolute inset-0">
+            <GeospatialViewer
+              cells={displayCells}
+              routeSafety={routeSafety}
+              historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
+              nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
+              onCellClick={(cell) => setSelectedCellId(cell ? cell.location_id : null)}
+              initialSelectedCellId={selectedCellId}
+            />
+          </div>
+          {/* Exit fullscreen dynamic positioning */}
+          <div className={`absolute top-4 z-[1010] ${selectedCell ? "right-[360px]" : "right-4"}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsMapFullscreen(false)}
+              className="bg-black/70 hover:bg-black/90 backdrop-blur border border-white/20 text-white shadow-xl p-2"
+            >
+              <Minimize2 className="h-4 w-4" />
+            </Button>
+          </div>
+          {selectedCell && (
+            <div className="absolute top-0 right-0 h-full w-[340px] z-[1001] pointer-events-auto">
+              <div className="h-full bg-black/50 backdrop-blur-2xl border-l border-white/10 flex flex-col shadow-2xl">
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                  <XAIPanel cell={selectedCell} onClose={() => setSelectedCellId(null)} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
 

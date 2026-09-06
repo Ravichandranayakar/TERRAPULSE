@@ -90,9 +90,6 @@ export function LandslideMap({
   onCellSelect,
   simulationCells,
 }: LandslideMapProps) {
-  const [zoom, setZoom] = React.useState(1);
-  const handleZoomIn = () => setZoom(z => Math.min(z + 0.5, 3));
-  const handleZoomOut = () => setZoom(z => Math.max(z - 0.5, 1));
 
   const isNepal = cells && cells.length > 0 && cells[0].centroid_lon < 86;
   const mapTitle = isNepal ? "Rasuwa District - Landslide Risk Map" : "North Sikkim - Landslide Risk Map";
@@ -179,15 +176,7 @@ export function LandslideMap({
       </CardHeader>
 
       <CardContent className="flex-1 p-0 relative overflow-hidden min-h-[420px]">
-        {/* Map Controls */}
-        <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-          <button onClick={handleZoomIn} className="bg-slate-800/80 hover:bg-slate-700 text-white p-2 rounded border border-slate-600 backdrop-blur-sm" title="Zoom In">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-          <button onClick={handleZoomOut} className="bg-slate-800/80 hover:bg-slate-700 text-white p-2 rounded border border-slate-600 backdrop-blur-sm" title="Zoom Out">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          </button>
-        </div>
+
         {/* Terrain background */}
         <div
           className="absolute inset-0"
@@ -202,7 +191,7 @@ export function LandslideMap({
           className="absolute inset-0 w-full h-full"
           preserveAspectRatio="xMidYMid meet"
         >
-          <g style={{ transform: `scale(${zoom})`, transformOrigin: 'center', transition: 'transform 0.3s ease' }}>
+          <g>
           {/* Reference grid */}
           <g opacity="0.07">
             {latLines.map(lat => (

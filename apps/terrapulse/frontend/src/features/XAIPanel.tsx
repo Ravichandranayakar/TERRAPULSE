@@ -17,15 +17,8 @@ interface ContributingFactor {
 }
 
 interface XAIPanelProps {
-  locationName: string;
-  riskLevel: string;
-  riskScore: number;
-  contributingFactors: ContributingFactor[];
-  slopeAngle?: number;
-  elevation?: number;
-  soilType?: string;
-  nearNH10?: boolean;
-  historicalCount?: number;
+  cell: any;
+  onClose?: () => void;
 }
 
 const FACTOR_COLORS: Record<string, string> = {
@@ -83,21 +76,26 @@ function CustomTooltip({ active, payload }: any) {
   );
 }
 
-export function XAIPanel({
-  locationName,
-  riskLevel,
-  riskScore,
-  contributingFactors,
-  slopeAngle,
-  elevation,
-  soilType,
-  nearNH10,
-  historicalCount,
-}: XAIPanelProps) {
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+export function XAIPanel({ cell, onClose }: XAIPanelProps) {
+  if (!cell) return null;
+  const { 
+    name: locationName,
+    risk_level: riskLevel,
+    risk_score: riskScore,
+    contributing_factors: contributingFactors,
+    slope_angle: slopeAngle,
+    elevation_m: elevation,
+    soil_type: soilType,
+    near_nh10: nearNH10,
+    historical_count: historicalCount,
+  } = cell;
   const level = riskLevel?.toLowerCase() || 'low';
 
   // Normalize display values so bars don't exceed 100
-  const chartData = contributingFactors.map(f => ({
+  const chartData = (contributingFactors || []).map(f => ({
     ...f,
     displayValue: Math.min(f.value, 100),
     fill: FACTOR_COLORS[f.factor] || '#6366f1',
@@ -111,6 +109,14 @@ export function XAIPanel({
         RISK_BG[level] || RISK_BG.low,
         RISK_RING[level] || RISK_RING.low
       )}>
+        {onClose && (
+          <button 
+            onClick={onClose}
+            className="absolute top-3 right-3 text-white/60 hover:text-white transition-colors bg-black/40 hover:bg-black/60 rounded-full p-1"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -131,7 +137,7 @@ export function XAIPanel({
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs font-bold mb-1.5">
             <span className="text-muted-foreground uppercase tracking-wider">Risk Score</span>
-            <span className="font-mono text-lg font-black">{riskScore.toFixed(1)}<span className="text-[10px] text-muted-foreground font-normal">/100</span></span>
+            <span className="font-mono text-lg font-black">{(riskScore || 0).toFixed(1)}<span className="text-[10px] text-muted-foreground font-normal">/100</span></span>
           </div>
           <div className="h-2.5 bg-background/40 rounded-full overflow-hidden">
             <div
@@ -190,7 +196,7 @@ export function XAIPanel({
       </div>
 
       {/* XAI — Contributing Factors Chart */}
-      {contributingFactors.length > 0 && (
+      {(contributingFactors || []).length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 text-primary" />
@@ -199,7 +205,7 @@ export function XAIPanel({
 
           {/* Horizontal bar chart */}
           <div className="space-y-2">
-            {contributingFactors.slice(0, 5).map((f, i) => {
+            {(contributingFactors || []).slice(0, 5).map((f, i) => {
               const Icon = FACTOR_ICONS[f.factor] || TrendingUp;
               const barColor = FACTOR_COLORS[f.factor] || '#6366f1';
               const pct = Math.min(f.value, 100);
