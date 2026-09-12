@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { rpcCall } from './api';
 import { useRegion } from './contexts/RegionContext';
 import { EventReplay } from './features/EventReplay';
+import { CitizenApp } from './features/CitizenApp';
 import { cn } from './lib/utils';
 import {
   LayoutDashboard,
@@ -23,7 +24,9 @@ import {
   Layers,
   MapPin,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Users,
+  Radio,
 } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card';
@@ -106,8 +109,13 @@ const RISK_COLORS: Record<string, string> = {
   critical: "#7f1d1d" // Dark Red
 };
 
+type AppMode = 'authority' | 'citizen';
+
 export default function App() {
   const { state: regionState, setMode } = useRegion();
+  const [appMode, setAppMode] = useState<AppMode>('authority');
+  const [showModeMenu, setShowModeMenu] = useState(false);
+  const modeMenuRef = useRef<HTMLDivElement>(null);
   const [activeView, setActiveView] = useState<'overview' | 'simulation' | 'warnings' | 'curator'>('overview');
   const [geoData, setGeoData] = useState<any>(null);
   const [statusData, setStatusData] = useState<GeoCell[]>([]);
@@ -115,7 +123,7 @@ export default function App() {
   const [nh10Route, setNh10Route] = useState<any[]>([]);
   const [warnings, setWarnings] = useState<Warning[]>([]);
   const [selectedCellId, setSelectedCellId] = useState<string | null>(null);
-    const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [simulationCells, setSimulationCells] = useState<GeoCell[]>([]);
   const [forecastData, setForecastData] = useState<any>(null);
   const [forecastHourIdx, setForecastHourIdx] = useState(0);
@@ -124,6 +132,17 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [modelInfo, setModelInfo] = useState<any>(null);
   const [now, setNow] = useState(new Date());
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (modeMenuRef.current && !modeMenuRef.current.contains(e.target as Node)) {
+        setShowModeMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   // Live clock
   useEffect(() => {
@@ -259,6 +278,12 @@ export default function App() {
 
   // ---------------------------------------------------------------------------
   // RENDER
+
+  // ── Citizen App mode — completely separate UI ──────────────────────────
+  if (appMode === 'citizen') {
+    return <CitizenApp onSwitchToAdmin={() => setAppMode('authority')} />;
+  }
+
   return (
     <div className="flex h-screen flex-col md:flex-row bg-[#09090b] text-foreground selection:bg-primary/30 overflow-hidden">
       <aside className="hidden md:flex w-72 border-r border-border/40 flex-col flex-shrink-0">
@@ -406,9 +431,78 @@ export default function App() {
                 {now.toLocaleTimeString('en-US', { hour12: false })} UTC
               </div>
             </div>
-            <Button variant="outline" size="icon" className="h-8 w-8 rounded-md hover:bg-muted/30 border-border/20 bg-card/10">
-              <Settings className="h-4 w-4 text-muted-foreground" />
-            </Button>
+            {/* ─── Mode Switcher Dropdown ─── */}
+            <div className="relative" ref={modeMenuRef}>
+              <button
+                onClick={() => setShowModeMenu(v => !v)}
+                className={cn(
+                  "h-8 w-8 rounded-md flex items-center justify-center border transition-all",
+                  showModeMenu
+                    ? "bg-primary/20 border-primary/40 text-primary"
+                    : "hover:bg-muted/30 border-border/20 bg-card/10 text-muted-foreground hover:text-white"
+                )}
+                title="Switch portal mode"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+
+              {showModeMenu && (
+                <div className="absolute right-0 top-10 z-[200] w-56 rounded-xl border border-border/40 bg-[#111114] shadow-2xl backdrop-blur-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-2 border-b border-border/30">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Portal Mode</span>
+                  </div>
+
+                  {/* Authority option */}
+                  <button
+                    onClick={() => { setAppMode('authority'); setShowModeMenu(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all hover:bg-white/5",
+                      appMode === 'authority' ? "text-white" : "text-muted-foreground"
+                    )}
+                  >
+                    <div className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                      appMode === 'authority' ? "bg-primary/20 text-primary" : "bg-white/5 text-slate-500"
+                    )}>
+                      <Shield className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-xs">Authority Dashboard</div>
+                      <div className="text-[10px] text-slate-500">Command & control view</div>
+                    </div>
+                    {appMode === 'authority' && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary" />}
+                  </button>
+
+                  {/* Citizen option */}
+                  <button
+                    onClick={() => { setAppMode('citizen'); setShowModeMenu(false); }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all hover:bg-white/5",
+                      appMode === 'citizen' ? "text-white" : "text-muted-foreground"
+                    )}
+                  >
+                    <div className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                      appMode === 'citizen' ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-slate-500"
+                    )}>
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-xs">Citizen Portal</div>
+                      <div className="text-[10px] text-slate-500">Field reporting & alerts</div>
+                    </div>
+                    {appMode === 'citizen' && <div className="ml-auto h-1.5 w-1.5 rounded-full bg-emerald-400" />}
+                  </button>
+
+                  <div className="px-4 py-2 border-t border-border/20">
+                    <div className="flex items-center gap-1.5 text-[9px] text-slate-600 font-mono">
+                      <Radio className="h-2.5 w-2.5" />
+                      TERRAPULSE · SIH 2026
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

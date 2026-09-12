@@ -141,16 +141,16 @@ def init_db():
                      rock_type, base_susceptibility, near_nh10, historical_count, description)
                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """, (
-                    cell["location_id"], cell["name"], cell["district"], cell["state"],
-                    cell["lat_min"], cell["lat_max"], cell["lon_min"], cell["lon_max"],
-                    cell["centroid_lat"], cell["centroid_lon"],
-                    cell["slope_angle"], cell["elevation_m"], cell.get("aspect", ""),
-                    cell["soil_type"], cell.get("rock_type", ""),
-                    cell["base_susceptibility"], 1 if cell["near_nh10"] else 0,
-                    cell["historical_count"], cell.get("description", "")
+                    cell.get("location_id", ""), cell.get("name", ""), cell.get("district", ""), cell.get("state", ""),
+                    cell.get("lat_min", 0.0), cell.get("lat_max", 0.0), cell.get("lon_min", 0.0), cell.get("lon_max", 0.0),
+                    cell.get("centroid_lat", 0.0), cell.get("centroid_lon", 0.0),
+                    cell.get("slope_angle", 0.0), cell.get("elevation_m", 0.0), cell.get("aspect", ""),
+                    cell.get("soil_type", ""), cell.get("rock_type", ""),
+                    cell.get("base_susceptibility", 0.5), 1 if cell.get("near_nh10", False) else 0,
+                    cell.get("historical_count", 0), cell.get("description", "")
                 ))
             conn.commit()
-            print(f"[TERRAPULSE] Seeded {len(NER_GRID_CELLS)} monitoring locations")
+            print(f"[TERRAPULSE] Seeded {len(all_cells)} monitoring locations")
 
         print("[TERRAPULSE] Database ready")
     finally:
