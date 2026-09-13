@@ -177,7 +177,7 @@ class VerificationRepository:
                     model_target, training_eligibility, submitted_event_presence
                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """, (
-                report.get("warning_id"), report.get("location_id"), now,
+                report.get("warning_id") if report.get("warning_id") else None, report.get("location_id"), now,
                 report.get("reporter_id"), report.get("classification"),
                 report.get("description"), 0, report.get("reporter_id"),
                 report.get("reporter_role"), report.get("observed_at"),
