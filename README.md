@@ -37,9 +37,24 @@ uvicorn main:app --reload --port 5000
 Navigate to the frontend directory and start the Vite dev server:
 ```bash
 cd apps/terrapulse/frontend
-npm install --legacy-peer-deps
 npm run dev
 ```
+
+## Development Risk Predictor
+
+The Storm Simulator currently uses the development risk contract rather than a
+trained or validated machine-learning model. Scenario feature values are sent
+to `POST /api/risk/predict-batch`, normalized by the backend, and evaluated by
+`DevelopmentRiskPredictor`. The response contains a deterministic score,
+`LOW`/`MODERATE`/`HIGH`/`CRITICAL` class, interpretable drivers, and a
+warning-ready flag. The score is an internal development indicator, not a
+probability or scientifically validated prediction.
+
+The frontend keeps the response in the existing `simulationCells` state, which
+is merged into `displayCells` and consumed by both MapLibre 2D and 3D views.
+When validated Indian environmental and landslide datasets are ready, replace
+the predictor implementation behind the same risk service and API contract;
+the simulator and map consumers should not need to change.
 
 ---
 

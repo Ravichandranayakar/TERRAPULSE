@@ -21,11 +21,19 @@ import time
 from datetime import datetime, timedelta
 from typing import Optional
 
+from alerts.service import CellBroadcastService
+from verification.repository import VerificationRepository
+from verification.service import VerificationService
+from risk.schemas import RiskBatchRequest, RiskFeatureInput
+from risk.service import predict_development_risk, predict_development_risk_batch
+
 # ---------------------------------------------------------------------------
 # DATABASE SETUP
 # ---------------------------------------------------------------------------
 DB_DIR = os.path.join(os.path.dirname(__file__), "data", "db")
 DB_PATH = os.path.join(DB_DIR, "terrapulse.db")
+_verification_repository = VerificationRepository(DB_PATH)
+_verification_service = VerificationService(_verification_repository)
 
 
 def _get_db():
@@ -126,6 +134,19 @@ def init_db():
             )
         """)
 
+        # Cell Broadcast dispatch simulation audit records
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS cell_broadcast_simulations (
+                broadcast_id TEXT PRIMARY KEY,
+                warning_id INTEGER NOT NULL,
+                created_at TEXT NOT NULL,
+                target_source TEXT NOT NULL,
+                live_network_connected INTEGER NOT NULL DEFAULT 0,
+                result_json TEXT NOT NULL,
+                FOREIGN KEY(warning_id) REFERENCES landslide_warnings(id)
+            )
+        """)
+
         conn.commit()
 
         # Seed locations from all regions
@@ -155,7 +176,8 @@ def init_db():
         print("[TERRAPULSE] Database ready")
     finally:
         conn.close()
-
+        
+    _verification_repository.ensure_schema()
 
 # ---------------------------------------------------------------------------
 # DATA FUNCTIONS (called from frontend via RPC)
@@ -347,7 +369,12 @@ def get_latest_status(region_id: str = 'ner_india'):
                 "timestamp": pred["timestamp"] if pred else datetime.now().isoformat(),
             })
         from regions import get_region_data
-        route = get_region_data(region_id).get('nh10_route', [])
+        region_data = get_region_data(region_id)
+        route = region_data.get('nh10_route', [])
+        geo_cells = region_data.get('grid_cells', [])
+        hazard_lookup = {c['location_id']: c.get('hazard_types', []) for c in geo_cells}
+        for r in results:
+            r['hazard_types'] = hazard_lookup.get(r['location_id'], [])
         return {
             'cells': results,
             'route_safety': 'HIGH_RISK',
@@ -418,6 +445,65 @@ def get_active_warnings(region_id: str = 'ner_india'):
         conn.close()
 
 
+_cell_broadcast_service = CellBroadcastService()
+
+
+def _get_warning_for_cell_broadcast(warning_id: int):
+    conn = _get_db()
+    try:
+        row = conn.execute("""
+            SELECT w.*, l.district, l.state, l.lat_min, l.lat_max,
+                   l.lon_min, l.lon_max, l.centroid_lat, l.centroid_lon
+            FROM landslide_warnings w
+            JOIN monitoring_locations l ON w.location_id = l.location_id
+            WHERE w.id = ?
+        """, (warning_id,)).fetchone()
+        if not row:
+            raise ValueError(f"Warning {warning_id} was not found.")
+        warning = dict(row)
+        location = dict(row)
+        warning["trigger_factors"] = json.loads(warning.get("trigger_factors") or "[]")
+        warning["affected_infrastructure"] = json.loads(warning.get("affected_infrastructure") or "[]")
+        return warning, location
+    finally:
+        conn.close()
+
+
+def prepare_cell_broadcast(warning_id: int):
+    """Prepare an operator-reviewed payload without dispatching anything."""
+    warning, location = _get_warning_for_cell_broadcast(warning_id)
+    return _cell_broadcast_service.prepare(warning, location)
+
+
+def _save_cell_broadcast_simulation(result: dict):
+    conn = _get_db()
+    try:
+        conn.execute("""
+            INSERT INTO cell_broadcast_simulations
+            (broadcast_id, warning_id, created_at, target_source, live_network_connected, result_json)
+            VALUES (?,?,?,?,?,?)
+        """, (
+            result["broadcast_id"],
+            result["warning_id"],
+            result["dispatched_at"],
+            result["target"]["source"],
+            0,
+            json.dumps(result, ensure_ascii=False),
+        ))
+        conn.commit()
+        _verification_repository.ensure_schema()
+    finally:
+        conn.close()
+
+
+def simulate_cell_broadcast(warning_id: int):
+    """Run an auditable Cell Broadcast dispatch simulation."""
+    warning, location = _get_warning_for_cell_broadcast(warning_id)
+    result = _cell_broadcast_service.simulate(warning, location)
+    _save_cell_broadcast_simulation(result)
+    return result
+
+
 def resolve_warning(warning_id: int, notes: str):
     """Acknowledge and resolve an early warning."""
     conn = _get_db()
@@ -433,47 +519,64 @@ def resolve_warning(warning_id: int, notes: str):
         conn.close()
 
 
-def submit_field_verification(warning_id: int, location_id: str, verified_by: str, outcome: str, notes: str):
-    """Submit a field verification report (human-in-the-loop)."""
-    conn = _get_db()
-    try:
-        conn.execute("""
-            INSERT INTO field_verifications (warning_id, location_id, verified_by, outcome, field_notes)
-            VALUES (?, ?, ?, ?, ?)
-        """, (warning_id, location_id, verified_by, outcome, notes))
-        conn.commit()
-        return {"success": True, "message": "Field verification submitted. Pending curator approval for training dataset."}
-    finally:
-        conn.close()
+def submit_field_verification(
+    warning_id: int,
+    location_id: str,
+    verified_by: str,
+    outcome: str,
+    notes: str,
+    **extended_fields,
+):
+    """Submit a raw field/citizen report for curator review."""
+    submitted = {
+        "warning_id": warning_id,
+        "location_id": location_id,
+        "reporter_id": verified_by,
+        "hazard_type": extended_fields.get("hazard_type", "landslide"),
+        "classification": outcome,
+        "description": notes,
+        "event_presence": outcome,
+        **extended_fields,
+    }
+    return _verification_service.submit_report(submitted)
 
 
 def get_pending_verifications(region_id: str = 'ner_india'):
-    """Return field verifications pending curator approval."""
-    conn = _get_db()
-    try:
-        rows = conn.execute("""
-            SELECT fv.*, w.location_name, w.risk_level, w.risk_score
-            FROM field_verifications fv
-            JOIN landslide_warnings w ON fv.warning_id = w.id
-            WHERE fv.is_approved_for_training = 0
-            ORDER BY fv.reported_at DESC
-        """).fetchall()
-        return [dict(r) for r in rows]
-    finally:
-        conn.close()
+    """Backward-compatible pending report queue."""
+    return _verification_service.get_reports("pending_review")
 
 
 def approve_for_training(verification_id: int):
-    """Curator approves a field verification for the training dataset."""
-    conn = _get_db()
-    try:
-        conn.execute("""
-            UPDATE field_verifications SET is_approved_for_training = 1 WHERE id = ?
-        """, (verification_id,))
-        conn.commit()
-        return {"success": True, "message": "Approved for training dataset. Will be included in next model update cycle."}
-    finally:
-        conn.close()
+    """Legacy RPC wrapper; new UI uses the explicit review endpoint."""
+    return _verification_service.review_report(verification_id, {
+        "decision": "approved",
+        "curator_id": "legacy_admin",
+        "curator_role": "admin",
+    })
+
+
+def get_verification_reports(status: str | None = None):
+    return _verification_service.get_reports(status)
+
+
+def get_verification_report(report_id: int):
+    return _verification_service.get_report(report_id)
+
+
+def review_verification_report(report_id: int, decision: dict):
+    return _verification_service.review_report(report_id, decision)
+
+
+def get_verification_stats():
+    return _verification_service.get_stats()
+
+
+def get_training_buffer():
+    return _verification_service.get_training_buffer()
+
+
+def build_training_dataset(hazard_type: str, curator_id: str):
+    return _verification_service.build_dataset(hazard_type, curator_id)
 
 
 # ---------------------------------------------------------------------------
@@ -916,6 +1019,87 @@ class RpcRequest(BaseModel):
     func: str
     args: Dict[str, Any] = {}
     stream: bool = False
+
+class CellBroadcastRequest(BaseModel):
+    warning_id: int
+
+class VerificationReviewRequest(BaseModel):
+    decision: str
+    curator_id: str
+    curator_role: str
+    hazard_type: str | None = None
+    event_presence: str | None = None
+    evidence_quality: str | None = None
+    location_quality: str | None = None
+    reason: str | None = None
+    notes: str | None = None
+
+class TrainingDatasetBuildRequest(BaseModel):
+    hazard_type: str
+    curator_id: str
+
+@app.post("/api/alerts/cell-broadcast/prepare")
+async def prepare_cell_broadcast_endpoint(request: CellBroadcastRequest):
+    try:
+        return prepare_cell_broadcast(request.warning_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+
+@app.post("/api/risk/predict")
+async def predict_risk_endpoint(request: RiskFeatureInput):
+    return predict_development_risk(request)
+
+@app.post("/api/risk/predict-batch")
+async def predict_risk_batch_endpoint(request: RiskBatchRequest):
+    predictions = predict_development_risk_batch(request.cells)
+    return {
+        "predictions": [prediction.model_dump() for prediction in predictions],
+        "predictor": predictions[0].predictor,
+        "predictor_type": predictions[0].predictor_type,
+    }
+
+@app.post("/api/alerts/cell-broadcast/simulate")
+async def simulate_cell_broadcast_endpoint(request: CellBroadcastRequest):
+    try:
+        return simulate_cell_broadcast(request.warning_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+
+@app.get("/api/verifications")
+async def get_verifications_endpoint(status: str | None = None):
+    try:
+        return {"reports": get_verification_reports(status)}
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+@app.get("/api/verifications/stats")
+async def get_verification_stats_endpoint():
+    return get_verification_stats()
+
+@app.get("/api/verifications/{report_id}")
+async def get_verification_report_endpoint(report_id: int):
+    try:
+        return get_verification_report(report_id)
+    except ValueError as error:
+        raise HTTPException(status_code=404, detail=str(error))
+
+@app.post("/api/verifications/{report_id}/review")
+async def review_verification_endpoint(report_id: int, request: VerificationReviewRequest):
+    try:
+        return review_verification_report(report_id, request.model_dump())
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
+
+@app.get("/api/training-buffer")
+async def get_training_buffer_endpoint():
+    return {"buffers": get_training_buffer()}
+
+@app.post("/api/training-datasets/build")
+async def build_training_dataset_endpoint(request: TrainingDatasetBuildRequest):
+    try:
+        return build_training_dataset(request.hazard_type, request.curator_id)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error))
 
 @app.post("/rpc")
 async def rpc_endpoint(req: RpcRequest):

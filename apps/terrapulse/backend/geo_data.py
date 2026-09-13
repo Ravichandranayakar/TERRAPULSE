@@ -23,6 +23,7 @@ NER_GRID_CELLS = [
         "slope_angle": 42.0, "elevation_m": 1820, "aspect": "NW",
         "soil_type": "Weathered Gneiss", "rock_type": "Biotite Gneiss",
         "base_susceptibility": 0.72, "near_nh10": True, "historical_count": 8,
+        "hazard_types": ["Debris Flow"],
         "description": "Steep ridge above NH-10 corridor, high historical landslide frequency"
     },
     {
@@ -33,6 +34,7 @@ NER_GRID_CELLS = [
         "slope_angle": 38.0, "elevation_m": 1650, "aspect": "SE",
         "soil_type": "Colluvial Soil", "rock_type": "Phyllite-Schist",
         "base_susceptibility": 0.65, "near_nh10": True, "historical_count": 5,
+        "hazard_types": ["Shallow Translational Slide", "Hill Cutting"],
         "description": "Populated slope area near Mangan town, NH-10 passes below"
     },
     {
@@ -43,6 +45,7 @@ NER_GRID_CELLS = [
         "slope_angle": 47.0, "elevation_m": 2210, "aspect": "W",
         "soil_type": "Phyllite Regolith", "rock_type": "Chlorite Phyllite",
         "base_susceptibility": 0.81, "near_nh10": False, "historical_count": 11,
+        "hazard_types": ["Rotational Slide", "Flash Flood"],
         "description": "Very steep upper slopes above Teesta river confluence"
     },
     {
@@ -53,6 +56,7 @@ NER_GRID_CELLS = [
         "slope_angle": 51.0, "elevation_m": 2460, "aspect": "SW",
         "soil_type": "Schist-Gneiss Colluvium", "rock_type": "Garnet Schist",
         "base_susceptibility": 0.87, "near_nh10": False, "historical_count": 14,
+        "hazard_types": ["Rock Fall", "Debris Avalanche", "Multiple Debris Flows"],
         "description": "Highest susceptibility zone — extreme slope angles with fractured bedrock"
     },
     {
@@ -83,6 +87,7 @@ NER_GRID_CELLS = [
         "slope_angle": 36.0, "elevation_m": 960, "aspect": "SE",
         "soil_type": "Alluvial-Colluvial Fill", "rock_type": "Meta-Sedimentary",
         "base_susceptibility": 0.55, "near_nh10": True, "historical_count": 4,
+        "hazard_types": ["Planar Slide", "Road Cutting Failure"],
         "description": "Teesta valley section — NH-10 cut slopes frequently destabilised"
     },
     {
@@ -103,6 +108,7 @@ NER_GRID_CELLS = [
         "slope_angle": 40.0, "elevation_m": 1370, "aspect": "E",
         "soil_type": "Regolith Debris", "rock_type": "Dolomitic Limestone",
         "base_susceptibility": 0.62, "near_nh10": False, "historical_count": 7,
+        "hazard_types": ["Debris Flow", "Hill Cutting"],
         "description": "South Sikkim hill station area — road cuttings increase instability"
     },
     {
@@ -113,6 +119,7 @@ NER_GRID_CELLS = [
         "slope_angle": 35.0, "elevation_m": 1540, "aspect": "W",
         "soil_type": "Colluvial Soil", "rock_type": "Mica Schist",
         "base_susceptibility": 0.58, "near_nh10": True, "historical_count": 9,
+        "hazard_types": ["Planar Slide", "Road Blocking"],
         "description": "High-traffic corridor — NH-10 adjacent slopes with frequent minor slides"
     },
 ]
