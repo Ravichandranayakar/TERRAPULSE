@@ -5,7 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { cn } from '../lib/utils';
 import {
   AlertTriangle, CheckCircle, Clock, MapPin, Navigation,
-  MessageSquare, ShieldCheck, Loader2
+  MessageSquare, ShieldCheck, Loader2, RadioTower
 } from 'lucide-react';
 import { rpcCall } from '../api';
 
@@ -29,13 +29,44 @@ interface Warning {
 interface WarningsPanelProps {
   warnings: Warning[];
   onResolved: () => void;
+  onBroadcast?: (warning: Warning) => void;
 }
 
-const RISK_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  critical: { bg: 'bg-red-950/40', text: 'text-red-400', border: 'border-red-800/60' },
-  high: { bg: 'bg-orange-950/40', text: 'text-orange-400', border: 'border-orange-800/60' },
-  moderate: { bg: 'bg-amber-950/40', text: 'text-amber-400', border: 'border-amber-800/60' },
-  low: { bg: 'bg-emerald-950/30', text: 'text-emerald-400', border: 'border-emerald-800/50' },
+const RISK_COLORS: Record<string, {
+  bg: string;
+  text: string;
+  border: string;
+  accent: string;
+  bar: string;
+}> = {
+  critical: {
+    bg: 'bg-card/70',
+    text: 'text-red-400',
+    border: 'border-red-800/50',
+    accent: 'border-l-4 border-l-red-600/80',
+    bar: 'bg-red-500',
+  },
+  high: {
+    bg: 'bg-card/70',
+    text: 'text-orange-400',
+    border: 'border-orange-800/50',
+    accent: 'border-l-4 border-l-orange-500/80',
+    bar: 'bg-orange-500',
+  },
+  moderate: {
+    bg: 'bg-card/70',
+    text: 'text-amber-400',
+    border: 'border-amber-800/50',
+    accent: 'border-l-4 border-l-amber-500/80',
+    bar: 'bg-amber-500',
+  },
+  low: {
+    bg: 'bg-card/70',
+    text: 'text-emerald-400',
+    border: 'border-emerald-800/40',
+    accent: 'border-l-4 border-l-emerald-500/80',
+    bar: 'bg-emerald-500',
+  },
 };
 
 const RECOMMENDED_ACTIONS: Record<string, string[]> = {
@@ -66,13 +97,21 @@ const RECOMMENDED_ACTIONS: Record<string, string[]> = {
   ],
 };
 
+function isCellBroadcastEligible(warning: Warning): boolean {
+  return warning.risk_level?.toLowerCase() === 'high' || warning.risk_level?.toLowerCase() === 'critical';
+}
+
 function VerificationModal({ warning, onClose, onSubmit }: {
   warning: Warning;
   onClose: () => void;
   onSubmit: (data: any) => void;
 }) {
   const [verifiedBy, setVerifiedBy] = useState('');
-  const [outcome, setOutcome] = useState<'confirmed' | 'false_alarm' | ''>('');
+  const [outcome, setOutcome] = useState<'confirmed' | 'not_observed' | 'uncertain' | ''>('');
+  const [hazardType, setHazardType] = useState<'landslide' | 'flood' | 'debris_flow' | 'other'>('landslide');
+  const [observedAt, setObservedAt] = useState(new Date().toISOString().slice(0, 16));
+  const [severity, setSeverity] = useState('');
+  const [infrastructureImpact, setInfrastructureImpact] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -88,9 +127,24 @@ function VerificationModal({ warning, onClose, onSubmit }: {
           verified_by: verifiedBy,
           outcome,
           notes,
+          hazard_type: hazardType,
+          description: notes,
+          source_type: 'field_officer',
+          source_reference: `warning_${warning.id}`,
+          reporter_role: 'field_officer',
+          reporter_id: verifiedBy,
+          observed_at: new Date(observedAt).toISOString(),
+          event_presence: outcome,
+          latitude: warning.centroid_lat,
+          longitude: warning.centroid_lon,
+          location_quality: 'approximate',
+          severity: severity || undefined,
+          infrastructure_impact: infrastructureImpact
+            ? infrastructureImpact.split(',').map(item => item.trim()).filter(Boolean)
+            : [],
         }
       });
-      onSubmit({ outcome, notes });
+      onSubmit({ outcome, notes, hazardType });
     } catch (e) {
       console.error(e);
     } finally {
@@ -135,10 +189,10 @@ function VerificationModal({ warning, onClose, onSubmit }: {
                 🔴 Landslide Confirmed
               </button>
               <button
-                onClick={() => setOutcome('false_alarm')}
+                onClick={() => setOutcome('not_observed')}
                 className={cn(
                   "p-3 rounded-lg border text-sm font-bold transition-all",
-                  outcome === 'false_alarm'
+                  outcome === 'not_observed'
                     ? 'bg-emerald-950/60 border-emerald-600 text-emerald-300'
                     : 'border-border/40 text-muted-foreground hover:border-emerald-700'
                 )}
@@ -146,6 +200,57 @@ function VerificationModal({ warning, onClose, onSubmit }: {
                 🟢 False Alarm
               </button>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Hazard Type</label>
+            <select
+              value={hazardType}
+              onChange={e => setHazardType(e.target.value as typeof hazardType)}
+              className="w-full px-3 py-2 rounded-lg bg-zinc-900/95 border border-border/40 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option className="bg-zinc-900 text-zinc-100" value="landslide">Landslide</option>
+              <option className="bg-zinc-900 text-zinc-100" value="flood">Flood</option>
+              <option className="bg-zinc-900 text-zinc-100" value="debris_flow">Debris Flow</option>
+              <option className="bg-zinc-900 text-zinc-100" value="other">Other</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Observed At</label>
+              <input
+                type="datetime-local"
+                value={observedAt}
+                onChange={e => setObservedAt(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Severity</label>
+            <select
+              value={severity}
+              onChange={e => setSeverity(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg bg-zinc-900/95 border border-border/40 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option className="bg-zinc-900 text-zinc-100" value="">Not assessed</option>
+              <option className="bg-zinc-900 text-zinc-100" value="low">Low</option>
+              <option className="bg-zinc-900 text-zinc-100" value="moderate">Moderate</option>
+              <option className="bg-zinc-900 text-zinc-100" value="high">High</option>
+              <option className="bg-zinc-900 text-zinc-100" value="critical">Critical</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Infrastructure Impact</label>
+            <input
+              type="text"
+              value={infrastructureImpact}
+              onChange={e => setInfrastructureImpact(e.target.value)}
+              placeholder="e.g. NH-10, Dikchu bridge, Mangan settlement"
+              className="w-full px-3 py-2 rounded-lg bg-muted/40 border border-border/40 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            />
           </div>
 
           <div className="space-y-1.5">
@@ -181,7 +286,7 @@ function VerificationModal({ warning, onClose, onSubmit }: {
   );
 }
 
-export function WarningsPanel({ warnings, onResolved }: WarningsPanelProps) {
+export function WarningsPanel({ warnings, onResolved, onBroadcast }: WarningsPanelProps) {
   const [resolvingId, setResolvingId] = useState<number | null>(null);
   const [notes, setNotes] = useState<Record<number, string>>({});
   const [verifyingWarning, setVerifyingWarning] = useState<Warning | null>(null);
@@ -228,7 +333,7 @@ export function WarningsPanel({ warnings, onResolved }: WarningsPanelProps) {
             const count = warnings.filter(w => w.risk_level === level).length;
             const col = RISK_COLORS[level];
             return (
-              <div key={level} className={cn("rounded-xl p-3 border", col.bg, col.border)}>
+              <div key={level} className={cn("rounded-xl p-3 border bg-card/60 border-border/60", col.accent)}>
                 <div className={cn("text-[10px] font-bold uppercase tracking-wider", col.text)}>{level}</div>
                 <div className={cn("text-3xl font-black font-mono", col.text)}>{count}</div>
               </div>
@@ -246,13 +351,13 @@ export function WarningsPanel({ warnings, onResolved }: WarningsPanelProps) {
             const isVerified = verifiedIds.includes(w.id);
 
             return (
-              <Card key={w.id} className={cn("border overflow-hidden", col.border, col.bg)}>
+              <Card key={w.id} className={cn("border overflow-hidden bg-card/70 border-border/60", col.accent)}>
                 <CardContent className="p-5 space-y-4">
                   {/* Header */}
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Badge className={cn("font-bold uppercase text-[11px] px-2.5", col.text)} variant="outline">
+                        <Badge className={cn("font-bold uppercase text-[11px] px-2.5", col.text, col.border, "bg-black/20")} variant="outline">
                           ⚠ {w.risk_level} Risk
                         </Badge>
                         <Badge variant="outline" className="text-[10px] font-mono">
@@ -293,7 +398,7 @@ export function WarningsPanel({ warnings, onResolved }: WarningsPanelProps) {
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-[10px] text-muted-foreground/60">{f.raw} {f.raw_unit}</span>
                               <div className="w-20 h-1.5 bg-muted/40 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(f.value, 100)}%` }} />
+                                <div className={cn("h-full rounded-full", col.bar)} style={{ width: `${Math.min(f.value, 100)}%` }} />
                               </div>
                               <span className={cn("font-bold text-[10px]", col.text)}>{f.value.toFixed(0)}%</span>
                             </div>
@@ -353,6 +458,17 @@ export function WarningsPanel({ warnings, onResolved }: WarningsPanelProps) {
                         <Badge variant="outline" className="text-emerald-400 border-emerald-700/50 text-[10px]">
                           <CheckCircle className="h-3 w-3 mr-1" /> Verification Submitted
                         </Badge>
+                      )}
+                      {isCellBroadcastEligible(w) && onBroadcast && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs font-bold border-amber-700/60 text-amber-300 hover:bg-amber-950/30"
+                          onClick={() => onBroadcast(w)}
+                        >
+                          <RadioTower className="h-3.5 w-3.5 mr-1.5" />
+                          Simulate Cell Broadcast
+                        </Button>
                       )}
                     </div>
                   ) : (

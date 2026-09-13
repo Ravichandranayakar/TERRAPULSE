@@ -959,15 +959,73 @@ def get_model_info():
         return {"status": "error", "error": str(e)}
 
 
+def _seed_baseline_predictions():
+    """Run the ML model on all cells using terrain features on first boot so
+    the Risk Map shows real colors instead of all-green fallback."""
+    conn = _get_db()
+    try:
+        count = conn.execute("SELECT COUNT(*) FROM risk_predictions").fetchone()[0]
+        if count > 0:
+            print(f"[TERRAPULSE] Baseline predictions exist ({count} rows) — skipping seed")
+            return
+        print("[TERRAPULSE] Seeding baseline risk predictions from ML model...")
+        from ml_engine import load_model, predict_risk
+        model_bundle = load_model()
+        if not model_bundle:
+            print("[TERRAPULSE] Model not available — skipping baseline seed")
+            return
+        locations = conn.execute("SELECT * FROM monitoring_locations").fetchall()
+        seeded = 0
+        for loc in locations:
+            loc = dict(loc)
+            features = {
+                "slope_angle": loc.get("slope_angle", 25.0),
+                "elevation_m": loc.get("elevation_m", 1500.0),
+                "rainfall_24h_mm": 15.0,
+                "rainfall_3d_mm": 40.0,
+                "rainfall_7d_mm": 80.0,
+                "rainfall_intensity": 5.0,
+                "soil_moisture_index": 0.45,
+                "ndvi": 0.55,
+                "distance_to_fault_km": 8.0,
+                "road_proximity_km": 0.5 if loc.get("near_nh10") else 3.0,
+                "historical_events": loc.get("historical_count", 0),
+                "base_susceptibility": loc.get("base_susceptibility", 0.5),
+            }
+            try:
+                prediction = predict_risk(features, model_bundle)
+                conn.execute("""
+                    INSERT INTO risk_predictions
+                    (location_id, risk_score, risk_level, probability, contributing_factors)
+                    VALUES (?,?,?,?,?)
+                """, (
+                    loc["location_id"],
+                    prediction["risk_score"], prediction["risk_level"],
+                    prediction["probability"],
+                    json.dumps(prediction["contributing_factors"])
+                ))
+                seeded += 1
+            except Exception as e:
+                print(f"[TERRAPULSE] Seed failed for {loc['location_id']}: {e}")
+        conn.commit()
+        print(f"[TERRAPULSE] Seeded baseline predictions for {seeded} locations")
+    except Exception as e:
+        print(f"[TERRAPULSE] Baseline seed error: {e}")
+    finally:
+        conn.close()
+
+
 def _startup():
     try:
         from ml_engine import load_model, train_and_save_model, MODEL_PATH
         init_db()
+        _verification_repository.ensure_schema()
         if not os.path.exists(MODEL_PATH):
             print("[TERRAPULSE] No model found — training now...")
             train_and_save_model()
         else:
             print("[TERRAPULSE] Model already exists — skipping training")
+        _seed_baseline_predictions()
     except Exception as e:
         print(f"[TERRAPULSE] Startup warning: {e}")
         init_db()

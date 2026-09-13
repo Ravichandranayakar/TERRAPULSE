@@ -92,7 +92,7 @@ export function LandslideMap({
 }: LandslideMapProps) {
 
   const isNepal = cells && cells.length > 0 && cells[0].centroid_lon < 86;
-  const mapTitle = isNepal ? "Rasuwa District - Landslide Risk Map" : "North Sikkim - Landslide Risk Map";
+  const mapTitle = isNepal ? "Rasuwa District - Geospatial Risk Map" : "North Sikkim - Geospatial Risk Map";
   const mapSubtitle = isNepal ? "HIMALAYAS - NEPAL" : "NER - INDIA";
   const svgOverlayTitle = isNepal ? "Langtang Region, Rasuwa" : "Mangan District, North Sikkim";
 

@@ -40,7 +40,8 @@ import { cn } from '../lib/utils';
 // ---------------------------------------------------------------------------
 // TYPES
 // ---------------------------------------------------------------------------
-type ReportType = 'landslide' | 'road_crack' | 'flooding' | 'slope_movement' | 'blocked_road' | 'infrastructure_damage';
+type ReportType = 'landslide' | 'road_crack' | 'flooding' | 'slope_movement' | 'debris_flow' | 'blocked_road' | 'infrastructure_damage';
+type HazardType = 'landslide' | 'flood' | 'debris_flow' | 'other';
 type ReportStatus = 'pending' | 'under_review' | 'verified' | 'false_alarm';
 
 interface Report {
@@ -60,27 +61,38 @@ interface Report {
 // CONSTANTS — neutral, friendly icons & colors (not all red!)
 // ---------------------------------------------------------------------------
 const REPORT_TYPES: { id: ReportType; label: string; icon: React.ComponentType<any>; accent: string; bg: string; }[] = [
-  { id: 'landslide',            label: 'Landslide',       icon: Mountain,  accent: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/25' },
-  { id: 'road_crack',           label: 'Road Crack',      icon: Zap,       accent: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/25' },
-  { id: 'slope_movement',       label: 'Slope Movement',  icon: Mountain,  accent: 'text-amber-400',  bg: 'bg-amber-500/10  border-amber-500/25'  },
-  { id: 'flooding',             label: 'Flooding',        icon: Droplets,  accent: 'text-blue-400',   bg: 'bg-blue-500/10   border-blue-500/25'   },
-  { id: 'blocked_road',         label: 'Blocked Road',    icon: Truck,     accent: 'text-slate-400',  bg: 'bg-slate-500/10  border-slate-500/25'  },
-  { id: 'infrastructure_damage',label: 'Infrastructure',  icon: Home,      accent: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/25' },
+  { id: 'landslide', label: 'Landslide', icon: Mountain, accent: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/25' },
+  { id: 'road_crack', label: 'Road Crack', icon: Zap, accent: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/25' },
+  { id: 'slope_movement', label: 'Slope Movement', icon: Mountain, accent: 'text-amber-400', bg: 'bg-amber-500/10  border-amber-500/25' },
+  { id: 'debris_flow', label: 'Debris Flow', icon: Zap, accent: 'text-orange-300', bg: 'bg-orange-400/10 border-orange-400/25' },
+  { id: 'flooding', label: 'Flooding', icon: Droplets, accent: 'text-blue-400', bg: 'bg-blue-500/10   border-blue-500/25' },
+  { id: 'blocked_road', label: 'Blocked Road', icon: Truck, accent: 'text-slate-400', bg: 'bg-slate-500/10  border-slate-500/25' },
+  { id: 'infrastructure_damage', label: 'Infrastructure', icon: Home, accent: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/25' },
 ];
+
+const CITIZEN_HAZARD_MAP: Record<ReportType, HazardType> = {
+  landslide: 'landslide',
+  road_crack: 'landslide',
+  slope_movement: 'landslide',
+  debris_flow: 'debris_flow',
+  flooding: 'flood',
+  blocked_road: 'other',
+  infrastructure_damage: 'other',
+};
 
 // Risk level — subtle palette, no blazing full-screen red
 const RISK_CONFIG: Record<string, { pill: string; bar: string; label: string }> = {
-  critical: { pill: 'bg-red-500/15 text-red-300 border-red-500/30',    bar: 'bg-red-500',    label: 'Critical' },
-  high:     { pill: 'bg-orange-500/15 text-orange-300 border-orange-500/30', bar: 'bg-orange-400', label: 'High' },
-  moderate: { pill: 'bg-amber-500/15 text-amber-300 border-amber-500/30',   bar: 'bg-amber-400',  label: 'Moderate' },
-  low:      { pill: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', bar: 'bg-emerald-400', label: 'Low' },
+  critical: { pill: 'bg-red-500/15 text-red-300 border-red-500/30', bar: 'bg-red-500', label: 'Critical' },
+  high: { pill: 'bg-orange-500/15 text-orange-300 border-orange-500/30', bar: 'bg-orange-400', label: 'High' },
+  moderate: { pill: 'bg-amber-500/15 text-amber-300 border-amber-500/30', bar: 'bg-amber-400', label: 'Moderate' },
+  low: { pill: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', bar: 'bg-emerald-400', label: 'Low' },
 };
 
 const STATUS_STYLE: Record<ReportStatus, string> = {
-  pending:      'bg-amber-500/15 text-amber-300 border-amber-500/25',
+  pending: 'bg-amber-500/15 text-amber-300 border-amber-500/25',
   under_review: 'bg-blue-500/15 text-blue-300 border-blue-500/25',
-  verified:     'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
-  false_alarm:  'bg-slate-500/15 text-slate-400 border-slate-500/25',
+  verified: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/25',
+  false_alarm: 'bg-slate-500/15 text-slate-400 border-slate-500/25',
 };
 
 // ---------------------------------------------------------------------------
@@ -95,20 +107,22 @@ type Screen = 'home' | 'report' | 'my_reports' | 'emergency';
 export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
   const { state: regionState } = useRegion();
 
-  const [screen, setScreen]     = useState<Screen>('home');
+  const [screen, setScreen] = useState<Screen>('home');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  const [gps, setGps]           = useState<{ lat: number; lon: number } | null>(null);
+  const [gps, setGps] = useState<{ lat: number; lon: number } | null>(null);
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsError, setGpsError] = useState('');
   const [nearbyZone, setNearbyZone] = useState<any>(null);
 
   const [selectedType, setSelectedType] = useState<ReportType | null>(null);
-  const [description, setDescription]   = useState('');
-  const [photo, setPhoto]               = useState<string | null>(null);
+  const [description, setDescription] = useState('');
+  const [photo, setPhoto] = useState<string | null>(null);
   const [reporterName, setReporterName] = useState('');
-  const [submitting, setSubmitting]     = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [myReports, setMyReports] = useState<Report[]>(() => {
     try { return JSON.parse(sessionStorage.getItem('citizen_reports') || '[]'); }
@@ -131,7 +145,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
   }, []);
 
   useEffect(() => {
-    const on  = () => setIsOnline(true);
+    const on = () => setIsOnline(true);
     const off = () => setIsOnline(false);
     window.addEventListener('online', on);
     window.addEventListener('offline', off);
@@ -147,13 +161,14 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-        setGps(loc); setGpsLoading(false); fetchNearbyZone(loc);
+        setGps(loc); setGpsAccuracy(pos.coords.accuracy ?? null); setGpsLoading(false); fetchNearbyZone(loc);
       },
       () => {
         const fallback = regionState.mode === 'case-study'
           ? { lat: 28.0, lon: 85.2 }
           : { lat: 27.6, lon: 88.4 };
         setGps(fallback); setGpsLoading(false);
+        setGpsAccuracy(null);
         setGpsError('Using approximate location (GPS unavailable).');
         fetchNearbyZone(fallback);
       },
@@ -172,7 +187,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
         return d < bd ? cell : best;
       }, null);
       setNearbyZone(closest);
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -186,6 +201,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
   async function handleSubmitReport() {
     if (!selectedType || !gps) return;
     setSubmitting(true);
+    setSubmitError('');
     const report: Report = {
       id: `RPT-${Date.now()}`,
       type: selectedType,
@@ -199,19 +215,35 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
       photo: photo ?? undefined,
     };
     try {
-      if (nearbyZone) {
-        await rpcCall({
-          func: 'submit_field_verification',
-          args: {
-            warning_id: 0,
-            location_id: nearbyZone.location_id,
-            verified_by: reporterName || 'Citizen Reporter',
-            outcome: 'unverified',
-            notes: `[CITIZEN REPORT] Type: ${selectedType} — ${description}`,
-          },
-        });
-      }
-    } catch (_) {}
+      await rpcCall({
+        func: 'submit_field_verification',
+        args: {
+          warning_id: 0,
+          location_id: nearbyZone?.location_id,
+          verified_by: reporterName || 'Citizen Reporter',
+          outcome: 'unverified',
+          notes: description,
+          description,
+          hazard_type: CITIZEN_HAZARD_MAP[selectedType],
+          source_type: 'citizen',
+          source_reference: 'citizen_portal',
+          reporter_role: 'citizen',
+          reporter_id: reporterName || 'Citizen Reporter',
+          observed_at: report.timestamp,
+          event_presence: 'uncertain',
+          latitude: gps.lat,
+          longitude: gps.lon,
+          location_accuracy: gpsAccuracy,
+          location_quality: gpsAccuracy ? undefined : 'uncertain',
+          photo_reference: photo ?? undefined,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      setSubmitError('Report could not be submitted. Please try again when you have connectivity.');
+      setSubmitting(false);
+      return;
+    }
     const updated = [report, ...myReports];
     setMyReports(updated);
     sessionStorage.setItem('citizen_reports', JSON.stringify(updated));
@@ -231,6 +263,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
     setDescription('');
     setPhoto(null);
     setSubmitSuccess(false);
+    setSubmitError('');
     setScreen('home');
   }
 
@@ -337,7 +370,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
       ══════════════════════════════════════════════════════════ */}
       {screen === 'home' && (
         <div className="flex-1 overflow-y-auto">
-          
+
           {/* Greeting section */}
           <div className="px-5 pt-6 pb-2">
             <p className="text-slate-400 text-sm">Good day 👋</p>
@@ -348,7 +381,7 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
           {/* GPS + Zone Card */}
           <div className="px-4 pt-3 pb-2">
             <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 space-y-3">
-              
+
               {/* Card header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -646,6 +679,12 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
                 }
               </button>
 
+              {submitError && (
+                <p className="text-[11px] text-center text-red-400 border border-red-500/20 bg-red-500/10 rounded-lg py-2">
+                  {submitError}
+                </p>
+              )}
+
               <p className="text-[10px] text-center text-slate-600 leading-relaxed pb-2">
                 Your report will appear under "Pending Verifications" in the Authority Dashboard
                 for expert review before being used for model improvement.
@@ -726,12 +765,12 @@ export function CitizenApp({ onSwitchToAdmin }: CitizenAppProps) {
           <TopBar title="Emergency Contacts" subtitle="Landslide response helplines — NER & Nepal" onBack={() => setScreen('home')} />
           <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
             {[
-              { name: 'NDMA National Helpline', number: '1078',           desc: 'National Disaster Management Authority',       icon: '🇮🇳', accent: 'border-white/10' },
-              { name: 'Sikkim State EOC',        number: '1070',           desc: 'State Emergency Operations Centre',             icon: '🏢', accent: 'border-white/10' },
-              { name: 'SDRF North Sikkim',       number: '+91-3592-234567',desc: 'State Disaster Response Force',                 icon: '🛡️', accent: 'border-white/10' },
-              { name: 'BRO Mangan Division',     number: '+91-3592-234222',desc: 'Border Roads Organisation — NH-10 Corridor',   icon: '🚧', accent: 'border-white/10' },
-              { name: 'Nepal NDRRMA',            number: '1155',           desc: 'National Disaster Risk Reduction Authority',   icon: '🇳🇵', accent: 'border-white/10' },
-              { name: 'Rasuwa District DCC',     number: '+977-10-540203', desc: 'Rasuwa District Coordination Committee',       icon: '🏔️', accent: 'border-white/10' },
+              { name: 'NDMA National Helpline', number: '1078', desc: 'National Disaster Management Authority', icon: '🇮🇳', accent: 'border-white/10' },
+              { name: 'Sikkim State EOC', number: '1070', desc: 'State Emergency Operations Centre', icon: '🏢', accent: 'border-white/10' },
+              { name: 'SDRF North Sikkim', number: '+91-3592-234567', desc: 'State Disaster Response Force', icon: '🛡️', accent: 'border-white/10' },
+              { name: 'BRO Mangan Division', number: '+91-3592-234222', desc: 'Border Roads Organisation — NH-10 Corridor', icon: '🚧', accent: 'border-white/10' },
+              { name: 'Nepal NDRRMA', number: '1155', desc: 'National Disaster Risk Reduction Authority', icon: '🇳🇵', accent: 'border-white/10' },
+              { name: 'Rasuwa District DCC', number: '+977-10-540203', desc: 'Rasuwa District Coordination Committee', icon: '🏔️', accent: 'border-white/10' },
             ].map(c => (
               <a
                 key={c.name}

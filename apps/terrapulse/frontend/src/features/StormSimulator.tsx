@@ -1,398 +1,324 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
-import {
-  Activity, Play, Square, Loader2, CloudRain, Droplets,
-  AlertTriangle, CheckCircle, RefreshCw, Zap, Wind
-} from 'lucide-react';
-import { streamCall, rpcCall } from '../api';
+import { Activity, AlertTriangle, CheckCircle, CloudRain, Droplets, Loader2, Play, RefreshCw, RotateCcw, Shield, SlidersHorizontal, Square, TrendingUp } from 'lucide-react';
+import { predictRiskBatch, rpcCall, RiskPredictionRequest } from '../api';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { cn } from '../lib/utils';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import GeospatialViewer from './GeospatialViewer';
+import { XAIPanel } from './XAIPanel';
 
-interface SimulationChunk {
-  type: string;
-  step: number;
-  time_label: string;
-  description?: string;
-  progress: number;
-  cells?: any[];
-  warnings?: any[];
-  summary?: any;
-  recommended_actions?: string[];
-  affected_cells?: string[];
+interface GeoCell {
+  location_id: string;
+  name: string;
+  centroid_lat?: number;
+  centroid_lon?: number;
+  slope_angle?: number;
+  elevation_m?: number;
+  aspect?: string | number;
+  base_susceptibility?: number;
+}
+
+interface ScenarioFeatures {
+  rainfall_1h: number;
+  rainfall_3h: number;
+  rainfall_6h: number;
+  rainfall_24h: number;
+  antecedent_rainfall: number;
+  soil_moisture: number;
+}
+
+interface ScenarioStep {
+  time: string;
+  description: string;
+  inputs: ScenarioFeatures;
+}
+
+interface RiskPrediction {
+  cell_id: string;
+  risk_score: number;
+  risk_class: string;
+  risk_level: string;
+  drivers: string[];
+  contributing_factors: any[];
+  warning_ready: boolean;
+  predictor: string;
+  predictor_type: string;
+}
+
+interface RiskStats {
+  average: number;
+  critical: number;
+  high: number;
+  moderate: number;
+  low: number;
+  warningReady: number;
+}
+
+interface SimulationEvent {
+  id: string;
+  time: string;
+  description: string;
+  type: 'scenario' | 'prediction' | 'error' | 'complete';
+  stats?: RiskStats;
 }
 
 interface StormMonitorProps {
+  cells?: GeoCell[];
+  mapCells?: any[];
+  historicalEvents?: any[];
+  eventLayers?: any[];
+  infrastructure?: any;
+  nh10Route?: any[];
+  routeSafety?: string;
+  selectedCell?: any;
+  selectedCellId?: string | null;
+  onCellSelect?: (cellId: string | null) => void;
   onSimulationUpdate?: (cells: any[]) => void;
-  onWarningsUpdate?: (warnings: any[]) => void;
 }
 
-const STEP_COLOR: Record<string, string> = {
-  scenario_start: 'text-emerald-400',
-  scenario_event: 'text-amber-400',
-  map_update: 'text-blue-400',
-  infrastructure_alert: 'text-red-400',
-  simulation_complete: 'text-emerald-400',
-  error: 'text-red-500',
-};
+const RISK_COLORS: Record<string, string> = { critical: '#ef4444', high: '#f97316', moderate: '#f59e0b', low: '#10b981' };
 
-const RISK_COLORS: Record<string, string> = {
-  critical: '#ef4444',
-  high: '#f97316',
-  moderate: '#f59e0b',
-  low: '#10b981',
-};
+const SCENARIO_STEPS: ScenarioStep[] = [
+  { time: 'T+0', description: 'Baseline development scenario with low rainfall loading.', inputs: { rainfall_1h: 2, rainfall_3h: 8, rainfall_6h: 15, rainfall_24h: 25, antecedent_rainfall: 35, soil_moisture: 0.35 } },
+  { time: 'T+10', description: 'Rainfall loading increases across monitored cells.', inputs: { rainfall_1h: 8, rainfall_3h: 25, rainfall_6h: 48, rainfall_24h: 80, antecedent_rainfall: 115, soil_moisture: 0.52 } },
+  { time: 'T+20', description: 'Heavy scenario rainfall produces higher antecedent loading.', inputs: { rainfall_1h: 18, rainfall_3h: 64, rainfall_6h: 120, rainfall_24h: 180, antecedent_rainfall: 260, soil_moisture: 0.72 } },
+  { time: 'T+30', description: 'Extreme demonstration scenario with high saturation inputs.', inputs: { rainfall_1h: 32, rainfall_3h: 110, rainfall_6h: 220, rainfall_24h: 320, antecedent_rainfall: 430, soil_moisture: 0.88 } },
+];
 
-export function StormSimulator({ onSimulationUpdate, onWarningsUpdate }: StormMonitorProps) {
+const INPUT_FIELDS: { key: keyof ScenarioFeatures; label: string; unit: string; step: string; max?: number }[] = [
+  { key: 'rainfall_1h', label: 'Rainfall 1h', unit: 'mm', step: '0.1' },
+  { key: 'rainfall_3h', label: 'Rainfall 3h', unit: 'mm', step: '0.1' },
+  { key: 'rainfall_6h', label: 'Rainfall 6h', unit: 'mm', step: '0.1' },
+  { key: 'rainfall_24h', label: 'Rainfall 24h', unit: 'mm', step: '0.1' },
+  { key: 'antecedent_rainfall', label: 'Antecedent Rain', unit: 'mm', step: '0.1' },
+  { key: 'soil_moisture', label: 'Soil Moisture', unit: 'index', step: '0.01', max: 1 },
+];
+
+function aspectToDegrees(aspect: string | number | undefined): number | null {
+  if (typeof aspect === 'number') return aspect;
+  if (!aspect) return null;
+  return ({ N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315 } as Record<string, number>)[aspect.toUpperCase()] ?? null;
+}
+
+function calculateStats(predictions: RiskPrediction[]): RiskStats {
+  const stats = predictions.reduce((result, prediction) => {
+    const level = prediction.risk_class.toLowerCase() as 'critical' | 'high' | 'moderate' | 'low';
+    result[level] += 1;
+    result.average += prediction.risk_score;
+    if (prediction.warning_ready) result.warningReady += 1;
+    return result;
+  }, { average: 0, critical: 0, high: 0, moderate: 0, low: 0, warningReady: 0 } as RiskStats);
+  return { ...stats, average: predictions.length ? stats.average / predictions.length : 0 };
+}
+
+function buildCellPayload(cell: GeoCell, inputs: ScenarioFeatures): RiskPredictionRequest {
+  return { cell_id: cell.location_id, lat: cell.centroid_lat ?? null, lon: cell.centroid_lon ?? null, ...inputs, elevation: cell.elevation_m ?? null, slope: cell.slope_angle ?? null, aspect: aspectToDegrees(cell.aspect), historical_susceptibility: cell.base_susceptibility ?? null };
+}
+
+function mergePredictions(cells: GeoCell[], predictions: RiskPrediction[], inputs: ScenarioFeatures): any[] {
+  const byCellId = new Map(predictions.map(prediction => [prediction.cell_id, prediction]));
+  return cells.map(cell => {
+    const scenarioCell = JSON.parse(JSON.stringify(cell)) as GeoCell;
+    const prediction = byCellId.get(cell.location_id);
+    if (!prediction) return scenarioCell;
+    return { ...scenarioCell, risk_score: prediction.risk_score, risk_level: prediction.risk_level, risk_class: prediction.risk_class, drivers: prediction.drivers, predictor: prediction.predictor, predictor_type: prediction.predictor_type, contributing_factors: prediction.contributing_factors, rainfall: { rainfall_1h: inputs.rainfall_1h, rainfall_3h: inputs.rainfall_3h, rainfall_6h: inputs.rainfall_6h, rainfall_24h_mm: inputs.rainfall_24h, antecedent_rainfall: inputs.antecedent_rainfall, soil_moisture_index: inputs.soil_moisture } };
+  });
+}
+
+function getRiskClass(score: number): string {
+  if (score >= 75) return 'CRITICAL';
+  if (score >= 55) return 'HIGH';
+  if (score >= 35) return 'MODERATE';
+  return 'LOW';
+}
+
+export function StormSimulator({ cells = [], mapCells = [], historicalEvents = [], eventLayers = [], infrastructure = {}, nh10Route = [], routeSafety = 'UNKNOWN', selectedCell, selectedCellId, onCellSelect, onSimulationUpdate }: StormMonitorProps) {
   const [isStreaming, setIsStreaming] = useState(false);
-  const [events, setEvents] = useState<SimulationChunk[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState<SimulationChunk | null>(null);
-  const [summary, setSummary] = useState<any>(null);
-  const [rainfallHistory, setRainfallHistory] = useState<any[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [scenarioInputs, setScenarioInputs] = useState<ScenarioFeatures>(SCENARIO_STEPS[0].inputs);
+  const [predictions, setPredictions] = useState<RiskPrediction[]>([]);
+  const [events, setEvents] = useState<SimulationEvent[]>([]);
+  const [rainfallHistory, setRainfallHistory] = useState<{ time: string; rainfall24h: number; averageRisk: number }[]>([]);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [error, setError] = useState('');
+  const [summary, setSummary] = useState<RiskStats | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const runRef = useRef(false);
+  const requestIdRef = useRef(0);
+  const currentStep = SCENARIO_STEPS[scenarioIndex];
+  const currentStats = useMemo(() => calculateStats(predictions), [predictions]);
+  const highestRiskPrediction = useMemo(() => [...predictions].sort((left, right) => right.risk_score - left.risk_score)[0], [predictions]);
+  const initialSimulationCellsRef = useRef<any[] | null>(null);
 
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [events]);
-
-  
-  const handleSaveRecord = async () => {
+  const runPrediction = useCallback(async (inputs: ScenarioFeatures, time: string, recordEvent = true) => {
+    const requestId = ++requestIdRef.current;
+    if (!cells.length) { setError('No monitoring cells are available for this region.'); return null; }
+    setIsPredicting(true);
+    setError('');
     try {
-      const res = await rpcCall({
-        func: 'save_simulation_record',
-        args: { summary, events }
-      });
-      alert(res.message);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to save record.');
+      const response = await predictRiskBatch<RiskPrediction>(cells.map(cell => buildCellPayload(cell, inputs)));
+      if (requestId !== requestIdRef.current) return null;
+      const nextStats = calculateStats(response.predictions);
+      const nextSimulationCells = mergePredictions(cells, response.predictions, inputs);
+      if (!initialSimulationCellsRef.current) initialSimulationCellsRef.current = nextSimulationCells;
+      setPredictions(response.predictions);
+      setSummary(nextStats);
+      onSimulationUpdate?.(nextSimulationCells);
+      setRainfallHistory(previous => [...previous.filter(item => item.time !== time), { time, rainfall24h: inputs.rainfall_24h, averageRisk: Number(nextStats.average.toFixed(1)) }]);
+      if (recordEvent) setEvents(previous => [...previous, { id: `${time}-${Date.now()}`, time, type: 'prediction', description: `Backend recalculated ${response.predictions.length} spatial cells from scenario inputs.`, stats: nextStats }]);
+      return response.predictions;
+    } catch (predictionError: any) {
+      if (requestId !== requestIdRef.current) return null;
+      setError(predictionError?.message || 'Risk prediction request failed.');
+      setEvents(previous => [...previous, { id: `error-${Date.now()}`, time, type: 'error', description: 'The backend did not return a new risk result. The last valid map state was preserved.' }]);
+      return null;
+    } finally {
+      if (requestId === requestIdRef.current) setIsPredicting(false);
     }
+  }, [cells, onSimulationUpdate]);
+
+  useEffect(() => { if (cells.length) runPrediction(SCENARIO_STEPS[0].inputs, 'T+0', false); }, [cells, runPrediction]);
+
+  const updateInputs = (key: keyof ScenarioFeatures, value: number) => {
+    runRef.current = false;
+    setIsStreaming(false);
+    const nextInputs = { ...scenarioInputs, [key]: value };
+    setScenarioInputs(nextInputs);
+    runPrediction(nextInputs, currentStep.time);
+  };
+
+  const selectScenario = (index: number) => {
+    runRef.current = false;
+    setIsStreaming(false);
+    setScenarioIndex(index);
+    setScenarioInputs(SCENARIO_STEPS[index].inputs);
+    runPrediction(SCENARIO_STEPS[index].inputs, SCENARIO_STEPS[index].time);
   };
 
   const startSimulation = async () => {
+    if (isStreaming || !cells.length) return;
+    runRef.current = true;
     setIsStreaming(true);
-    setEvents([]);
-    setProgress(0);
-    setCurrentStep(null);
-    setSummary(null);
-    setRainfallHistory([]);
-
-    // Reset previous simulation state
-    try {
-      await rpcCall({ func: 'reset_simulation' });
-    } catch (e) { /* ignore */ }
-
-    try {
-      await streamCall({
-        func: 'run_storm_simulation',
-        args: {},
-        onChunk: (chunk: SimulationChunk) => {
-          setProgress(chunk.progress || 0);
-          setCurrentStep(chunk);
-          setEvents(prev => [...prev, chunk]);
-
-          // Update map when we get cell data
-          if (chunk.cells && onSimulationUpdate) {
-            onSimulationUpdate(chunk.cells);
-          }
-
-          // Update warnings
-          if (chunk.warnings && onWarningsUpdate) {
-            onWarningsUpdate(chunk.warnings);
-          }
-
-          // Track rainfall accumulation for chart
-          if (chunk.type === 'map_update' && chunk.cells) {
-            const avgRain3d = chunk.cells.reduce((sum: number, c: any) =>
-              sum + (c.rainfall?.rainfall_3d_mm || 0), 0) / chunk.cells.length;
-            const avgIntensity = chunk.cells.reduce((sum: number, c: any) =>
-              sum + (c.rainfall?.rainfall_intensity || 0), 0) / chunk.cells.length;
-            const critCount = chunk.cells.filter((c: any) => c.risk_level === 'critical').length;
-            const highCount = chunk.cells.filter((c: any) => c.risk_level === 'high').length;
-
-            setRainfallHistory(prev => [...prev, {
-              step: `T+${chunk.step}`,
-              rainfall3d: Math.round(avgRain3d),
-              intensity: Math.round(avgIntensity),
-              critical: critCount,
-              high: highCount,
-            }]);
-          }
-
-          if (chunk.type === 'simulation_complete') {
-            setSummary(chunk.summary);
-            setIsStreaming(false);
-          }
-          if (chunk.type === 'error') {
-            setIsStreaming(false);
-          }
-        },
-        onError: (err) => {
-          console.error('Storm simulation error:', err);
-          setIsStreaming(false);
-          setEvents(prev => [...prev, {
-            type: 'error', step: 0, time_label: 'Error',
-            description: `Simulation error: ${err.message}`, progress: 0
-          }]);
-        }
-      });
-    } catch (err) {
-      setIsStreaming(false);
+    setEvents(previous => [...previous, { id: `start-${Date.now()}`, time: currentStep.time, type: 'scenario', description: 'Development scenario playback started. Every step is sent through the backend risk pipeline.' }]);
+    for (let index = scenarioIndex; index < SCENARIO_STEPS.length && runRef.current; index += 1) {
+      const step = SCENARIO_STEPS[index];
+      setScenarioIndex(index);
+      setScenarioInputs(step.inputs);
+      await runPrediction(step.inputs, step.time);
+      if (runRef.current && index < SCENARIO_STEPS.length - 1) await new Promise(resolve => setTimeout(resolve, 1800));
     }
-  };
-
-  const stopSimulation = () => {
+    if (runRef.current) setEvents(previous => [...previous, { id: `complete-${Date.now()}`, time: 'COMPLETE', type: 'complete', description: 'Scenario playback complete. The final development risk state remains on the map.', stats: summary || currentStats }]);
+    runRef.current = false;
     setIsStreaming(false);
   };
 
-  const getRiskBadge = (level: string) => {
-    const colors: Record<string, string> = {
-      critical: 'bg-red-950/50 text-red-400 border-red-800/50',
-      high: 'bg-orange-950/50 text-orange-400 border-orange-800/50',
-      moderate: 'bg-amber-950/50 text-amber-400 border-amber-800/50',
-      low: 'bg-emerald-950/50 text-emerald-400 border-emerald-800/50',
-    };
-    return colors[level?.toLowerCase()] || colors.low;
+  const resetSimulation = async () => {
+    runRef.current = false;
+    setIsStreaming(false);
+    setScenarioIndex(0);
+    setScenarioInputs(SCENARIO_STEPS[0].inputs);
+    setEvents([]);
+    setRainfallHistory([]);
+    setSummary(null);
+    setPredictions([]);
+    if (initialSimulationCellsRef.current) onSimulationUpdate?.(initialSimulationCellsRef.current);
+    await runPrediction(SCENARIO_STEPS[0].inputs, 'T+0');
   };
 
+  const handleSaveRecord = async () => {
+    try {
+      const response = await rpcCall({ func: 'save_simulation_record', args: { summary, events } });
+      setToastMessage(response.message);
+      setTimeout(() => setToastMessage(null), 3000);
+    } catch (saveError) {
+      console.error(saveError);
+      setError('Unable to save the scenario record.');
+    }
+  };
+
+  const progress = ((scenarioIndex + (predictions.length ? 1 : 0)) / SCENARIO_STEPS.length) * 100;
+  const primaryRiskClass = getRiskClass(currentStats.average);
+  const spatialCells = mapCells.length ? mapCells : cells;
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full p-2">
-      {/* Left Panel — Main Simulator */}
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full p-2 relative">
+      {toastMessage && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in slide-in-from-top-8 duration-300">
+          <div className="flex items-center gap-3 rounded-full border border-emerald-500/40 bg-[#0c0c0e]/80 backdrop-blur-xl px-6 py-3.5 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
+            <CheckCircle className="h-5 w-5 text-emerald-400" />
+            <span className="text-sm font-bold text-white tracking-wide">{toastMessage}</span>
+          </div>
+        </div>
+      )}
+
       <div className="xl:col-span-2 space-y-6">
-        
-        {/* Main Card (Matches Screenshot) */}
-        <Card className="bg-[#131313] border-border/20 rounded-xl overflow-hidden shadow-xl flex flex-col">
-          <div className="p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <Card className="bg-[#131313] border-border/20 rounded-xl overflow-hidden shadow-xl">
+          <CardHeader className="p-6 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div><CardTitle className="text-xl font-bold flex items-center gap-2 text-primary"><Activity className="h-5 w-5" /> Development Risk Scenario</CardTitle><CardDescription className="text-sm mt-1">Backend-calculated scenario inputs for spatial risk-state development</CardDescription></div>
+              <div className="flex gap-2">{isStreaming ? <Button onClick={() => { runRef.current = false; setIsStreaming(false); }} variant="destructive" className="font-bold rounded-md flex items-center gap-2"><Square className="h-4 w-4" /> Pause</Button> : <Button onClick={startSimulation} disabled={isPredicting || !cells.length} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-md flex items-center gap-2"><Play className="h-4 w-4 fill-current" /> Start</Button>}<Button onClick={resetSimulation} variant="outline" disabled={isPredicting && !predictions.length} className="font-bold rounded-md flex items-center gap-2"><RotateCcw className="h-4 w-4" /> Reset</Button></div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 pt-0 space-y-6">
+            <div className="flex items-center justify-between gap-4 bg-black/40 rounded-lg p-4 border border-border/10"><div><div className="flex items-center gap-2 mb-1"><Badge className="bg-blue-500/15 text-blue-300 border border-blue-500/30">DEMO SCENARIO</Badge><span className="text-[11px] uppercase tracking-widest text-muted-foreground">Scenario Time</span></div><div className="text-xl font-black text-white">{currentStep.time}</div></div><div className="min-w-[160px] text-right"><div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Pipeline Progress</div><Progress value={progress} className="h-2" /><div className="text-[10px] text-muted-foreground mt-1">{Math.round(progress)}%</div></div></div>
+            <div className="grid grid-cols-4 gap-2">{SCENARIO_STEPS.map((step, index) => <button key={step.time} onClick={() => selectScenario(index)} disabled={isPredicting} className={cn('rounded-lg border px-3 py-2 text-left transition-all', scenarioIndex === index ? 'border-primary/70 bg-primary/10 text-primary' : 'border-border/30 bg-card/40 text-muted-foreground hover:border-primary/40')}><div className="text-xs font-bold">{step.time}</div><div className="text-[10px] mt-1 line-clamp-2">{step.description}</div></button>)}</div>
+            <div className="rounded-xl border border-border/30 bg-black/25 p-4 space-y-4"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground"><SlidersHorizontal className="h-4 w-4 text-primary" /> Environmental Inputs</div><span className="text-[10px] text-blue-300 uppercase tracking-wider">Demo values, not observations</span></div><div className="grid grid-cols-2 md:grid-cols-3 gap-3">{INPUT_FIELDS.map(field => <label key={field.key} className="space-y-1.5"><span className="text-[10px] text-muted-foreground uppercase tracking-wider">{field.label}</span><div className="flex items-center gap-2"><input type="number" min="0" max={field.max} step={field.step} value={scenarioInputs[field.key]} onChange={event => updateInputs(field.key, Number(event.target.value))} className="w-full rounded-md border border-border/40 bg-background/50 px-2.5 py-2 text-sm text-white outline-none focus:border-primary/70" /><span className="text-[10px] text-muted-foreground min-w-fit">{field.unit}</span></div></label>)}</div><div className="text-[11px] text-muted-foreground">{currentStep.description} Changing any value sends the complete spatial feature payload to the backend again.</div></div>
+            {error && <div className="flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-950/20 p-3 text-xs text-red-300"><AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" /><span>{error}</span><button onClick={() => runPrediction(scenarioInputs, currentStep.time)} className="ml-auto underline">Retry</button></div>}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">{(['critical', 'high', 'moderate', 'low'] as const).map(level => <div key={level} className="rounded-lg border border-border/20 bg-card/40 p-3"><div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground"><span className="h-2 w-2 rounded-full" style={{ backgroundColor: RISK_COLORS[level] }} /> {level}</div><div className="text-2xl font-black mt-1">{currentStats[level]}</div></div>)}</div>
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4"><div className="flex items-start justify-between gap-4"><div><div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-primary"><Shield className="h-4 w-4" /> Calculated Development Risk</div><div className="flex items-baseline gap-3 mt-2"><span className="text-3xl font-black" style={{ color: RISK_COLORS[primaryRiskClass.toLowerCase()] }}>{primaryRiskClass}</span><span className="font-mono text-lg text-white">{currentStats.average.toFixed(1)}<span className="text-xs text-muted-foreground">/100</span></span></div></div><Badge variant="outline" className="border-blue-400/40 text-blue-300">DEVELOPMENT / RULE-BASED</Badge></div>{highestRiskPrediction?.drivers?.length ? <div className="mt-4 space-y-1.5"><div className="text-[10px] uppercase tracking-widest text-muted-foreground">Risk Drivers</div>{highestRiskPrediction.drivers.slice(0, 4).map(driver => <div key={driver} className="flex items-center gap-2 text-xs text-slate-300"><TrendingUp className="h-3 w-3 text-primary" />{driver}</div>)}</div> : null}</div>
+            {rainfallHistory.length > 0 && <div className="space-y-2"><div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5"><CloudRain className="h-3 w-3 text-blue-400" /> Scenario Input and Risk Timeline</div><div className="h-[150px] bg-muted/10 rounded-lg p-2 border border-border/20"><ResponsiveContainer width="100%" height="100%"><LineChart data={rainfallHistory}><XAxis dataKey="time" tick={{ fontSize: 9, fill: '#64748b' }} /><YAxis tick={{ fontSize: 9, fill: '#64748b' }} width={35} /><Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', fontSize: '11px' }} /><Line type="monotone" dataKey="rainfall24h" name="Rainfall 24h (mm)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} /><Line type="monotone" dataKey="averageRisk" name="Average development risk" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} /></LineChart></ResponsiveContainer></div></div>}
+            <ScrollArea className="h-[250px]"><div className="space-y-2 pr-2">{events.map(event => <div key={event.id} className={cn('flex gap-3 p-3 rounded-lg border', event.type === 'error' ? 'border-red-800/50 bg-red-950/20' : event.type === 'complete' ? 'border-emerald-800/50 bg-emerald-950/20' : 'border-border/30 bg-card/40')}><div className="mt-0.5 shrink-0">{event.type === 'error' ? <AlertTriangle className="h-4 w-4 text-red-400" /> : event.type === 'complete' ? <CheckCircle className="h-4 w-4 text-emerald-400" /> : <Activity className="h-4 w-4 text-blue-400" />}</div><div className="min-w-0 flex-1"><div className="flex justify-between gap-2"><span className="text-xs font-bold text-slate-300">{event.time}</span>{event.stats && <span className="text-[10px] text-muted-foreground">Avg {event.stats.average.toFixed(1)}</span>}</div><p className="text-[11px] text-muted-foreground mt-1">{event.description}</p></div></div>)}{isPredicting && <div className="flex items-center justify-center p-4 text-xs text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin mr-2" /> Sending spatial features to backend...</div>}</div></ScrollArea>
+          </CardContent>
+        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="bg-[#131313] border-border/20 rounded-xl shadow-xl"><CardHeader className="p-5 pb-3"><CardTitle className="text-[13px] font-bold uppercase tracking-widest text-white">Risk Pipeline</CardTitle></CardHeader><CardContent className="p-5 pt-0 space-y-4">{['Scenario inputs', 'Feature construction and normalization', 'Development risk predictor', 'Shared spatial map state', 'Warning-ready output'].map((item, index) => <div key={item} className="flex items-center gap-3 text-xs text-slate-300"><span className="h-6 w-6 rounded-full bg-primary/15 text-primary flex items-center justify-center font-bold">{index + 1}</span>{item}</div>)}<div className="rounded-lg border border-blue-500/20 bg-blue-950/15 p-3 text-[11px] text-blue-200/80">The current predictor is a deterministic development heuristic. A future validated ML predictor can replace it behind the same API contract.</div></CardContent></Card>
+          <Card className="bg-[#131313] border-border/20 rounded-xl shadow-xl"><CardHeader className="p-5 pb-3"><CardTitle className="text-[13px] font-bold uppercase tracking-widest text-white">Scenario Output</CardTitle></CardHeader><CardContent className="p-5 pt-0 space-y-4"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center"><Droplets className="h-5 w-5 text-blue-400" /></div><div><div className="text-sm font-bold text-white">{cells.length} spatial cells</div><div className="text-[10px] text-muted-foreground">Updated from the latest backend result</div></div></div><div className="grid grid-cols-2 gap-3 text-[11px]"><div className="rounded-lg bg-white/5 p-3"><div className="text-muted-foreground uppercase">Warning-ready</div><div className="text-lg font-black text-orange-400">{currentStats.warningReady}</div></div><div className="rounded-lg bg-white/5 p-3"><div className="text-muted-foreground uppercase">Predictor</div><div className="text-sm font-bold text-blue-300">Development</div></div></div><Button onClick={handleSaveRecord} variant="outline" className="w-full flex items-center gap-2"><RefreshCw className="h-4 w-4" /> Save Scenario Record</Button></CardContent></Card>
+        </div>
+      </div>
+      <div className="space-y-6">
+        <Card className="bg-[#131313] border-border/20 rounded-xl shadow-xl overflow-hidden">
+          <CardHeader className="p-5 pb-3 border-b border-border/20">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold font-heading flex items-center gap-2 text-primary">
-                  <Activity className="h-5 w-5" />
-                  Live Sensor Stream
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Real-time displacement and vibration monitoring across active zones
-                </p>
+                <CardTitle className="text-[13px] font-bold uppercase tracking-widest text-white">Scenario Risk Map</CardTitle>
+                <CardDescription className="text-[11px] mt-1">DEMO SCENARIO — SPATIAL RISK</CardDescription>
               </div>
-              
-              {isStreaming ? (
-                <Button onClick={stopSimulation} variant="destructive" className="font-bold rounded-md px-6 flex items-center gap-2 transition-all">
-                  <Square className="h-4 w-4" />
-                  Stop Simulation
-                </Button>
-              ) : (
-                <Button onClick={startSimulation} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-md px-6 flex items-center gap-2 transition-all">
-                  <Play className="h-4 w-4 fill-current" />
-                  Start Simulation
-                </Button>
+              <Badge variant="outline" className="border-blue-400/40 text-blue-300 text-[10px]">RULE-BASED</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="relative h-[560px] min-h-[460px] w-full">
+              <GeospatialViewer
+                cells={spatialCells as any}
+                historicalEvents={historicalEvents}
+                eventLayers={eventLayers}
+                infrastructure={infrastructure}
+                nh10Route={nh10Route}
+                routeSafety={routeSafety}
+                initialSelectedCellId={selectedCellId}
+                onCellClick={(cell) => onCellSelect?.(cell?.location_id || null)}
+              />
+              {isPredicting && (
+                <div className="absolute inset-0 z-20 flex items-start justify-center pointer-events-none pt-4">
+                  <div className="flex items-center gap-2 rounded-full border border-blue-400/30 bg-slate-950/85 px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-200 shadow-xl">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Calculating scenario...
+                  </div>
+                </div>
               )}
             </div>
-
-            <div className="bg-black/40 rounded-lg p-4 mb-6 border border-border/10">
-              <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest mb-3">
-                <span className="text-muted-foreground">
-                  SIMULATION STATUS: <span className="text-primary">{status === 'idle' ? 'STANDBY' : status === 'running' ? 'INITIALIZING SIMULATION...' : 'COMPLETE'}</span>
-                </span>
-                <span className="text-muted-foreground">{Math.round(progress)}%</span>
-              </div>
-              <div className="h-3 w-full bg-[#1c140a] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-[#9c4b1d] transition-all duration-500 ease-out"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-
-            {events.length === 0 && !isStreaming ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-6">
-                  <Activity className="h-6 w-6 text-muted-foreground/50" />
-                </div>
-                <p className="text-muted-foreground text-sm">
-                  Click "Start Simulation" to begin real-time data flow
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {/* Rainfall Accumulation Chart */}
-                {rainfallHistory.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                      <CloudRain className="h-3 w-3 text-blue-400" />
-                      Rainfall Accumulation Timeline
-                    </div>
-                    <div className="h-[140px] bg-muted/10 rounded-lg p-2 border border-border/20">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={rainfallHistory}>
-                          <XAxis dataKey="step" tick={{ fontSize: 9, fill: '#64748b' }} />
-                          <YAxis tick={{ fontSize: 9, fill: '#64748b' }} width={35} />
-                          <Tooltip
-                            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', fontSize: '11px' }}
-                            labelStyle={{ color: '#94a3b8' }}
-                          />
-                          <ReferenceLine y={150} stroke="#f59e0b" strokeDasharray="4 2" strokeOpacity={0.5} label={{ value: 'Warning', fontSize: 9, fill: '#f59e0b' }} />
-                          <ReferenceLine y={280} stroke="#ef4444" strokeDasharray="4 2" strokeOpacity={0.5} label={{ value: 'Critical', fontSize: 9, fill: '#ef4444' }} />
-                          <Line type="monotone" dataKey="rainfall3d" name="3-Day Rain (mm)" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                          <Line type="monotone" dataKey="intensity" name="Intensity (mm/hr)" stroke="#22d3ee" strokeWidth={1.5} strokeDasharray="5 3" dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                )}
-
-                {/* Event Stream Log */}
-                <ScrollArea className="h-[300px]" ref={scrollRef as any}>
-                  <div className="space-y-2.5 pr-2">
-
-                {events.map((event, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "flex gap-3 p-3 rounded-lg border animate-in fade-in slide-in-from-left-2 duration-300",
-                      event.type === 'infrastructure_alert'
-                        ? 'border-red-800/50 bg-red-950/20'
-                        : event.type === 'simulation_complete'
-                          ? 'border-emerald-800/50 bg-emerald-950/20'
-                          : event.type === 'error'
-                            ? 'border-red-800/50 bg-red-950/30'
-                            : 'border-border/30 bg-card/50'
-                    )}
-                  >
-                    <div className="flex-shrink-0 mt-0.5">
-                      {event.type === 'map_update' && <Activity className="h-4 w-4 text-blue-400" />}
-                      {event.type === 'scenario_start' && <CheckCircle className="h-4 w-4 text-emerald-400" />}
-                      {event.type === 'scenario_event' && <CloudRain className="h-4 w-4 text-amber-400" />}
-                      {event.type === 'infrastructure_alert' && <AlertTriangle className="h-4 w-4 text-red-400" />}
-                      {event.type === 'simulation_complete' && <CheckCircle className="h-4 w-4 text-emerald-400" />}
-                      {event.type === 'error' && <AlertTriangle className="h-4 w-4 text-red-500" />}
-                    </div>
-
-                    <div className="flex-1 space-y-1.5 min-w-0">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className={cn("text-xs font-bold", STEP_COLOR[event.type] || 'text-muted-foreground')}>
-                          {event.time_label}
-                        </span>
-                        <span className="text-[10px] font-mono text-muted-foreground/60">{new Date().toLocaleTimeString()}</span>
-                      </div>
-
-                      {event.description && (
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">{event.description}</p>
-                      )}
-
-                      {/* Map update summary */}
-                      {event.type === 'map_update' && event.cells && (
-                        <div className="flex gap-2 flex-wrap mt-1">
-                          {(['critical', 'high', 'moderate', 'low'] as const).map(lvl => {
-                            const count = event.cells!.filter(c => c.risk_level === lvl).length;
-                            if (!count) return null;
-                            return (
-                              <div key={lvl} className="flex items-center gap-1 text-[10px] font-bold"
-                                style={{ color: RISK_COLORS[lvl] }}>
-                                <span className="h-1.5 w-1.5 rounded-full inline-block" style={{ backgroundColor: RISK_COLORS[lvl] }} />
-                                {count} {lvl}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-
-                      {/* Infrastructure alert actions */}
-                      {event.type === 'infrastructure_alert' && event.recommended_actions && (
-                        <div className="space-y-1 mt-1">
-                          {event.recommended_actions.slice(0, 3).map((action, j) => (
-                            <div key={j} className="flex items-start gap-1.5 text-[10px] text-red-300">
-                              <span className="flex-shrink-0 mt-0.5">→</span>
-                              <span>{action}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* New warnings generated */}
-                      {event.warnings && event.warnings.length > 0 && (
-                        <div className="flex items-center gap-1.5 text-[10px] text-red-400 font-bold">
-                          <AlertTriangle className="h-3 w-3" />
-                          {event.warnings.length} early warning(s) triggered
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {isStreaming && (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary opacity-60 mr-2" />
-                    <span className="text-xs text-muted-foreground">Processing through ML pipeline...</span>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-          )}
-          </div>
-        </Card>
-      </div>
-
-
-
-
-
-      {/* Right Panel — Simulation Summary + Model Info */}
-      <div className="space-y-6">
-        
-        {/* Site Context with Image */}
-        <Card className="bg-[#131313] border-border/20 rounded-xl overflow-hidden shadow-xl">
-          <div className="relative h-48 w-full">
-            <img
-              src="/assets/231854574217558.jpg"
-              alt="Site View"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Dark gradient overlay at bottom for text contrast */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
-            
-            <div className="absolute bottom-4 left-4">
-              <Badge className="bg-primary text-black font-bold uppercase tracking-widest hover:bg-primary/90 rounded-[4px] px-2 py-0.5 text-[10px]">
-                SITE PRIMARY VIEW
-              </Badge>
-            </div>
-          </div>
-          <CardContent className="p-5 space-y-3">
-            <div className="text-[13px] font-bold uppercase tracking-widest text-white mt-1">
-              Site Context
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Monitoring is active for the North Sikkim high-risk corridor (NH-10). Simulation mode runs high-frequency risk re-calculations based on the Gradient Boosting ensemble model.
-            </p>
           </CardContent>
         </Card>
 
-        {/* Model Information */}
-        <Card className="bg-[#131313] border-border/20 rounded-xl shadow-xl">
-          <CardHeader className="p-5 pb-3">
-            <CardTitle className="text-[13px] font-bold uppercase tracking-widest text-white">Model Information</CardTitle>
-          </CardHeader>
-          <CardContent className="p-5 pt-0 space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-[8px] bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                <Activity className="h-5 w-5 text-blue-400" />
-              </div>
-              <div>
-                <div className="text-sm font-bold text-white">Gradient Boosting Classifier</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">v2.4.1 - Production Ensemble</div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between pt-0 text-[11px] font-bold">
-              <div className="text-muted-foreground uppercase tracking-widest">Precision: <span className="text-primary">94.2%</span></div>
-              <div className="text-muted-foreground uppercase tracking-widest">Recall: <span className="text-primary">91.8%</span></div>
-            </div>
-          </CardContent>
-        </Card>
+        {selectedCell && (
+          <Card className="bg-[#131313] border-border/20 rounded-xl shadow-xl">
+            <CardHeader className="p-5 pb-2"><CardTitle className="text-[13px] font-bold uppercase tracking-widest text-white">Selected Scenario Cell</CardTitle></CardHeader>
+            <CardContent className="p-5 pt-2"><XAIPanel cell={selectedCell} onClose={() => onCellSelect?.(null)} /></CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

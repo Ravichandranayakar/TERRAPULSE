@@ -5,7 +5,8 @@ import { cn } from '../lib/utils';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { Brain, AlertTriangle, TrendingUp, Mountain, Droplets, Wind } from 'lucide-react';
+import { Brain, AlertTriangle, TrendingUp, Mountain, Droplets, Wind, ShieldCheck, Radio, Users, Activity, Layers } from 'lucide-react';
+import { useRegion } from '../contexts/RegionContext';
 
 interface ContributingFactor {
   factor: string;
@@ -80,6 +81,12 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function XAIPanel({ cell, onClose }: XAIPanelProps) {
+  const { state: regionState } = useRegion();
+  const isNepal = regionState.region === 'nepal_case';
+  const highwayName = isNepal ? 'Trishuli Hwy' : 'NH-10';
+  const clearingTeam = isNepal ? 'DoR' : 'BRO';
+  const rescueTeam = isNepal ? 'Nepal APF' : 'SDRF Battalion 3';
+
   if (!cell) return null;
   const { 
     name: locationName,
@@ -91,8 +98,34 @@ export function XAIPanel({ cell, onClose }: XAIPanelProps) {
     soil_type: soilType,
     near_nh10: nearNH10,
     historical_count: historicalCount,
+    historical_events: historicalEvents,
+    hazard_types: hazardTypes,
   } = cell;
   const level = riskLevel?.toLowerCase() || 'low';
+
+  // Derive unique hazard types — use direct hazard_types if available, else derive from historical_events
+  const resolvedHazards: string[] = React.useMemo(() => {
+    if (hazardTypes && hazardTypes.length > 0) return hazardTypes;
+    if (!historicalEvents || historicalEvents.length === 0) return [];
+    const types = new Set<string>(historicalEvents.map((e: any) => e.event_type || e.type || 'Landslide'));
+    return Array.from(types);
+  }, [hazardTypes, historicalEvents]);
+
+  const HAZARD_COLORS: Record<string, string> = {
+    'Debris Flow': '#f97316',
+    'Flash Flood': '#38bdf8',
+    'Rotational Slide': '#a855f7',
+    'Shallow Translational Slide': '#fb923c',
+    'Rock Fall': '#ef4444',
+    'Debris Avalanche': '#dc2626',
+    'Multiple Debris Flows': '#f97316',
+    'Planar Slide': '#eab308',
+    'Road Cutting Failure': '#fbbf24',
+    'Road Blocking': '#fbbf24',
+    'Hill Cutting': '#84cc16',
+    'Landslide': '#f97316',
+    'Flood': '#38bdf8',
+  };
 
   // Normalize display values so bars don't exceed 100
   const chartData = (contributingFactors || []).map(f => ({
@@ -173,9 +206,9 @@ export function XAIPanel({ cell, onClose }: XAIPanelProps) {
             </div>
           )}
           {soilType && (
-            <div className="space-y-0.5 col-span-2">
+            <div className="space-y-0.5">
               <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Soil / Rock Type</div>
-              <div className="text-sm font-bold">{soilType}</div>
+              <div className="text-sm font-bold truncate" title={soilType}>{soilType}</div>
             </div>
           )}
           {historicalCount !== undefined && (
@@ -184,9 +217,29 @@ export function XAIPanel({ cell, onClose }: XAIPanelProps) {
               <div className="text-sm font-bold">{historicalCount} recorded</div>
             </div>
           )}
+          {resolvedHazards.length > 0 && (
+            <div className="space-y-1 col-span-2">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Recorded Hazards</div>
+              <div className="flex flex-wrap gap-1">
+                {resolvedHazards.map(type => (
+                  <span
+                    key={type}
+                    className="text-[10px] font-bold px-2 py-0.5 rounded-full border"
+                    style={{
+                      color: HAZARD_COLORS[type] || '#f97316',
+                      borderColor: (HAZARD_COLORS[type] || '#f97316') + '55',
+                      background: (HAZARD_COLORS[type] || '#f97316') + '18',
+                    }}
+                  >
+                    {type}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
           {nearNH10 !== undefined && (
             <div className="space-y-0.5">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">NH-10 Proximity</div>
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider">{highwayName} Proximity</div>
               <div className={cn("text-sm font-bold", nearNH10 ? "text-blue-400" : "text-muted-foreground")}>
                 {nearNH10 ? '⚠ Adjacent' : 'Remote'}
               </div>
@@ -239,28 +292,60 @@ export function XAIPanel({ cell, onClose }: XAIPanelProps) {
         </div>
       )}
 
-      {/* Infrastructure Impact Alert */}
-      {nearNH10 && (riskLevel === 'high' || riskLevel === 'critical') && (
-        <div className="rounded-xl border border-blue-500/40 bg-blue-950/30 p-3 space-y-2">
-          <div className="flex items-center gap-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
-            <AlertTriangle className="h-3.5 w-3.5" />
-            Infrastructure Exposure
-          </div>
-          <p className="text-xs text-blue-200/80">
-            This location is adjacent to the <strong>NH-10 highway corridor</strong>. 
-            A landslide event could disrupt Sikkim's primary road lifeline connecting Rangpo to Mangan.
-          </p>
-          <div className="text-[10px] font-bold text-blue-300 uppercase tracking-wider">
-            Recommended: Alert BRO clearing teams · Issue NH-10 traffic advisory
-          </div>
+      {/* Action Protocol (SOP) */}
+      <div className="rounded-xl border border-border/40 bg-card/40 p-3 space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          Standard Operating Procedure (SOP)
         </div>
-      )}
-
-      {/* Scientific disclaimer */}
-      <div className="text-[9px] text-muted-foreground/50 leading-relaxed border-t border-border/20 pt-2">
-        ⚠ Risk assessment based on candidate ML model trained on synthetic NER-style simulation dataset.
-        For operational use, validate with GSI/ISRO historical landslide records and IMD rainfall data.
+        
+        {level === 'critical' ? (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-xs text-red-400">
+              <Radio className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Immediate Evacuation:</strong> Authorize Cell Broadcast System (CBS) for local residents.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-red-400">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Highway Closure:</strong> Alert {clearingTeam} to block {highwayName} traffic at checkposts.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-red-400">
+              <Users className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Deployment:</strong> Scramble {rescueTeam} to staging area.</span>
+            </div>
+          </div>
+        ) : level === 'high' ? (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-xs text-orange-400">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Advisory:</strong> Issue heavy rain and landslide caution for {highwayName} transit.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-orange-400">
+              <Radio className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Pre-positioning:</strong> Keep CBS payload drafted and ready for authorization.</span>
+            </div>
+          </div>
+        ) : level === 'moderate' ? (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-xs text-yellow-400">
+              <Activity className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Surveillance:</strong> Increase Open-Meteo polling frequency to 15 mins.</span>
+            </div>
+            <div className="flex items-start gap-2 text-xs text-yellow-400">
+              <Layers className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Analysis:</strong> Cross-reference soil moisture index trends.</span>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex items-start gap-2 text-xs text-emerald-400">
+              <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5" />
+              <span><strong>Routine:</strong> Maintain standard hourly satellite telemetry logging. No immediate action required.</span>
+            </div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 }
