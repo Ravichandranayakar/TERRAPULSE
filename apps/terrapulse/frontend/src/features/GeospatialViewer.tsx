@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef } from "react";
-import Map, { Source, Layer, MapRef, NavigationControl } from "react-map-gl/maplibre";
+import Map, { Source, Layer, MapRef, NavigationControl, Marker } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -484,8 +484,6 @@ export default function GeospatialViewer({
           <Layer id="risk-outline" type="line" paint={{ "line-color": ["get", "color"], "line-width": 0.8, "line-opacity": 0.45 }} />
         </Source>
         <Source id="risk-centroids" type="geojson" data={riskCentroidsGeoJSON as any}>
-          <Layer id="risk-circle-outer" type="circle" paint={{ "circle-radius": ["case", ["any", ["==", ["get", "risk_level"], "high"], ["==", ["get", "risk_level"], "critical"]], 10, 8], "circle-color": "#64748b", "circle-opacity": 0.9 }} />
-          <Layer id="risk-circle-inner" type="circle" paint={{ "circle-radius": ["case", ["any", ["==", ["get", "risk_level"], "high"], ["==", ["get", "risk_level"], "critical"]], 7, 5.5], "circle-color": ["get", "color"], "circle-stroke-width": 0 }} />
           <Layer id="risk-labels" type="symbol" layout={{ "text-field": ["get", "shortName"], "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"], "text-size": 11, "text-offset": [0, 1.6], "text-anchor": "top" }} paint={{ "text-color": "#ffffff", "text-halo-color": "rgba(0,0,0,0.85)", "text-halo-width": 1.5 }} />
         </Source>
         <Source id="event-footprints" type="geojson" data={eventFootprintGeoJSON as any}>
@@ -519,6 +517,33 @@ export default function GeospatialViewer({
         {highlightCellId && (
           <Layer id="operator-selected-highlight" type="line" source="risk-data" filter={["==", "location_id", highlightCellId]} paint={{ "line-color": "#ffffff", "line-width": 3.5, "line-opacity": 1 }} />
         )}
+        
+        {cells && cells.map(cell => {
+          const riskLevel = cell.risk_level ? cell.risk_level.toLowerCase() : 'low';
+          const color = riskLevel === 'critical' ? '#ef4444' :
+                        riskLevel === 'high' ? '#f97316' :
+                        riskLevel === 'moderate' ? '#eab308' : '#10b981';
+          return (
+            <Marker 
+              key={cell.location_id} 
+              longitude={cell.centroid_lon} 
+              latitude={cell.centroid_lat} 
+              anchor="bottom"
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                if (onCellClick) {
+                  onCellClick(cell);
+                }
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="28" height="28" style={{ cursor: 'pointer', filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.5))' }}>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill={color} stroke="#ffffff" strokeWidth="1.5" />
+                <circle cx="12" cy="9" r="3.5" fill="#ffffff" />
+              </svg>
+            </Marker>
+          );
+        })}
+
         <NavigationControl position="top-right" showCompass={true} showZoom={true} visualizePitch={true} />
       </Map>
 

@@ -232,36 +232,41 @@ export default function App() {
     }
   }, [activeView, forecastData, regionState.region]);
 
-  // Merge simulation cells with base status.
-  // CRITICAL: forecast colors only apply when ACTIVELY on the forecast tab.
-  // Switching to Risk Map always shows live risk colors from statusData.
-  const displayCells: GeoCell[] = (() => {
-    if (activeView === 'forecast' && forecastData && forecastData.cells) {
-      return statusData.map(cell => {
-        const fCell = forecastData.cells.find((c: any) => c.cell_id === cell.location_id);
-        if (fCell && fCell.predictions && fCell.predictions[forecastHourIdx]) {
-          return {
-            ...cell,
-            risk_score: fCell.predictions[forecastHourIdx].risk_score,
-            risk_level: fCell.predictions[forecastHourIdx].risk_level,
-            rainfall_24h: fCell.predictions[forecastHourIdx].precipitation_mm,
-          };
-        }
-        return cell;
-      });
-    }
-    // Risk Map & all other tabs: live statusData + simulation overlay only
-    return statusData.map(cell => {
-      const simCell = simulationCells.find(s => s.location_id === cell.location_id);
-      return simCell ? { ...cell, ...simCell } : cell;
-    });
-  })();
+  // RISK MAP cells — always live baseline. Never contaminated by simulation or forecast data.
+  const riskMapCells = React.useMemo<GeoCell[]>(() => {
+    return statusData;
+  }, [statusData]);
 
-  const selectedCell = displayCells.find(c => c.location_id === selectedCellId);
+  // FORECAST MAP cells — isolated dataset driven by the time scrubber.
+  // Only consumed by the 24h Forecast GeospatialViewer; Risk Map is unaffected.
+  const forecastCells = React.useMemo<GeoCell[]>(() => {
+    if (!forecastData?.cells) return riskMapCells;
+    return riskMapCells.map(cell => {
+      const fCell = forecastData.cells.find((c: any) => c.cell_id === cell.location_id);
+      if (fCell?.predictions?.[forecastHourIdx]) {
+        return {
+          ...cell,
+          risk_score: fCell.predictions[forecastHourIdx].risk_score,
+          risk_level: fCell.predictions[forecastHourIdx].risk_level,
+          rainfall_24h: fCell.predictions[forecastHourIdx].precipitation_mm,
+        };
+      }
+      return cell;
+    });
+  }, [riskMapCells, forecastData, forecastHourIdx]);
+
+  // displayCells switches based on active view to keep map states isolated
+  const displayCells = React.useMemo(() => {
+    if (activeView === 'forecast') return forecastCells;
+    if (activeView === 'simulation') return simulationCells.length > 0 ? simulationCells : riskMapCells;
+    return riskMapCells;
+  }, [activeView, forecastCells, simulationCells, riskMapCells]);
+
+  const selectedCell = riskMapCells.find(c => c.location_id === selectedCellId);
   const criticalCount = warnings.filter(w => w.risk_level === 'critical').length;
   const highCount = warnings.filter(w => w.risk_level === 'high').length;
-  const avgRisk = displayCells.length
-    ? displayCells.reduce((s, c) => s + (c.risk_score || 0), 0) / displayCells.length
+  const avgRisk = riskMapCells.length
+    ? riskMapCells.reduce((s, c) => s + (c.risk_score || 0), 0) / riskMapCells.length
     : 0;
 
   const navItems = [
@@ -657,11 +662,11 @@ export default function App() {
 
               {activeView === 'forecast' && (
                 <div className="mt-6 w-full">
-                  <ForecastDashboard 
+                  <ForecastDashboard
                     forecastData={forecastData}
                     onTimeScrub={setForecastHourIdx}
                     currentHourIndex={forecastHourIdx}
-                    displayCells={displayCells}
+                    displayCells={forecastCells}
                   />
                 </div>
               )}
