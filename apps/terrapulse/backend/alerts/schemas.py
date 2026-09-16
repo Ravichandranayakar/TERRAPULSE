@@ -37,6 +37,7 @@ class BroadcastTarget:
 class BroadcastDispatchRequest:
     payload: dict[str, Any]
     target: BroadcastTarget
+    demo_phone_numbers: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

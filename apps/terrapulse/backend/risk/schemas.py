@@ -29,6 +29,35 @@ class RiskBatchRequest(BaseModel):
     cells: list[RiskFeatureInput] = Field(min_length=1, max_length=500)
 
 
+class TrainedRiskFeatureInput(BaseModel):
+    """Payload for the trained susceptibility model.
+
+    `features` must carry every column named in the artifact's
+    feature_schema.json. Coordinates are provenance only and are never scored:
+    the trained model does not accept raw coordinates. A new location needs its
+    terrain, rainfall-climatology, soil, land-cover and distance features
+    extracted first, which is what scripts/extract_*.py do.
+
+    The vector must be post-derivation. The schema names columns the
+    extraction step does not write directly - aspect_sin, aspect_cos and the
+    missingness flags - so build it the way scripts/predict_landslide.py does
+    before scoring, or the request is rejected.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    cell_id: str = Field(min_length=1, max_length=120)
+    lat: float | None = None
+    lon: float | None = None
+    features: dict[str, float | str | None] = Field(default_factory=dict)
+
+
+class TrainedRiskBatchRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cells: list[TrainedRiskFeatureInput] = Field(min_length=1, max_length=500)
+
+
 class RiskPrediction(BaseModel):
     """Standardized response consumed by the simulator and map state."""
 
@@ -37,7 +66,7 @@ class RiskPrediction(BaseModel):
     risk_class: str
     risk_level: str
     drivers: list[str]
-    features: dict[str, float | None]
+    features: dict[str, float | str | None]
     normalized_features: dict[str, float]
     missing_features: list[str]
     contributing_factors: list[dict[str, Any]]

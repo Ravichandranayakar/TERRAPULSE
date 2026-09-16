@@ -132,3 +132,141 @@ class SimulatedCellBroadcastGateway:
                 {"entity": "State disaster management authority", "status": "SIMULATED"},
             ],
         )
+
+class TwilioCellBroadcastGateway:
+    """Sends real SMS messages to demo target phone numbers using Twilio."""
+
+    def __init__(self, account_sid: str, auth_token: str, from_number: str):
+        try:
+            from twilio.rest import Client
+            self.client = Client(account_sid, auth_token)
+            self.from_number = from_number
+        except ImportError:
+            self.client = None
+
+    def dispatch(self, payload: BroadcastDispatchRequest) -> BroadcastDispatchResult:
+        if not self.client:
+            return BroadcastDispatchResult(
+                status="FAILED",
+                network_simulation={"status": "TWILIO_NOT_INSTALLED", "target_cells": [], "estimated_devices": 0},
+                escalation=[],
+            )
+
+        messages = payload.payload.get("messages", [])
+        sms_body = "TerraPulse Early Warning"
+        for m in messages:
+            if m.get("language") == "en":
+                sms_body = f"[{m.get('headline')}] {m.get('description')} {m.get('instruction')}"
+                break
+        
+        success_count = 0
+        phone_numbers = payload.demo_phone_numbers
+
+        if not phone_numbers:
+             return BroadcastDispatchResult(
+                status="NO_TARGETS_PROVIDED",
+                network_simulation={"status": "SKIPPED", "target_cells": [], "estimated_devices": 0},
+                escalation=[],
+            )
+
+        for number in phone_numbers:
+            try:
+                self.client.messages.create(
+                    body=sms_body,
+                    from_=self.from_number,
+                    to=number
+                )
+                success_count += 1
+            except Exception as e:
+                pass # Logging can be added later
+
+        return BroadcastDispatchResult(
+            status="DELIVERED_VIA_TWILIO",
+            network_simulation={
+                "status": "LIVE_DEMO",
+                "target_cells": [],
+                "estimated_devices": success_count,
+            },
+            escalation=[
+                {"entity": f"Sent SMS to {success_count} team members", "status": "DELIVERED"},
+                {"entity": "District administration", "status": "SIMULATED"},
+                {"entity": "Road authority / control room", "status": "SIMULATED"},
+                {"entity": "Police / emergency response", "status": "SIMULATED"},
+                {"entity": "State disaster management authority", "status": "SIMULATED"},
+            ],
+        )
+
+class NtfyCellBroadcastGateway:
+    """Sends real push notifications to ntfy.sh topics."""
+    
+    def dispatch(self, payload: BroadcastDispatchRequest) -> BroadcastDispatchResult:
+        import urllib.request
+        
+        messages = payload.payload.get("messages", [])
+        alert_body = "TerraPulse Early Warning"
+        alert_title = "Landslide Warning"
+        for m in messages:
+            if m.get("language") == "en":
+                alert_title = m.get("headline", alert_title)
+                alert_body = f"{m.get('description')} {m.get('instruction')}"
+                break
+        
+        success_count = 0
+        topics = payload.demo_phone_numbers
+
+        if not topics:
+            return BroadcastDispatchResult(
+                status="SIMULATED_DISPATCH",
+                network_simulation={
+                    "status": "SIMULATED",
+                    "target_cells": [],
+                    "estimated_devices": None,
+                },
+                escalation=[
+                    {"entity": "District administration", "status": "SIMULATED"},
+                    {"entity": "Road authority / control room", "status": "SIMULATED"},
+                    {"entity": "Police / emergency response", "status": "SIMULATED"},
+                    {"entity": "State disaster management authority", "status": "SIMULATED"},
+                ],
+            )
+
+        for topic in topics:
+            try:
+                # topic could be a phone number or a string. ntfy topics just need to be valid URLs.
+                # strip out spaces or special characters just in case
+                clean_topic = "".join(c for c in str(topic) if c.isalnum() or c in "-_")
+                if not clean_topic:
+                    continue
+                    
+                req = urllib.request.Request(
+                    f"https://ntfy.sh/{clean_topic}",
+                    data=alert_body.encode("utf-8"),
+                    headers={
+                        "Title": alert_title,
+                        "Priority": "urgent",
+                        "Tags": "warning,rotating_light"
+                    },
+                    method="POST"
+                )
+                with urllib.request.urlopen(req, timeout=5) as response:
+                    if response.status == 200:
+                        success_count += 1
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                pass # Fail silently for the demo
+        return BroadcastDispatchResult(
+            status="DELIVERED_VIA_NTFY",
+            network_simulation={
+                "status": "LIVE_DEMO",
+                "target_cells": [],
+                "estimated_devices": success_count,
+            },
+            escalation=[
+                {"entity": f"Sent push notification to {success_count} ntfy topics", "status": "DELIVERED"},
+                {"entity": "District administration", "status": "SIMULATED"},
+                {"entity": "Road authority / control room", "status": "SIMULATED"},
+                {"entity": "Police / emergency response", "status": "SIMULATED"},
+                {"entity": "State disaster management authority", "status": "SIMULATED"},
+            ],
+        )

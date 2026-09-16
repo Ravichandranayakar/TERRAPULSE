@@ -1,0 +1,563 @@
+{
+  "generated_at": "2026-09-16T21:56:04.549729+00:00",
+  "source": "Earth Search STAC v1 (AWS Open Data Sentinel mirrors)",
+  "collections": {
+    "sentinel2": "sentinel-2-l2a",
+    "sentinel1": "sentinel-1-grd"
+  },
+  "days_back": 60,
+  "cells": [
+    {
+      "cell_id": "NSK_01",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_01_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_02",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_02_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_03",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_03_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_04",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_04_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_05",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_05_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_06",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_06_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_07",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_07_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_08",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_08_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_09",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_09_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    },
+    {
+      "cell_id": "NSK_10",
+      "downloaded": [
+        {
+          "band": "blue",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel2_blue_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "green",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel2_green_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "red",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel2_red_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "nir",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel2_nir_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "scl",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel2_scl_S2B_45RXL_20260811_0_L2A.tif",
+          "scene": "S2B_45RXL_20260811_0_L2A",
+          "datetime": "2026-08-11T04:51:00.585000Z",
+          "cached": true
+        },
+        {
+          "band": "vv",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel1_vv_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        },
+        {
+          "band": "vh",
+          "path": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\apps\\terrapulse\\backend\\data\\satellite\\NSK_10_sentinel1_vh_S1D_IW_GRDH_1SDV_20260916T12.tif",
+          "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+          "datetime": "2026-09-16T12:13:26.431932Z",
+          "cached": true
+        }
+      ],
+      "skipped": []
+    }
+  ],
+  "bands_downloaded": 70,
+  "cells_with_imagery": 10
+}

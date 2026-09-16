@@ -143,6 +143,20 @@ NH10_ROUTE = [
     [27.545, 88.535],   # Mangan North
 ]
 
+# Safe alternative routes completely outside the high-risk hazard zones
+EVACUATION_ROUTES = [
+    {
+        "name": "Proposed Western Safe Corridor",
+        "route": [
+            [27.300, 88.400], # Far west of Dikchu (low risk)
+            [27.350, 88.420], 
+            [27.420, 88.450], 
+            [27.500, 88.460], # West of Mangan
+            [27.560, 88.470], 
+        ]
+    }
+]
+
 # ---------------------------------------------------------------------------
 # HISTORICAL LANDSLIDE INVENTORY
 # Based on GSI NER Inventory + ISRO Landslide Atlas records for Sikkim

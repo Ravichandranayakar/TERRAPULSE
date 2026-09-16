@@ -1,0 +1,241 @@
+{
+  "generated_at": "2026-09-16T21:56:05.019923+00:00",
+  "source": "Earth Search STAC v1 (AWS Open Data Sentinel mirrors)",
+  "days_back": 60,
+  "cells_total": 10,
+  "cells_with_imagery": 10,
+  "images_downloaded": 70,
+  "role": "observation layer, not a model input: the trained model consumes the fixed feature contract in its feature_schema.json and no satellite band is among them",
+  "cells": {
+    "NSK_01": {
+      "cell_id": "NSK_01",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.8775,
+        "ndvi_p10": 0.8537,
+        "ndvi_p90": 0.9157,
+        "usable_pixels": 65488,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9993,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 265.0,
+        "vh_dn_mean": 125.75,
+        "vv_vh_ratio_db": 3.24,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_02": {
+      "cell_id": "NSK_02",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.8051,
+        "ndvi_p10": 0.6243,
+        "ndvi_p90": 0.9068,
+        "usable_pixels": 65255,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9957,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 185.12,
+        "vh_dn_mean": 93.41,
+        "vv_vh_ratio_db": 2.97,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_03": {
+      "cell_id": "NSK_03",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.7685,
+        "ndvi_p10": 0.3058,
+        "ndvi_p90": 0.9038,
+        "usable_pixels": 63478,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9686,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 201.65,
+        "vh_dn_mean": 105.12,
+        "vv_vh_ratio_db": 2.83,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_04": {
+      "cell_id": "NSK_04",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.8361,
+        "ndvi_p10": 0.8028,
+        "ndvi_p90": 0.8935,
+        "usable_pixels": 61549,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9392,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 157.14,
+        "vh_dn_mean": 80.08,
+        "vv_vh_ratio_db": 2.93,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_05": {
+      "cell_id": "NSK_05",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.7756,
+        "ndvi_p10": 0.4959,
+        "ndvi_p90": 0.8919,
+        "usable_pixels": 61722,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9418,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 118.49,
+        "vh_dn_mean": 63.18,
+        "vv_vh_ratio_db": 2.73,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_06": {
+      "cell_id": "NSK_06",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.8568,
+        "ndvi_p10": 0.8029,
+        "ndvi_p90": 0.9025,
+        "usable_pixels": 65493,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9993,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 239.59,
+        "vh_dn_mean": 117.92,
+        "vv_vh_ratio_db": 3.08,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_07": {
+      "cell_id": "NSK_07",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.8144,
+        "ndvi_p10": 0.6009,
+        "ndvi_p90": 0.911,
+        "usable_pixels": 65457,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9988,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 209.01,
+        "vh_dn_mean": 102.77,
+        "vv_vh_ratio_db": 3.08,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_08": {
+      "cell_id": "NSK_08",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.7997,
+        "ndvi_p10": 0.6045,
+        "ndvi_p90": 0.9058,
+        "usable_pixels": 65362,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9973,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 259.35,
+        "vh_dn_mean": 121.97,
+        "vv_vh_ratio_db": 3.28,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_09": {
+      "cell_id": "NSK_09",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.791,
+        "ndvi_p10": 0.5121,
+        "ndvi_p90": 0.9033,
+        "usable_pixels": 65462,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9989,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 293.61,
+        "vh_dn_mean": 136.91,
+        "vv_vh_ratio_db": 3.31,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    },
+    "NSK_10": {
+      "cell_id": "NSK_10",
+      "optical": {
+        "usable": true,
+        "ndvi_mean": 0.6673,
+        "ndvi_p10": 0.2132,
+        "ndvi_p90": 0.911,
+        "usable_pixels": 65399,
+        "window_pixels": 65536,
+        "usable_fraction": 0.9979,
+        "scene": "S2B_45RXL_20260811_0_L2A",
+        "datetime": "2026-08-11T04:51:00.585000Z"
+      },
+      "sar": {
+        "usable": true,
+        "vv_dn_mean": 348.3,
+        "vh_dn_mean": 162.5,
+        "vv_vh_ratio_db": 3.31,
+        "scene": "S1D_IW_GRDH_1SDV_20260916T121313_20260916T121338_004603_008949",
+        "datetime": "2026-09-16T12:13:26.431932Z"
+      },
+      "available": true
+    }
+  }
+}

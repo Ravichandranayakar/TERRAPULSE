@@ -24,8 +24,12 @@ from typing import Optional
 from alerts.service import CellBroadcastService
 from verification.repository import VerificationRepository
 from verification.service import VerificationService
-from risk.schemas import RiskBatchRequest, RiskFeatureInput
-from risk.service import predict_development_risk, predict_development_risk_batch
+from risk.schemas import (RiskBatchRequest, RiskFeatureInput,
+                          TrainedRiskBatchRequest, TrainedRiskFeatureInput)
+from risk.service import (predict_development_risk,
+                          predict_development_risk_batch, predict_trained_risk,
+                          predict_trained_risk_batch, trained_predictor_status)
+from risk.trained_predictor import ArtifactUnavailable
 
 # ---------------------------------------------------------------------------
 # DATABASE SETUP
@@ -496,10 +500,10 @@ def _save_cell_broadcast_simulation(result: dict):
         conn.close()
 
 
-def simulate_cell_broadcast(warning_id: int):
+def simulate_cell_broadcast(warning_id: int, demo_phone_numbers: list[str] | None = None):
     """Run an auditable Cell Broadcast dispatch simulation."""
     warning, location = _get_warning_for_cell_broadcast(warning_id)
-    result = _cell_broadcast_service.simulate(warning, location)
+    result = _cell_broadcast_service.simulate(warning, location, demo_phone_numbers)
     _save_cell_broadcast_simulation(result)
     return result
 
@@ -936,17 +940,54 @@ def reset_simulation():
 def get_model_info():
     """Return information about the current ML model."""
     try:
+        from risk.trained_predictor import load_artifact, ArtifactUnavailable, model_dir
+        import os
+        try:
+            artifact = load_artifact()
+            dir_name = os.path.basename(model_dir())
+            # Read the name and the scores off the artifact and the registry.
+            # These were typed in as literals, so the panel kept announcing the
+            # retired Random Forest with an invented accuracy no matter which
+            # version was actually loaded. The feature list was also read from a
+            # "features" key the schema does not have, so it always came back empty.
+            algorithm = str(artifact.schema.get("model", "")).upper()
+            names = {"RF": "Random Forest", "XGB": "XGBoost", "LGBM": "LightGBM",
+                     "LOGREG": "Logistic Regression"}
+            columns = (list(artifact.schema.get("numeric_features", []))
+                       + list(artifact.schema.get("categorical_features", [])))
+            metrics = {}
+            try:
+                import feedback_loop
+                metrics = feedback_loop.active_version().get("metrics") or {}
+            except Exception:
+                metrics = {}
+            recall = metrics.get("recall")
+            roc_auc = metrics.get("roc_auc")
+            return {
+                "model_name": names.get(algorithm, algorithm or "trained model"),
+                "artifact_version": artifact.schema.get("artifact_version"),
+                "recall": recall,
+                "roc_auc": roc_auc,
+                "feature_columns": columns,
+                "feature_count": len(columns),
+                "feature_importances": artifact.importances,
+                "note": (f"Active artifact: {dir_name}. Recall and ROC-AUC are "
+                         "leave-one-state-out, read from models/registry.json. The "
+                         "score is a ranking, not a calibrated probability."),
+                "status": "loaded",
+            }
+        except ArtifactUnavailable:
+            pass
+            
         from ml_engine import load_model, FEATURE_COLUMNS
         bundle = load_model()
         if bundle:
             return {
-                "model_name": bundle.get("model_name", "Random Forest"),
+                "model_name": bundle.get("model_name", "Development RF"),
                 "accuracy": bundle.get("accuracy"),
-                "rf_accuracy": bundle.get("rf_accuracy"),
-                "gb_accuracy": bundle.get("gb_accuracy"),
                 "feature_columns": bundle.get("feature_columns", FEATURE_COLUMNS),
                 "feature_importances": bundle.get("feature_importances", {}),
-                "note": bundle.get("note", ""),
+                "note": "Development artifact loaded from ml_engine.",
                 "status": "loaded",
             }
         else:
@@ -1033,6 +1074,14 @@ def _startup():
 
 _startup()
 
+def simulate_data_streaming():
+    import time
+    yield {"status": "Initializing...", "progress": 10}
+    time.sleep(1)
+    yield {"status": "Processing stream...", "progress": 50, "zone_id": "z1", "message": "High rainfall detected"}
+    time.sleep(1)
+    yield {"status": "Complete", "progress": 100}
+
 __all__ = [
     "get_locations",
     "get_latest_status",
@@ -1042,6 +1091,8 @@ __all__ = [
     "resolve_warning",
     "submit_field_verification",
     "get_pending_verifications",
+    "get_verification_reports",
+    "simulate_data_streaming",
     "approve_for_training",
     "run_storm_simulation",
     "save_simulation_record",
@@ -1072,6 +1123,91 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------------------------------------------------------------------------
+# LIVE CYCLE SCHEDULER
+#
+# Runs the ingest -> features -> model -> alert loop on a timer so the map
+# updates by itself. Interval is configurable; set TERRAPULSE_LIVE_DISABLE=1 to
+# keep the loop off (tests, offline demos).
+#
+# The first cycle is deliberately not awaited at startup: it reaches the network
+# and the API should begin serving immediately either way. Until the first cycle
+# finishes, /api/live/risk runs one on demand.
+# ---------------------------------------------------------------------------
+LIVE_INTERVAL_SECONDS = int(os.environ.get("TERRAPULSE_LIVE_INTERVAL", "900"))
+_live_task = None
+
+# The feedback loop runs on a much slower clock than the risk cycle: it waits for
+# enough curated events, or for the refresh interval, whichever comes first.
+FEEDBACK_INTERVAL_SECONDS = int(os.environ.get("TERRAPULSE_FEEDBACK_INTERVAL", "86400"))
+_feedback_task = None
+
+
+async def _feedback_loop_runner():
+    """Periodically check the retraining conditions and run the loop when due."""
+    import feedback_loop
+    # Wait one interval before the first check. Checking at boot would restart a
+    # training run every time the service restarts.
+    await asyncio.sleep(FEEDBACK_INTERVAL_SECONDS)
+    while True:
+        try:
+            report = await asyncio.get_event_loop().run_in_executor(
+                None, lambda: feedback_loop.run_feedback_cycle(force=False))
+            if report.get("ran"):
+                print(f"[TERRAPULSE] Feedback loop: {report.get('outcome', report)}")
+        except Exception as error:
+            print(f"[TERRAPULSE] Feedback loop failed: {error}")
+        await asyncio.sleep(FEEDBACK_INTERVAL_SECONDS)
+
+# Sentinel imagery changes every ~5-12 days, so it runs on its own slow clock
+# rather than inside the 15-minute cycle. The first pull waits for the API to
+# settle, because it reaches the network and can take a minute for ten cells.
+SATELLITE_INTERVAL_SECONDS = int(os.environ.get("TERRAPULSE_SATELLITE_INTERVAL", "86400"))
+SATELLITE_STARTUP_DELAY_SECONDS = int(os.environ.get("TERRAPULSE_SATELLITE_DELAY", "45"))
+_satellite_task = None
+
+
+async def _satellite_loop():
+    import satellite_watch
+    await asyncio.sleep(SATELLITE_STARTUP_DELAY_SECONDS)
+    while True:
+        try:
+            payload = await satellite_watch.refresh()
+            print("[TERRAPULSE] Satellite: %s/%s cells with imagery, %s images"
+                  % (payload.get("cells_with_imagery"), payload.get("cells_total"),
+                     payload.get("images_downloaded")))
+        except Exception as error:
+            print(f"[TERRAPULSE] Satellite refresh failed: {error}")
+        await asyncio.sleep(SATELLITE_INTERVAL_SECONDS)
+
+
+async def _live_loop():
+    import live_pipeline
+    while True:
+        try:
+            await live_pipeline.run_cycle(store=True)
+        except Exception as error:
+            print(f"[TERRAPULSE] Live cycle failed: {error}")
+        await asyncio.sleep(LIVE_INTERVAL_SECONDS)
+
+
+@app.on_event("startup")
+async def _start_live_loop():
+    global _live_task
+    if os.environ.get("TERRAPULSE_LIVE_DISABLE") == "1":
+        print("[TERRAPULSE] Live cycle scheduler disabled by environment")
+        return
+    _live_task = asyncio.create_task(_live_loop())
+    print(f"[TERRAPULSE] Live cycle scheduler started (every {LIVE_INTERVAL_SECONDS}s)")
+    global _feedback_task
+    _feedback_task = asyncio.create_task(_feedback_loop_runner())
+    print(f"[TERRAPULSE] Feedback loop scheduler started (checked every {FEEDBACK_INTERVAL_SECONDS}s)")
+    global _satellite_task
+    _satellite_task = asyncio.create_task(_satellite_loop())
+    print(f"[TERRAPULSE] Satellite scheduler started (first pull in {SATELLITE_STARTUP_DELAY_SECONDS}s, "
+          f"then every {SATELLITE_INTERVAL_SECONDS}s)")
+
+
 class RpcRequest(BaseModel):
     module: str
     func: str
@@ -1080,6 +1216,7 @@ class RpcRequest(BaseModel):
 
 class CellBroadcastRequest(BaseModel):
     warning_id: int
+    demo_phone_numbers: list[str] | None = None
 
 class VerificationReviewRequest(BaseModel):
     decision: str
@@ -1116,10 +1253,218 @@ async def predict_risk_batch_endpoint(request: RiskBatchRequest):
         "predictor_type": predictions[0].predictor_type,
     }
 
+# --- trained model endpoints -------------------------------------------------
+# These serve the active artifact (models/landslide_v0.4). They take the extracted
+# feature vector rather than the meteorological payload above, and they never
+# fall back to the rule-based predictor: a 503 with a reason is better than
+# returning a different model's score under the same field names.
+
+@app.get("/api/risk/model-status")
+async def risk_model_status_endpoint():
+    return trained_predictor_status()
+
+@app.post("/api/risk/predict-trained")
+async def predict_trained_risk_endpoint(request: TrainedRiskFeatureInput):
+    try:
+        return predict_trained_risk(request)
+    except ArtifactUnavailable as error:
+        raise HTTPException(status_code=503, detail=str(error))
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+
+@app.post("/api/risk/predict-trained-batch")
+async def predict_trained_risk_batch_endpoint(request: TrainedRiskBatchRequest):
+    try:
+        predictions = predict_trained_risk_batch(request.cells)
+    except ArtifactUnavailable as error:
+        raise HTTPException(status_code=503, detail=str(error))
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error))
+    return {
+        "predictions": [prediction.model_dump() for prediction in predictions],
+        "predictor": predictions[0].predictor,
+        "predictor_type": predictions[0].predictor_type,
+    }
+
+# --- live pipeline endpoints -------------------------------------------------
+# The cycle behind these reads every source, rebuilds the feature vector, calls
+# the trained model and writes the result to risk_predictions. See live_pipeline.py
+# for why terrain susceptibility is stable while the rainfall trigger moves.
+
+@app.get("/api/live/conditions")
+async def live_conditions_endpoint():
+    """Live rainfall and soil moisture per monitoring cell."""
+    import live_conditions
+    from regions import get_region_data
+
+    cells = get_region_data("ner_india").get("grid_cells", [])
+    return await live_conditions.fetch_live_conditions(cells)
+
+
+@app.get("/api/live/risk")
+async def live_risk_endpoint(refresh: bool = False):
+    """Latest completed cycle: model susceptibility + live trigger + alert."""
+    import live_pipeline
+
+    snapshot = live_pipeline.latest()
+    if snapshot is None or refresh:
+        snapshot = await live_pipeline.run_cycle(store=False)
+    return snapshot
+
+
+@app.post("/api/live/refresh")
+async def live_refresh_endpoint():
+    """Force a cycle now instead of waiting for the scheduler."""
+    import live_pipeline
+    return await live_pipeline.run_cycle(store=True)
+
+
+@app.get("/api/satellite/status")
+async def satellite_status_endpoint():
+    """What imagery the last satellite pull got, without triggering a download."""
+    import satellite_watch
+    return satellite_watch.status()
+
+
+@app.post("/api/satellite/refresh")
+async def satellite_refresh_endpoint():
+    """Force a satellite pull now instead of waiting for the daily job."""
+    import satellite_watch
+    return await satellite_watch.refresh()
+
+
+@app.get("/api/live/status")
+async def live_status_endpoint():
+    """Scheduler state, so the dashboard can show data freshness."""
+    import live_pipeline
+    import satellite_watch
+    snapshot = live_pipeline.latest()
+    return {
+        "scheduler_interval_seconds": LIVE_INTERVAL_SECONDS,
+        "scheduler_enabled": os.environ.get("TERRAPULSE_LIVE_DISABLE") != "1",
+        "cycles_completed": live_pipeline._state["runs"],
+        "last_generated_at": snapshot.get("generated_at") if snapshot else None,
+        "last_model_status": snapshot["model"]["status"] if snapshot else None,
+        "last_cells_live": snapshot["live"]["cells_live"] if snapshot else None,
+        "last_cells_total": snapshot["live"]["cells_total"] if snapshot else None,
+        "satellite": satellite_watch.status(),
+    }
+
+# --- pipeline endpoints ------------------------------------------------------
+# Expose the seven-stage pipeline and the feedback loop so the whole chain can be
+# driven and inspected without a shell.
+
+@app.get("/api/pipeline/stages")
+async def pipeline_stages_endpoint():
+    """Run the pipeline and return every stage result."""
+    import pipeline
+    return pipeline.run_pipeline(store=False)
+
+
+@app.get("/api/pipeline/status")
+async def pipeline_status_endpoint():
+    """Which stages exist, and what each one is responsible for."""
+    return {
+        "pipeline_file": "apps/terrapulse/backend/pipeline.py",
+        "stages": [
+            {"stage": "01", "name": "DATA INGESTION",
+             "sources": ["satellite (STAC)", "rainfall (IMD + Open-Meteo live)",
+                         "soil moisture (Open-Meteo live)", "terrain (Copernicus DEM)",
+                         "historical landslides (GSI)", "roads/rivers (OSM)"],
+             "formats": ["API", "Raster", "CSV", "GeoJSON", "Shapefile"]},
+            {"stage": "02", "name": "DATA PREPROCESSING",
+             "operations": ["cleaning", "missing value handling",
+                            "normalization & scaling", "geo-alignment & resampling"]},
+            {"stage": "03", "name": "GEO PROCESSING",
+             "operations": ["DEM processing", "slope & aspect calculation",
+                            "spatial gridding & reprojection", "spatial correlation"]},
+            {"stage": "04", "name": "FEATURE ENGINEERING",
+             "spatial": ["elevation", "slope", "aspect", "curvature", "land cover",
+                         "distance to roads/rivers"],
+             "temporal": ["rainfall accumulation", "rainfall intensity",
+                          "soil moisture trend", "antecedent rainfall"]},
+            {"stage": "05", "name": "AI / ML MODEL",
+             "operations": ["model training", "model validation", "inference"]},
+            {"stage": "06", "name": "RISK ENGINE",
+             "operations": ["probability 0-1", "risk score 0-100",
+                            "classification LOW/MODERATE/HIGH/CRITICAL"]},
+            {"stage": "07", "name": "SERVE & VISUALIZE",
+             "operations": ["FastAPI REST", "PostGIS spatial database",
+                            "React web app", "alerts & notifications"]},
+        ],
+        "runtime_inference_path": ["live data", "feature engineering",
+                                   "loaded trained model", "fast inference",
+                                   "risk map / alert"],
+        "feedback_loop": "see /api/feedback/status",
+        "scheduler_interval_seconds": LIVE_INTERVAL_SECONDS,
+    }
+
+
+@app.post("/api/pipeline/run")
+async def pipeline_run_endpoint(stages: str = ""):
+    """Run selected stages (comma separated) or the whole pipeline."""
+    import pipeline
+    selected = [s.strip() for s in stages.split(",") if s.strip()] or None
+    return pipeline.run_pipeline(stages=selected, store=True)
+
+
+# --- spatial database --------------------------------------------------------
+
+@app.get("/api/spatial/status")
+async def spatial_status_endpoint():
+    import spatial_db
+    status = spatial_db.status()
+    if status.get("available"):
+        status["schema"] = spatial_db.ensure_schema()
+    return status
+
+
+@app.get("/api/spatial/cells-near-landslides")
+async def spatial_near_landslides_endpoint(metres: float = 25000.0):
+    """Cells within a true-metre radius of a recorded landslide (PostGIS query)."""
+    import spatial_db
+    return spatial_db.cells_within_metres_of_landslides(metres)
+
+
+@app.get("/api/spatial/latest-risk")
+async def spatial_latest_risk_endpoint():
+    import spatial_db
+    return spatial_db.latest_risk_per_cell()
+
+
+# --- feedback loop -----------------------------------------------------------
+
+@app.get("/api/feedback/status")
+async def feedback_status_endpoint():
+    import feedback_loop
+    return {
+        "due": feedback_loop.due_for_retrain(),
+        "active_version": feedback_loop.active_version().get("version"),
+        "next_version": feedback_loop.next_version_label(),
+        "registry": feedback_loop.load_registry(),
+        "schedule": {
+            "check_interval_seconds": FEEDBACK_INTERVAL_SECONDS,
+            "min_new_events": feedback_loop.MIN_NEW_EVENTS,
+            "max_interval_days": feedback_loop.MAX_INTERVAL_DAYS,
+            "promotion_gate": feedback_loop.TOLERANCE,
+        },
+    }
+
+
+@app.post("/api/feedback/run")
+async def feedback_run_endpoint(force: bool = False):
+    """Run one turn of the loop. Retrains only if due, unless force=true."""
+    import feedback_loop
+    return await asyncio.get_event_loop().run_in_executor(
+        None, lambda: feedback_loop.run_feedback_cycle(force=force))
+
+
+
+
 @app.post("/api/alerts/cell-broadcast/simulate")
 async def simulate_cell_broadcast_endpoint(request: CellBroadcastRequest):
     try:
-        return simulate_cell_broadcast(request.warning_id)
+        return simulate_cell_broadcast(request.warning_id, request.demo_phone_numbers)
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error))
 
@@ -1205,6 +1550,26 @@ async def get_route_safety(region_id: str = "ner_india"):
         "region_id": region_id,
         "highway_name": "NH-10 (Sikkim Corridor)",
     }
+
+
+@app.get("/api/geo")
+# This handler used to be named get_geo_data, which shadowed the /rpc
+# function of the same name declared earlier in this module: the later
+# definition rebinds the global, so the RPC call failed with
+# "get_geo_data() got an unexpected keyword argument 'region_id'" and the
+# map lost its geometry layers. Keep the two names distinct.
+def get_geo_layers(region="ner_india"):
+    from regions import get_region_data
+    data = get_region_data(region)
+    from geo_data import NH10_ROUTE
+    return {
+        "nh10_route": NH10_ROUTE if region == "ner_india" else data.get("nh10_route", []),
+        "evacuation_routes": data.get("evacuation_routes", []),
+        "historical_events": data.get("historical_landslides", []),
+        "event_layers": data.get("event_layers", []),
+        "infrastructure": data.get("infrastructure", {})
+    }
+
 
 @app.get("/api/event-replay")
 async def get_event_replay():

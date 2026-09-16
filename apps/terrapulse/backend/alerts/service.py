@@ -1,10 +1,13 @@
 import uuid
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from .cell_broadcast import (
     CellBroadcastGateway,
     SimulatedCellBroadcastGateway,
+    TwilioCellBroadcastGateway,
+    NtfyCellBroadcastGateway,
     build_cell_broadcast_payload,
 )
 from .schemas import BroadcastDispatchRequest, BroadcastTarget
@@ -93,7 +96,16 @@ def _resolve_target(
 
 class CellBroadcastService:
     def __init__(self, gateway: CellBroadcastGateway | None = None) -> None:
-        self._gateway = gateway or SimulatedCellBroadcastGateway()
+        if gateway:
+            self._gateway = gateway
+        else:
+            twilio_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+            twilio_token = os.environ.get("TWILIO_AUTH_TOKEN")
+            twilio_from = os.environ.get("TWILIO_FROM_NUMBER")
+            if twilio_sid and twilio_token and twilio_from:
+                self._gateway = TwilioCellBroadcastGateway(twilio_sid, twilio_token, twilio_from)
+            else:
+                self._gateway = NtfyCellBroadcastGateway()
 
     def prepare(
         self,
@@ -132,6 +144,7 @@ class CellBroadcastService:
         self,
         warning: dict[str, Any],
         location: dict[str, Any] | None = None,
+        demo_phone_numbers: list[str] | None = None,
     ) -> dict[str, Any]:
         target = _resolve_target(warning, location)
         dispatched_at = datetime.now(timezone.utc)
@@ -145,7 +158,11 @@ class CellBroadcastService:
             expires_at=expires_at,
         )
         dispatch_result = self._gateway.dispatch(
-            BroadcastDispatchRequest(payload=payload, target=target)
+            BroadcastDispatchRequest(
+                payload=payload, 
+                target=target,
+                demo_phone_numbers=demo_phone_numbers or []
+            )
         )
 
         return {
