@@ -32,6 +32,7 @@ interface CellBroadcastModalProps {
   eventLayers?: any[];
   infrastructure?: any;
   nh10Route?: any[];
+  evacuationRoutes?: any[];
   routeSafety?: string;
   onClose: () => void;
 }
@@ -85,6 +86,7 @@ export function CellBroadcastModal({
   eventLayers = [],
   infrastructure = {},
   nh10Route = [],
+  evacuationRoutes = [],
   routeSafety = 'UNKNOWN',
   onClose,
 }: CellBroadcastModalProps) {
@@ -97,6 +99,8 @@ export function CellBroadcastModal({
   const [error, setError] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [reportToast, setReportToast] = useState(false);
+  const [isLiveDemo, setIsLiveDemo] = useState(false);
+  const [demoPhoneNumbers, setDemoPhoneNumbers] = useState('');
 
   const activeResult = simulationResult || preparation;
   const target = activeResult?.target;
@@ -106,6 +110,11 @@ export function CellBroadcastModal({
     ? { geometry: target.geometry, source: target.source, label: 'BROADCAST TARGET' }
     : null;
   const escalation = simulationResult?.escalation || ESCALATION_ENTITIES.map(entity => ({ entity, status: 'PENDING' }));
+  const deliveries = simulationResult?.network_simulation?.deliveries ?? [];
+  const sentDeliveries = deliveries.filter(item => item.status === 'SENT');
+  const liveDeliveryFailed = phase === 'confirmed'
+    && !!simulationResult
+    && simulationResult.network_simulation.status === 'LIVE_DEMO_FAILED';
 
   const loadPreparation = useCallback(async () => {
     setIsPreparing(true);
@@ -136,11 +145,14 @@ export function CellBroadcastModal({
     setError('');
     setLogs([]);
 
-    const simulationPromise = simulateCellBroadcast(warning.id);
+    const simulationPromise = simulateCellBroadcast(
+        warning.id,
+        isLiveDemo ? demoPhoneNumbers.split(',').map(n => n.trim()).filter(Boolean) : undefined
+    );
     try {
       for (const log of DISPATCH_LOGS) {
         setLogs(previous => [...previous, log]);
-        await delay(130);
+        await delay(50);
       }
       const result = await simulationPromise;
       setSimulationResult(result);
@@ -149,7 +161,7 @@ export function CellBroadcastModal({
       setPhase('failed');
       setError(dispatchError?.message || 'Dispatch simulation failed.');
     }
-  }, [preparation, warning.id]);
+  }, [preparation, warning.id, isLiveDemo, demoPhoneNumbers]);
 
   const retry = useCallback(() => {
     if (preparation) {
@@ -159,10 +171,10 @@ export function CellBroadcastModal({
     }
   }, [loadPreparation, preparation, runDispatch]);
 
-  const statusTone = phase === 'confirmed'
-    ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300'
-    : phase === 'failed'
-      ? 'border-red-500/50 bg-red-950/40 text-red-300'
+  const statusTone = phase === 'failed' || liveDeliveryFailed
+    ? 'border-red-500/50 bg-red-950/40 text-red-300'
+    : phase === 'confirmed'
+      ? 'border-emerald-500/50 bg-emerald-950/40 text-emerald-300'
       : 'border-amber-500/50 bg-amber-950/40 text-amber-300';
 
   const mapSection = useMemo(() => (
@@ -173,12 +185,13 @@ export function CellBroadcastModal({
         eventLayers={eventLayers}
         infrastructure={infrastructure}
         nh10Route={nh10Route}
+        evacuationRoutes={evacuationRoutes}
         routeSafety={routeSafety}
         targetGeometry={targetGeometry}
         highlightCellId={warning.location_id}
       />
     </div>
-  ), [cells, eventLayers, historicalEvents, infrastructure, nh10Route, routeSafety, targetGeometry, warning.location_id]);
+  ), [cells, eventLayers, historicalEvents, infrastructure, nh10Route, evacuationRoutes, routeSafety, targetGeometry, warning.location_id]);
 
   return (
     <Dialog open onOpenChange={open => !open && onClose()}>
@@ -199,7 +212,7 @@ export function CellBroadcastModal({
             </div>
             <div className="flex items-center gap-2">
               <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest ${statusTone}`}>
-                {phase === 'targeting' ? 'Targeting' : phase === 'dispatching' ? 'Dispatching' : phase === 'confirmed' ? 'Simulation complete' : 'Simulation failed'}
+                {phase === 'targeting' ? 'Targeting' : phase === 'dispatching' ? 'Dispatching' : phase === 'confirmed' ? (liveDeliveryFailed ? 'Push delivery failed' : 'Simulation complete') : 'Simulation failed'}
               </span>
               <button
                 onClick={onClose}
@@ -324,21 +337,50 @@ export function CellBroadcastModal({
             <div className="mt-4 rounded-lg border border-border/50 bg-black/70 p-3">
               <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Network simulation</div>
               <p className="mt-1 text-xs text-amber-300">
-                Telecom delivery unavailable in prototype — network integration simulated.
+                Telecom cell broadcast is unavailable in this prototype (no telecom licence).
+                {deliveries.length > 0
+                  ? ' This dispatch was published to the ntfy.sh push service.'
+                  : ' Enable Live Demo and enter an ntfy topic to send a real push notification.'}
               </p>
               <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-300">
                 <div>Target cells: {simulationResult?.network_simulation.target_cells.length ?? 0}</div>
-                <div>Devices: unavailable</div>
+                <div>Devices: {simulationResult?.network_simulation.estimated_devices ?? 'unavailable'}</div>
                 <div>Population: unavailable</div>
                 <div>Live network: NO</div>
               </div>
+
+              {deliveries.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Push delivery</div>
+                  {deliveries.map(item => (
+                    <div key={item.topic} className="rounded-lg border border-border/50 bg-black/50 p-2 text-[11px]">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-mono font-bold text-slate-100">{item.topic}</span>
+                        <span className={`font-mono font-bold ${item.status === 'SENT' ? 'text-emerald-300' : 'text-red-300'}`}>{item.status}</span>
+                      </div>
+                      <div className="mt-1 text-slate-400">{item.detail}</div>
+                    </div>
+                  ))}
+                  {sentDeliveries.length > 0 && (
+                    <p className="text-[11px] text-emerald-200">
+                      Subscribe the phone to the exact topic shown above in the free ntfy app.
+                      Topic names are case-sensitive.
+                    </p>
+                  )}
+                  {sentDeliveries.length === 0 && (
+                    <p className="text-[11px] text-red-200">
+                      Nothing was delivered. Fix the topic name above and dispatch again.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {phase === 'dispatching' || simulationResult ? (
               <div className="mt-4 rounded-lg border border-emerald-900/60 bg-black/80 p-3">
                 <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Simulation log</div>
                 <div className="mt-2 max-h-44 space-y-1 overflow-y-auto font-mono text-[10px] text-emerald-200">
-                  {(logs.length ? logs : simulationResult?.simulation_logs || []).map((log, index) => (
+                  {(simulationResult?.simulation_logs?.length ? simulationResult.simulation_logs : logs).map((log, index) => (
                     <div key={`${log}-${index}`}>{log}</div>
                   ))}
                 </div>
@@ -429,6 +471,23 @@ export function CellBroadcastModal({
               <p className="mt-4 rounded-lg border border-amber-800/60 bg-amber-950/30 p-3 text-xs text-amber-200">
                 This is a simulation. No telecom broadcast will be transmitted.
               </p>
+              
+              <div className="mt-4 flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-xs text-slate-300">
+                  <input type="checkbox" checked={isLiveDemo} onChange={e => setIsLiveDemo(e.target.checked)} className="rounded border-slate-700 bg-slate-900" />
+                  Enable Live Demo (Send push notification via ntfy.sh)
+                </label>
+                {isLiveDemo && (
+                  <input
+                    type="text"
+                    value={demoPhoneNumbers}
+                    onChange={e => setDemoPhoneNumbers(e.target.value)}
+                    placeholder="Enter your ntfy topic name (e.g. sih_demo)"
+                    className="rounded-lg border border-slate-700 bg-black p-2 text-xs text-white placeholder-slate-500"
+                  />
+                )}
+              </div>
+
               <div className="mt-4 flex justify-end gap-2">
                 <button onClick={() => setConfirming(false)} className="rounded-lg border border-white/20 px-4 py-2 text-xs font-bold uppercase text-slate-200 hover:bg-white/10">Cancel</button>
                 <button onClick={runDispatch} className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-black uppercase text-black hover:bg-amber-400">Simulate Dispatch</button>

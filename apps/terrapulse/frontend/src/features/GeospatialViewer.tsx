@@ -124,7 +124,9 @@ export default function GeospatialViewer({
   reportPoints = [],
   selectedReportId = null,
   nh10Route = [],
+  evacuationRoutes = [],
   routeSafety,
+  dynamicRoute = false,
   onCellClick,
   initialSelectedCellId,
 }: {
@@ -137,9 +139,13 @@ export default function GeospatialViewer({
   reportPoints?: ReportPoint[];
   selectedReportId?: string | number | null;
   nh10Route?: any[];
+  evacuationRoutes?: any[];
   onCellClick?: (cell: GeoCell | null) => void;
   initialSelectedCellId?: string | null;
   routeSafety?: string;
+  // Storm Simulator passes this: the corridor colour should follow the cells on
+  // screen, not the live database value.
+  dynamicRoute?: boolean;
 }) {
   const mapRef = useRef<MapRef>(null);
   const isNepal = cells && cells.length > 0 && cells[0].centroid_lon < 86;
@@ -343,7 +349,6 @@ export default function GeospatialViewer({
     }
   }, [viewState, cells]);
 
-  
   const handleResetMap = useCallback(() => {
     if (!mapRef.current) return;
     setSelectedCell(null);
@@ -387,8 +392,38 @@ export default function GeospatialViewer({
     }
   }, [initialSelectedCellId, cells, is3D, handleExplore3D]);
 
-  const routeColor = routeSafety === "CRITICAL" ? "#ef4444" : routeSafety === "HIGH_RISK" ? "#f97316" : routeSafety === "CAUTION" ? "#eab308" : "#3b82f6";
+  // The Storm Simulator drives the cells from scenario inputs, but routeSafety was
+  // passed straight through from the live database. That made the cells turn green
+  // at T+0 while the corridor line stayed orange at whatever the live data last
+  // wrote, so the path contradicted the map beside it. When dynamicRoute is set the
+  // corridor is derived from the cells being drawn. The thresholds mirror
+  // get_latest_status() in the backend, so a simulated corridor and a live corridor
+  // cannot disagree about what HIGH_RISK means.
+  const effectiveRouteSafety = useMemo(() => {
+    if (!dynamicRoute || cells.length === 0) return routeSafety;
+    const corridor = cells.filter(cell => (cell as any).near_nh10);
+    const pool = corridor.length > 0 ? corridor : cells;
+    const scores = pool
+      .map(cell => Number((cell as any).risk_score))
+      .filter(score => Number.isFinite(score));
+    if (scores.length === 0) return routeSafety;
+    const peak = Math.max(...scores);
+    if (peak >= 75) return "CRITICAL";
+    if (peak >= 55) return "HIGH_RISK";
+    if (peak >= 35) return "CAUTION";
+    return "OPEN";
+  }, [dynamicRoute, cells, routeSafety]);
+
+  const routeColor = effectiveRouteSafety === "CRITICAL" ? "#ef4444" : effectiveRouteSafety === "HIGH_RISK" ? "#f97316" : effectiveRouteSafety === "CAUTION" ? "#eab308" : "#10b981";
   const routeGeoJSON = resolvedRoute.length > 1 ? { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: resolvedRoute.map((p: any) => [p[1], p[0]]) } }] } : null;
+  const evacuationRoutesGeoJSON = evacuationRoutes && evacuationRoutes.length > 0 ? {
+    type: "FeatureCollection",
+    features: evacuationRoutes.map((er: any) => ({
+      type: "Feature",
+      properties: { name: er.name },
+      geometry: { type: "LineString", coordinates: er.route.map((p: any) => [p[1], p[0]]) }
+    }))
+  } : null;
 
   return (
     <div className="relative w-full h-full min-h-full bg-slate-900 rounded-xl overflow-hidden border border-border/20 shadow-2xl">
@@ -467,9 +502,16 @@ export default function GeospatialViewer({
         </Source>
         {routeGeoJSON && (
           <Source id="route-line-src" type="geojson" data={routeGeoJSON as any}>
-            <Layer id="route-line-buffer" type="line" paint={{ "line-color": "#ef4444", "line-width": 45, "line-opacity": 0.15, "line-blur": 15 }} />
+            <Layer id="route-line-buffer" type="line" paint={{ "line-color": dynamicRoute ? routeColor : "#ef4444", "line-width": 45, "line-opacity": 0.15, "line-blur": 15 }} />
             <Layer id="route-line-shadow" type="line" paint={{ "line-color": "#000000", "line-width": 7, "line-opacity": 0.3, "line-blur": 3 }} />
             <Layer id="route-line" type="line" paint={{ "line-color": routeColor, "line-width": 3, "line-opacity": 0.9 }} />
+          </Source>
+        )}
+        {evacuationRoutesGeoJSON && (
+          <Source id="evacuation-routes-src" type="geojson" data={evacuationRoutesGeoJSON as any}>
+            <Layer id="evacuation-routes-line" type="line" paint={{ "line-color": "#10b981", "line-width": 3.5, "line-opacity": 0.9, "line-dasharray": [2, 2] }} />
+            <Layer id="evacuation-routes-glow" type="line" paint={{ "line-color": "#10b981", "line-width": 8, "line-opacity": 0.25, "line-blur": 5 }} />
+            <Layer id="evacuation-routes-label" type="symbol" layout={{ "text-field": ["get", "name"], "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"], "text-size": 11, "symbol-placement": "line", "text-offset": [0, -1] }} paint={{ "text-color": "#10b981", "text-halo-color": "rgba(0,0,0,0.8)", "text-halo-width": 1.5 }} />
           </Source>
         )}
         <Source id="exposure-roads" type="geojson" data={exposureRoadsGeoJSON as any}>

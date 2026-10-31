@@ -1,0 +1,163 @@
+dataset      : TERRAPULSE_DATA\13_MODEL_DATASETS\landslide_dataset_v0.1.csv
+rows x cols  : 17092 x 56
+label balance: {1: 8546, 0: 8546}
+
+--- feature set ---
+excluded, leaky by design : 8  ['event_year', 'year_source', 'rain_annual_mm', 'rain_monsoon_mm', 'rain_monsoon_max1d_mm', 'rain_monsoon_max5d_mm', 'rain_anomaly', 'rain_monsoon_anomaly']
+excluded, identifier      : 9  ['point_id', 'SLIDE_NO', 'STATE', 'DISTRICT', 'INITIATION', 'lon', 'lat', 'dem_tile', 'edge_pixel']
+excluded, redundant       : ['dist_road_km', 'dist_river_km', 'dist_water_km', 'texture_sum_gkg', 'landcover_name', 'low_slope_review', 'rain_data_gap']
+excluded, constant        : ['lc_mangrove_pct']
+excluded, many levels     : none
+numeric features          : 32
+categorical features      : 1  ['road_fclass']
+total features            : 33
+
+--- spatial blocking ---
+block size    : 0.50 deg  (about 56 km)
+blocks used   : 130
+points/block  : median 61  min 1  max 974
+
+==============================================================================
+SPATIAL BLOCK CROSS-VALIDATION  (5 folds, whole blocks held out)
+==============================================================================
+
+--- logreg ---
+  metric                 mean      std
+  roc_auc              0.6725   0.0153
+  avg_precision        0.6437   0.0105
+  precision            0.5640   0.0208
+  recall               0.9073   0.0405
+  f1                   0.6950   0.0186
+  cuts chosen on validation blocks: 0.38, 0.29, 0.28, 0.30, 0.25
+  pooled out-of-fold (threshold = median of fold thresholds):
+    roc_auc 0.6729   avg_precision 0.6432   f1 0.6963   threshold 0.29
+    confusion  tn 2422  fp 6124  fn 710  tp 7836
+    false negative rate 0.0831   false positive rate 0.7166
+
+--- rf ---
+  metric                 mean      std
+  roc_auc              0.7338   0.0283
+  avg_precision        0.6925   0.0222
+  precision            0.6116   0.0122
+  recall               0.8718   0.0893
+  f1                   0.7170   0.0358
+  cuts chosen on validation blocks: 0.42, 0.37, 0.31, 0.45, 0.38
+  pooled out-of-fold (threshold = median of fold thresholds):
+    roc_auc 0.7316   avg_precision 0.6900   f1 0.7220   threshold 0.38
+    confusion  tn 3744  fp 4802  fn 1005  tp 7541
+    false negative rate 0.1176   false positive rate 0.5619
+
+--- xgb ---
+  metric                 mean      std
+  roc_auc              0.7393   0.0257
+  avg_precision        0.7078   0.0211
+  precision            0.6159   0.0266
+  recall               0.8603   0.0550
+  f1                   0.7165   0.0198
+  cuts chosen on validation blocks: 0.24, 0.23, 0.21, 0.27, 0.12
+  pooled out-of-fold (threshold = median of fold thresholds):
+    roc_auc 0.7375   avg_precision 0.7057   f1 0.7188   threshold 0.23
+    confusion  tn 4110  fp 4436  fn 1263  tp 7283
+    false negative rate 0.1478   false positive rate 0.5191
+
+--- lgbm ---
+  metric                 mean      std
+  roc_auc              0.7408   0.0268
+  avg_precision        0.7132   0.0239
+  precision            0.6164   0.0259
+  recall               0.8566   0.0647
+  f1                   0.7152   0.0230
+  cuts chosen on validation blocks: 0.21, 0.25, 0.18, 0.29, 0.13
+  pooled out-of-fold (threshold = median of fold thresholds):
+    roc_auc 0.7393   avg_precision 0.7122   f1 0.7190   threshold 0.21
+    confusion  tn 3938  fp 4608  fn 1163  tp 7383
+    false negative rate 0.1361   false positive rate 0.5392
+
+==============================================================================
+LEAVE-ONE-STATE-OUT  (train on 7 states, predict the state never seen)
+==============================================================================
+
+--- logreg ---
+  held-out state           auc    avgP    prec     rec      f1
+  Arunachal Pradesh     0.6448  0.4524  0.3480  0.9666  0.5117
+  Assam                 0.7882  0.6023  0.5442  0.8189  0.6539
+  Manipur               0.6088  0.6995  0.6676  0.8978  0.7658
+  Meghalaya             0.5594  0.6229  0.6162  0.4751  0.5366
+  Mizoram               0.5201  0.6482  0.6383  0.9256  0.7555
+  Nagaland              0.5929  0.6245  0.5549  0.9694  0.7058
+  Sikkim                0.6489  0.5555  0.5569  0.3882  0.4575
+  Tripura               0.6771  0.5408  0.3969  0.7761  0.5253
+  MEAN                  0.6300  0.5933  0.5404  0.7772  0.6140   (mean)
+
+--- rf ---
+  held-out state           auc    avgP    prec     rec      f1
+  Arunachal Pradesh     0.7424  0.5860  0.3808  0.9189  0.5384
+  Assam                 0.8631  0.7054  0.6435  0.8910  0.7473
+  Manipur               0.6603  0.7139  0.6805  0.9454  0.7914
+  Meghalaya             0.6421  0.7141  0.6092  0.8740  0.7179
+  Mizoram               0.4899  0.6180  0.6382  0.5901  0.6132
+  Nagaland              0.6344  0.6441  0.5621  0.9406  0.7036
+  Sikkim                0.6300  0.5387  0.4480  0.7576  0.5630
+  Tripura               0.7869  0.6510  0.5000  0.8806  0.6378
+  MEAN                  0.6811  0.6464  0.5578  0.8498  0.6641   (mean)
+
+--- xgb ---
+  held-out state           auc    avgP    prec     rec      f1
+  Arunachal Pradesh     0.7324  0.5566  0.3973  0.9361  0.5579
+  Assam                 0.8102  0.6706  0.4896  0.9022  0.6347
+  Manipur               0.6720  0.7500  0.6756  0.9149  0.7772
+  Meghalaya             0.6566  0.6981  0.6300  0.8405  0.7202
+  Mizoram               0.5250  0.6499  0.6366  0.6596  0.6479
+  Nagaland              0.6334  0.6664  0.5862  0.8560  0.6959
+  Sikkim                0.6564  0.5502  0.4955  0.7100  0.5836
+  Tripura               0.7845  0.6410  0.4882  0.9254  0.6392
+  MEAN                  0.6838  0.6479  0.5499  0.8431  0.6571   (mean)
+
+--- lgbm ---
+  held-out state           auc    avgP    prec     rec      f1
+  Arunachal Pradesh     0.7364  0.5537  0.3890  0.9399  0.5503
+  Assam                 0.8178  0.6784  0.4881  0.9231  0.6386
+  Manipur               0.6671  0.7470  0.6953  0.8317  0.7574
+  Meghalaya             0.6593  0.7069  0.6451  0.7503  0.6937
+  Mizoram               0.5180  0.6490  0.6330  0.7845  0.7006
+  Nagaland              0.6277  0.6652  0.5791  0.8701  0.6954
+  Sikkim                0.6618  0.5624  0.5044  0.6681  0.5748
+  Tripura               0.7897  0.6442  0.4697  0.9254  0.6231
+  MEAN                  0.6847  0.6509  0.5505  0.8366  0.6542   (mean)
+
+==============================================================================
+model selection (mean F1 across folds, the metric that matters here)
+==============================================================================
+  rf       F1 0.7170   (ROC-AUC 0.7338)
+  xgb      F1 0.7165   (ROC-AUC 0.7393)
+  lgbm     F1 0.7152   (ROC-AUC 0.7408)
+  logreg   F1 0.6950   (ROC-AUC 0.6725)
+
+selected model: rf
+note: the tree models are statistically tied on ROC-AUC (spread 0.003
+      against a fold-to-fold standard deviation of about 0.026), so the
+      choice is made on F1, the metric tied to the warning decision.
+==============================================================================
+
+--- top feature importances, rf refit on all data ---
+    num__dist_road_m             0.0717
+    num__tri_m                   0.0660
+    num__elevation_m             0.0551
+    num__lc_tree_pct             0.0542
+    num__slope_deg               0.0516
+    num__bulk_density_kgdm3      0.0490
+    num__lc_grass_pct            0.0447
+    num__rain_clim_annual_mm     0.0414
+    num__clay_gkg                0.0410
+    num__sand_gkg                0.0386
+    num__lc_crop_pct             0.0359
+    num__rain_clim_max5d_mm      0.0358
+    num__soc_gkg                 0.0358
+    num__rain_clim_monsoon_mm    0.0344
+    num__dist_water_m            0.0324
+
+wrote models\landslide_v0.1\rf.joblib
+wrote feature_schema.json, thresholds.json, metrics.json, training_report.txt in models\landslide_v0.1
+
+These numbers come from cross-validation on the dataset above. They are
+not production performance, and the score is not a calibrated probability.

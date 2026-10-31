@@ -139,6 +139,10 @@ export default function App() {
   const [modelInfo, setModelInfo] = useState<any>(null);
   const [now, setNow] = useState(new Date());
   const [broadcastWarning, setBroadcastWarning] = useState<Warning | null>(null);
+  // Geo-tagged citizen / field-officer reports, drawn on the main map.
+  const [reportPoints, setReportPoints] = useState<Array<{
+    id: number | string; lat: number; lon: number; hazardType: string; status?: string;
+  }>>([]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -203,6 +207,25 @@ export default function App() {
     }
   }, [regionState.region]);
 
+  const fetchReportPoints = useCallback(async () => {
+    try {
+      const reports = await rpcCall({ func: 'get_verification_reports' });
+      setReportPoints(
+        (Array.isArray(reports) ? reports : [])
+          .filter((r: any) => r.latitude != null && r.longitude != null)
+          .map((r: any) => ({
+            id: r.id,
+            lat: r.latitude,
+            lon: r.longitude,
+            hazardType: r.hazard_type || 'landslide',
+            status: r.status,
+          }))
+      );
+    } catch (err) {
+      console.error('[TERRAPULSE] Failed to fetch report points', err);
+    }
+  }, []);
+
   const fetchModelInfo = useCallback(async () => {
     try {
       const info = await rpcCall({ func: 'get_model_info' });
@@ -215,8 +238,16 @@ export default function App() {
   useEffect(() => {
     fetchAll();
     fetchModelInfo();
+    fetchReportPoints();
     console.log('[TERRAPULSE] Dashboard mounted â€” SIH 2026 TerraPulse.ai');
-  }, [fetchAll, fetchModelInfo]);
+  }, [fetchAll, fetchModelInfo, fetchReportPoints]);
+
+  // A report filed in the Citizen Portal should reach the authority map
+  // without a reload, so this polls on the same order as the 15-minute cycle.
+  useEffect(() => {
+    const id = setInterval(fetchReportPoints, 60000);
+    return () => clearInterval(id);
+  }, [fetchReportPoints]);
 
   useEffect(() => {
     if (activeView === 'curator') fetchPendingVerifications();
@@ -250,6 +281,8 @@ export default function App() {
           risk_level: fCell.predictions[forecastHourIdx].risk_level,
           rainfall_24h: fCell.predictions[forecastHourIdx].precipitation_mm,
         };
+      } else {
+        console.warn('Forecast cell missing or predictions undefined for cell:', cell.location_id, fCell);
       }
       return cell;
     });
@@ -262,7 +295,7 @@ export default function App() {
     return riskMapCells;
   }, [activeView, forecastCells, simulationCells, riskMapCells]);
 
-  const selectedCell = riskMapCells.find(c => c.location_id === selectedCellId);
+  const selectedCell = displayCells.find(c => c.location_id === selectedCellId);
   const criticalCount = warnings.filter(w => w.risk_level === 'critical').length;
   const highCount = warnings.filter(w => w.risk_level === 'high').length;
   const avgRisk = riskMapCells.length
@@ -538,9 +571,11 @@ export default function App() {
                     icon: Activity, color: 'text-amber-400', bg: 'bg-amber-950/30',
                   },
                   {
-                    label: 'Model Status', value: modelInfo?.model_name?.split(' ')[0] || 'Loading',
+                    label: 'Model Status', value: modelInfo?.model_name || 'Loading',
                     icon: ShieldCheck, color: 'text-emerald-400', bg: 'bg-emerald-950/30',
-                    sub: modelInfo?.accuracy ? `Acc: ${(modelInfo.accuracy * 100).toFixed(1)}%` : 'Candidate model',
+                    sub: modelInfo?.recall
+                      ? `${modelInfo.artifact_version ? modelInfo.artifact_version + ' - ' : ''}Recall ${(modelInfo.recall * 100).toFixed(0)}% / AUC ${(modelInfo.roc_auc ?? 0).toFixed(2)}`
+                      : 'Loading metrics',
                   },
                 ].map((stat, i) => (
                   <Card key={i} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
@@ -621,11 +656,13 @@ export default function App() {
                         <GeospatialViewer
                           key={`map-${regionState.region}-overview`}
                           cells={displayCells}
+                          reportPoints={reportPoints}
                           routeSafety={routeSafety}
                           historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
                           eventLayers={geoData?.event_layers || []}
                           infrastructure={geoData?.infrastructure || { highways: [], settlements: [] }}
                           nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
+                          evacuationRoutes={geoData?.evacuation_routes || []}
                           onCellClick={(cell) => setSelectedCellId(cell ? cell.location_id : null)}
                           initialSelectedCellId={selectedCellId}
                         />
@@ -850,9 +887,11 @@ export default function App() {
             <GeospatialViewer
               key={`map-${regionState.region}-fullscreen`}
               cells={displayCells}
+              reportPoints={reportPoints}
               routeSafety={routeSafety}
               historicalEvents={geoData?.historical_landslides || geoData?.historical_events || []}
               nh10Route={nh10Route || geoData?.nh10_route || (geoData?.infrastructure?.highways?.[0]?.route) || []}
+              evacuationRoutes={geoData?.evacuation_routes || []}
               onCellClick={(cell) => setSelectedCellId(cell ? cell.location_id : null)}
               initialSelectedCellId={selectedCellId}
             />

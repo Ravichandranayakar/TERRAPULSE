@@ -84,3 +84,7 @@ sim_record_*.json
 records
 AGENTS.md
 TERRAPULSE_DATA
+model_architecture.md
+
+# Ignore downloaded AI agent plugins
+.agents/plugins/

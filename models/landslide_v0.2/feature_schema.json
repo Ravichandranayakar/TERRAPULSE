@@ -1,0 +1,87 @@
+{
+  "artifact_version": "landslide_v0.1",
+  "model": "rf",
+  "dataset": "TERRAPULSE_DATA\\13_MODEL_DATASETS\\landslide_dataset_v0.1.csv",
+  "label": {
+    "column": "landslide",
+    "positive": "recorded landslide (GSI inventory)",
+    "negative": "generated negative (see build_negatives.py)"
+  },
+  "numeric_features": [
+    "elevation_m",
+    "slope_deg",
+    "curvature_1pm",
+    "tri_m",
+    "rain_clim_annual_mm",
+    "rain_clim_monsoon_mm",
+    "rain_clim_max1d_mm",
+    "rain_clim_max5d_mm",
+    "landcover_class",
+    "lc_tree_pct",
+    "lc_shrub_pct",
+    "lc_grass_pct",
+    "lc_crop_pct",
+    "lc_built_pct",
+    "lc_bare_pct",
+    "lc_snow_pct",
+    "lc_water_pct",
+    "lc_wetland_pct",
+    "lc_moss_pct",
+    "clay_gkg",
+    "sand_gkg",
+    "silt_gkg",
+    "bulk_density_kgdm3",
+    "soc_gkg",
+    "nitrogen_gkg",
+    "dist_road_m",
+    "dist_river_m",
+    "dist_water_m",
+    "aspect_sin",
+    "aspect_cos",
+    "miss_rain_clim",
+    "miss_soil"
+  ],
+  "categorical_features": [
+    "road_fclass"
+  ],
+  "excluded_leaky": [
+    "event_year",
+    "year_source",
+    "rain_annual_mm",
+    "rain_monsoon_mm",
+    "rain_monsoon_max1d_mm",
+    "rain_monsoon_max5d_mm",
+    "rain_anomaly",
+    "rain_monsoon_anomaly"
+  ],
+  "excluded_identifier": [
+    "point_id",
+    "SLIDE_NO",
+    "STATE",
+    "DISTRICT",
+    "INITIATION",
+    "lon",
+    "lat",
+    "dem_tile",
+    "edge_pixel"
+  ],
+  "excluded_redundant": [
+    "dist_road_km",
+    "dist_river_km",
+    "dist_water_km",
+    "texture_sum_gkg",
+    "landcover_name",
+    "low_slope_review",
+    "rain_data_gap"
+  ],
+  "excluded_constant": [
+    "lc_mangrove_pct"
+  ],
+  "excluded_high_cardinality": [],
+  "imputation": "median, fitted inside each training fold",
+  "notes": [
+    "score is a ranking, not a calibrated probability: the 1:1 case/control design fixes the base rate at 0.5",
+    "negatives are constructed, not observed: absence of a GSI record is not evidence that no landslide occurred",
+    "event-year rainfall is excluded because negatives have no event date; only climatology is used"
+  ]
+}

@@ -197,11 +197,44 @@ class TwilioCellBroadcastGateway:
         )
 
 class NtfyCellBroadcastGateway:
-    """Sends real push notifications to ntfy.sh topics."""
-    
+    """Sends real push notifications to public ntfy.sh topics.
+
+    A topic is the subscription key typed into the ntfy app. ntfy only shows a
+    message on devices subscribed to the exact same topic name, so an unusable
+    topic is reported back instead of being silently rewritten.
+    """
+
+    TOPIC_ALPHABET = frozenset(
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+    )
+    MAX_TOPIC_LENGTH = 64
+
+    def _validate_topic(self, raw_topic: Any) -> tuple[str | None, str | None]:
+        topic = str(raw_topic or "").strip()
+        if not topic:
+            return None, "No topic name was given."
+        if len(topic) > self.MAX_TOPIC_LENGTH:
+            return None, (
+                "Topic name is "
+                + str(len(topic))
+                + " characters long; ntfy allows at most "
+                + str(self.MAX_TOPIC_LENGTH)
+                + "."
+            )
+        invalid = sorted(
+            {character for character in topic if character not in self.TOPIC_ALPHABET}
+        )
+        if invalid:
+            return None, (
+                "Topic name contains characters ntfy does not allow: "
+                + " ".join(repr(character) for character in invalid)
+                + ". Use only letters, numbers, hyphen (-) and underscore (_)."
+            )
+        return topic, None
+
     def dispatch(self, payload: BroadcastDispatchRequest) -> BroadcastDispatchResult:
         import urllib.request
-        
+
         messages = payload.payload.get("messages", [])
         alert_body = "TerraPulse Early Warning"
         alert_title = "Landslide Warning"
@@ -210,11 +243,14 @@ class NtfyCellBroadcastGateway:
                 alert_title = m.get("headline", alert_title)
                 alert_body = f"{m.get('description')} {m.get('instruction')}"
                 break
-        
-        success_count = 0
-        topics = payload.demo_phone_numbers
+
+        topics = [str(topic) for topic in payload.demo_phone_numbers]
 
         if not topics:
+            print(
+                "[TERRAPULSE] Cell broadcast: no ntfy topic given, simulation only "
+                "(no push notification sent)"
+            )
             return BroadcastDispatchResult(
                 status="SIMULATED_DISPATCH",
                 network_simulation={
@@ -230,40 +266,110 @@ class NtfyCellBroadcastGateway:
                 ],
             )
 
-        for topic in topics:
+        deliveries: list[dict[str, str]] = []
+        success_count = 0
+
+        for raw_topic in topics:
+            topic, problem = self._validate_topic(raw_topic)
+            if problem:
+                deliveries.append(
+                    {
+                        "topic": str(raw_topic).strip(),
+                        "status": "REJECTED",
+                        "detail": problem,
+                    }
+                )
+                continue
+
             try:
-                # topic could be a phone number or a string. ntfy topics just need to be valid URLs.
-                # strip out spaces or special characters just in case
-                clean_topic = "".join(c for c in str(topic) if c.isalnum() or c in "-_")
-                if not clean_topic:
-                    continue
-                    
-                req = urllib.request.Request(
-                    f"https://ntfy.sh/{clean_topic}",
+                request = urllib.request.Request(
+                    f"https://ntfy.sh/{topic}",
                     data=alert_body.encode("utf-8"),
                     headers={
                         "Title": alert_title,
                         "Priority": "urgent",
-                        "Tags": "warning,rotating_light"
+                        "Tags": "warning,rotating_light",
                     },
-                    method="POST"
+                    method="POST",
                 )
-                with urllib.request.urlopen(req, timeout=5) as response:
-                    if response.status == 200:
-                        success_count += 1
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-                pass # Fail silently for the demo
+                with urllib.request.urlopen(request, timeout=10) as response:
+                    http_status = response.status
+            except Exception as exc:
+                deliveries.append(
+                    {
+                        "topic": topic,
+                        "status": "FAILED",
+                        "detail": type(exc).__name__ + ": " + str(exc),
+                    }
+                )
+                continue
+
+            if http_status == 200:
+                success_count += 1
+                deliveries.append(
+                    {
+                        "topic": topic,
+                        "status": "SENT",
+                        "detail": "ntfy.sh accepted the message for this topic.",
+                    }
+                )
+            else:
+                deliveries.append(
+                    {
+                        "topic": topic,
+                        "status": "FAILED",
+                        "detail": "ntfy.sh returned HTTP " + str(http_status) + ".",
+                    }
+                )
+
+        if success_count == 0:
+            status = "DELIVERY_FAILED"
+        elif success_count < len(topics):
+            status = "PARTIALLY_DELIVERED_VIA_NTFY"
+        else:
+            status = "DELIVERED_VIA_NTFY"
+
+        summary = ", ".join(
+            item["topic"] + "=" + item["status"] for item in deliveries
+        )
+        print(
+            "[TERRAPULSE] Cell broadcast "
+            + status
+            + " ("
+            + str(success_count)
+            + "/"
+            + str(len(topics))
+            + " delivered)"
+            + (": " + summary if summary else "")
+        )
+        for item in deliveries:
+            if item["status"] != "SENT":
+                print("[TERRAPULSE]   " + item["topic"] + ": " + item["detail"])
+
+        sent_topics = [
+            item["topic"] for item in deliveries if item["status"] == "SENT"
+        ]
+        if sent_topics:
+            entity = "Published to ntfy.sh topic(s): " + ", ".join(sent_topics)
+            entity_status = "DELIVERED"
+        else:
+            entity = "ntfy.sh push delivery failed for every topic"
+            entity_status = "FAILED"
+
         return BroadcastDispatchResult(
-            status="DELIVERED_VIA_NTFY",
+            status=status,
             network_simulation={
-                "status": "LIVE_DEMO",
+                "status": "LIVE_DEMO" if success_count else "LIVE_DEMO_FAILED",
                 "target_cells": [],
                 "estimated_devices": success_count,
+                "deliveries": deliveries,
+                "note": (
+                    "ntfy.sh accepted the message. A device shows it only when the ntfy app "
+                    "is subscribed to the exact same topic name (topics are case-sensitive)."
+                ),
             },
             escalation=[
-                {"entity": f"Sent push notification to {success_count} ntfy topics", "status": "DELIVERED"},
+                {"entity": entity, "status": entity_status},
                 {"entity": "District administration", "status": "SIMULATED"},
                 {"entity": "Road authority / control room", "status": "SIMULATED"},
                 {"entity": "Police / emergency response", "status": "SIMULATED"},

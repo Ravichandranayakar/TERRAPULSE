@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { Activity, Play, Square, Loader2, Thermometer, Droplets, ArrowUpRight } from 'lucide-react';
-import { streamCall } from '../api';
+import { rpcCall, streamCall } from '../api';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Separator } from '../components/ui/separator';
 import { cn } from '../lib/utils';
@@ -15,6 +15,11 @@ export function LiveMonitor() {
   const [currentProgress, setCurrentProgress] = useState(0);
   const [currentStatus, setCurrentStatus] = useState('Standby');
   const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    rpcCall({ func: 'get_model_info' })
+      .then(setModelInfo)
+      .catch(() => setModelInfo(null));
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -188,7 +193,7 @@ export function LiveMonitor() {
           <CardContent>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Monitoring is active for the Western Sector open-pit excavations. Simulation mode runs 
-              high-frequency risk re-calculations based on the Random Forest ensemble model.
+              high-frequency risk re-calculations based on the live trained susceptibility model.
             </p>
           </CardContent>
         </Card>
@@ -203,14 +208,14 @@ export function LiveMonitor() {
                 <Activity className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <div className="text-xs font-bold">Random Forest Classifier</div>
-                <div className="text-[10px] text-muted-foreground">v2.4.1 - Production Ensemble</div>
+                <div className="text-xs font-bold">{modelInfo?.model_name || 'Loading'}</div>
+                <div className="text-[10px] text-muted-foreground">{modelInfo?.artifact_version ? modelInfo.artifact_version + " - live artifact" : 'Loading'}</div>
               </div>
             </div>
             <div className="h-[1px] w-full bg-border/20" />
             <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase text-muted-foreground">
-               <div>Precision: <span className="text-primary">94.2%</span></div>
-               <div>Recall: <span className="text-primary">91.8%</span></div>
+               <div>Recall: <span className="text-primary">{modelInfo?.recall != null ? (modelInfo.recall * 100).toFixed(0) + "%" : "--"}</span></div>
+               <div>ROC-AUC: <span className="text-primary">{modelInfo?.roc_auc != null ? modelInfo.roc_auc.toFixed(2) : "--"}</span></div>
             </div>
           </CardContent>
         </Card>

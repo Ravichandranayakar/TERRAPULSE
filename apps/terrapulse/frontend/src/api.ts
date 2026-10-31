@@ -285,6 +285,12 @@ export type CellBroadcastSimulation = CellBroadcastPreparation & {
     status: string;
     target_cells: string[];
     estimated_devices: number | null;
+    deliveries?: {
+      topic: string;
+      status: string;
+      detail: string;
+    }[];
+    note?: string;
   };
   escalation: { entity: string; status: string }[];
   simulation_logs: string[];
@@ -300,8 +306,11 @@ export function prepareCellBroadcast(warningId: number): Promise<CellBroadcastPr
   return postApi<CellBroadcastPreparation>("/api/alerts/cell-broadcast/prepare", { warning_id: warningId });
 }
 
-export function simulateCellBroadcast(warningId: number): Promise<CellBroadcastSimulation> {
-  return postApi<CellBroadcastSimulation>("/api/alerts/cell-broadcast/simulate", { warning_id: warningId });
+export function simulateCellBroadcast(warningId: number, demoPhoneNumbers?: string[]): Promise<CellBroadcastSimulation> {
+  return postApi<CellBroadcastSimulation>("/api/alerts/cell-broadcast/simulate", { 
+    warning_id: warningId,
+    demo_phone_numbers: demoPhoneNumbers
+  });
 }
 
 export type VerificationReport = {

@@ -128,10 +128,11 @@ export function XAIPanel({ cell, onClose }: XAIPanelProps) {
   };
 
   // Normalize display values so bars don't exceed 100
-  const chartData = (contributingFactors || []).map(f => ({
+  const factorsArray = Array.isArray(contributingFactors) ? contributingFactors : [];
+  const chartData = factorsArray.map(f => ({
     ...f,
-    displayValue: Math.min(f.value, 100),
-    fill: FACTOR_COLORS[f.factor] || '#6366f1',
+    displayValue: Math.min(f?.value || 0, 100),
+    fill: FACTOR_COLORS[f?.factor] || '#6366f1',
   }));
 
   return (

@@ -32,7 +32,7 @@ export function AlertsList({ alerts, onResolved }: AlertsListProps) {
     if (!resolvingId) return;
     setIsSubmitting(true);
     try {
-      await rpcCall({ func: 'resolve_alert', args: { alert_id: resolvingId, notes } });
+      await rpcCall({ func: 'resolve_warning', args: { warning_id: resolvingId, resolution_notes: notes } });
       setResolvingId(null);
       setNotes('');
       onResolved();

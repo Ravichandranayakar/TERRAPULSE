@@ -165,6 +165,42 @@ class CellBroadcastService:
             )
         )
 
+        live_delivery = dispatch_result.status in {
+            "DELIVERED_VIA_NTFY",
+            "PARTIALLY_DELIVERED_VIA_NTFY",
+            "DELIVERY_FAILED",
+        }
+        sent_topics = [
+            item.get("topic", "")
+            for item in dispatch_result.network_simulation.get("deliveries", [])
+            if item.get("status") == "SENT"
+        ]
+        simulation_logs = [
+            "[00:00] Loading warning record... OK",
+            "[00:01] Validating target geometry... OK",
+            "[00:02] Generating CAP-compatible alert payload... OK",
+            "[00:03] Preparing Cell Broadcast message... OK",
+            "[00:04] Resolving target geographic cells...",
+            "[00:05] Network integration mode: SIMULATION",
+            "[00:06] Telecom gateway connection: NOT CONNECTED",
+            "[00:07] Simulating cell targeting...",
+            "[00:08] Simulating multilingual broadcast payload...",
+            "[00:09] Simulating escalation workflow...",
+            "[00:10] Dispatch simulation completed",
+        ]
+        if live_delivery:
+            simulation_logs[5] = "[00:05] Network mode: LIVE PUSH FALLBACK via ntfy.sh"
+            simulation_logs[7] = "[00:07] Publishing alert to ntfy.sh topic(s): " + (
+                ", ".join(sent_topics) if sent_topics else "none accepted"
+            )
+            simulation_logs[8] = "[00:08] Multilingual payload published"
+            simulation_logs[9] = "[00:09] Escalation workflow recorded"
+            simulation_logs[10] = (
+                "[00:10] Live push accepted by ntfy.sh for " + str(len(sent_topics)) + " topic(s)"
+                if sent_topics
+                else "[00:10] Live push FAILED - check the topic name and the phone subscription"
+            )
+
         return {
             "simulation": True,
             "status": dispatch_result.status,
@@ -178,19 +214,7 @@ class CellBroadcastService:
             "payload": payload,
             "network_simulation": dispatch_result.network_simulation,
             "escalation": dispatch_result.escalation,
-            "simulation_logs": [
-                "[00:00] Loading warning record... ✓",
-                "[00:01] Validating target geometry... ✓",
-                "[00:02] Generating CAP-compatible alert payload... ✓",
-                "[00:03] Preparing Cell Broadcast message... ✓",
-                "[00:04] Resolving target geographic cells...",
-                "[00:05] Network integration mode: SIMULATION",
-                "[00:06] Telecom gateway connection: NOT CONNECTED",
-                "[00:07] Simulating cell targeting...",
-                "[00:08] Simulating multilingual broadcast payload...",
-                "[00:09] Simulating escalation workflow...",
-                "[00:10] Dispatch simulation completed ✓",
-            ],
+            "simulation_logs": simulation_logs,
             "dispatched_at": dispatched_at.isoformat(),
             "expires_at": expires_at.isoformat(),
             "audit": {

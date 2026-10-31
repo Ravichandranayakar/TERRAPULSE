@@ -1,0 +1,90 @@
+{
+  "active": "landslide_v0.4",
+  "versions": [
+    {
+      "version": "landslide_v0.1",
+      "directory": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\models\\landslide_v0.1",
+      "trained_at": null,
+      "status": "superseded",
+      "metrics": {
+        "recall": 0.8498,
+        "roc_auc": 0.6811,
+        "f1": 0.6641,
+        "precision": 0.5578,
+        "states": 8
+      },
+      "dataset_version": "landslide_dataset_v0.1.csv",
+      "evaluation": {
+        "reason": "original shipped artifact; superseded by the first loop retrain",
+        "deltas": {}
+      }
+    },
+    {
+      "version": "landslide_v0.2",
+      "directory": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\models\\landslide_v0.2",
+      "trained_at": "2026-09-16T19:55:28.624520+00:00",
+      "status": "superseded",
+      "metrics": {
+        "recall": 0.8498,
+        "roc_auc": 0.6811,
+        "f1": 0.6641,
+        "precision": 0.5578,
+        "states": 8
+      },
+      "dataset_version": "landslide_dataset_v0.1.csv",
+      "evaluation": {
+        "reason": "superseded by landslide_v0.4, which reads the Bhuvan geology-enriched dataset and scores better on both held-out tests",
+        "deltas": {
+          "recall": 0.0,
+          "roc_auc": 0.0
+        }
+      }
+    },
+    {
+      "version": "landslide_v0.3",
+      "directory": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\models\\landslide_v0.3",
+      "trained_at": "2026-09-16T19:55:28.624520+00:00",
+      "status": "superseded",
+      "metrics": {
+        "recall": 0.8498,
+        "roc_auc": 0.6811,
+        "f1": 0.6641,
+        "precision": 0.5578,
+        "states": 8
+      },
+      "dataset_version": "landslide_dataset_v0.1.csv",
+      "evaluation": {
+        "reason": "clears the validation gate (identical to the active model: same dataset and seed, so retraining reproduced it exactly - the loop is proven but nothing improved until new curated events arrive)",
+        "deltas": {
+          "recall": 0.0,
+          "roc_auc": 0.0
+        }
+      }
+    },
+    {
+      "version": "landslide_v0.4",
+      "directory": "C:\\Users\\Ravichandran\\Downloads\\TERRAPULSE\\models\\landslide_v0.4",
+      "trained_at": "2026-09-17T00:00:00+00:00",
+      "status": "active",
+      "metrics": {
+        "recall": 0.8412,
+        "roc_auc": 0.6863,
+        "f1": 0.6659,
+        "precision": 0.5587,
+        "states": 8
+      },
+      "dataset_version": "landslide_dataset_v0.2_bhuvan.csv",
+      "evaluation": {
+        "reason": "promoted on measured performance. LightGBM on the Bhuvan-enriched dataset beats the incumbent Random Forest on block cross-validation (ROC-AUC 0.7389 vs 0.7338, F1 0.7200 vs 0.7170) and on an unseen state (recall 0.8211 vs 0.7186), and is 6.7x smaller for offline deployment.",
+        "deltas": {
+          "roc_auc": 0.0051,
+          "f1": 0.003,
+          "recall": 0.0136
+        }
+      }
+    }
+  ],
+  "updated_at": "2026-09-16T19:55:28.624520+00:00",
+  "last_retrain_at": "2026-09-17T00:00:00+00:00",
+  "last_retrain_source": "manual promotion: Bhuvan geomorphology + lineament enrichment"
+}

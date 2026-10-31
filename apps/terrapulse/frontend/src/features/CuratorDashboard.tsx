@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildTrainingDataset,
   getTrainingBuffer,
@@ -19,6 +19,7 @@ import {
   CheckCircle,
   Clock,
   Database,
+  Inbox,
   Loader2,
   MapPin,
   ShieldCheck,
@@ -84,9 +85,14 @@ export function CuratorDashboard({
   const [saving, setSaving] = useState(false);
   const [datasetMessage, setDatasetMessage] = useState('');
   const [creatingDemo, setCreatingDemo] = useState(false);
+  const knownReportIds = useRef<Set<number>>(new Set());
+  const [newReportIds, setNewReportIds] = useState<number[]>([]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setNewReportIds([]);
+    }
     setError('');
     try {
       const [nextReports, nextStats, nextBuffers] = await Promise.all([
@@ -94,6 +100,15 @@ export function CuratorDashboard({
         getVerificationStats(),
         getTrainingBuffer(),
       ]);
+      if (silent && tab === 'pending_review' && knownReportIds.current.size > 0) {
+        const arrived = nextReports
+          .map(report => report.id)
+          .filter(id => !knownReportIds.current.has(id));
+        if (arrived.length > 0) {
+          setNewReportIds(current => Array.from(new Set([...current, ...arrived])));
+        }
+      }
+      nextReports.forEach(report => knownReportIds.current.add(report.id));
       setReports(nextReports);
       setStats(nextStats);
       setBuffers(nextBuffers);
@@ -104,12 +119,17 @@ export function CuratorDashboard({
     } catch (loadError: any) {
       setError(loadError?.message || 'Unable to load verification workspace.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [onPendingCountChange, tab]);
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  useEffect(() => {
+    const timer = setInterval(() => { load(true); }, 15000);
+    return () => clearInterval(timer);
   }, [load]);
 
   const reportPoints = useMemo(() => reports
@@ -221,23 +241,26 @@ export function CuratorDashboard({
             Review, label, and route verified observations into future curated training datasets.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={load} disabled={loading}>
+        <Button variant="outline" size="sm" onClick={() => load()} disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
           Refresh Queue
         </Button>
-        {import.meta.env.DEV && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={createDemoVerification}
-            disabled={creatingDemo || loading}
-            className="border-amber-600/50 text-amber-300"
-          >
-            {creatingDemo ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <AlertTriangle className="h-4 w-4 mr-2" />}
-            Create Demo Verification
-          </Button>
-        )}
+
       </div>
+
+      {newReportIds.length > 0 && (
+        <div className="flex items-start gap-3 rounded-xl border border-emerald-600/50 bg-emerald-950/30 p-4">
+          <Inbox className="mt-0.5 h-5 w-5 shrink-0 text-emerald-300" />
+          <div>
+            <div className="text-sm font-bold text-emerald-200">
+              {newReportIds.length} new field report{newReportIds.length > 1 ? 's' : ''} received from the citizen portal
+            </div>
+            <p className="mt-1 text-xs text-emerald-100/80">
+              Waiting for review: {newReportIds.map(id => '#' + id).join(', ')}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {[

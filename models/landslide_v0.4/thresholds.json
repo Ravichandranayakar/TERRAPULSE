@@ -1,0 +1,6 @@
+{
+  "default": 0.5,
+  "f1_optimal_mean_over_folds": 0.18,
+  "high_recall_operating_point": 0.30888491830897546,
+  "note": "thresholds are tuned on training folds. They are not transferable probabilities and must be revisited after calibration against real event prevalence."
+}

@@ -495,7 +495,6 @@ def _save_cell_broadcast_simulation(result: dict):
             json.dumps(result, ensure_ascii=False),
         ))
         conn.commit()
-        _verification_repository.ensure_schema()
     finally:
         conn.close()
 
@@ -1067,6 +1066,7 @@ def _startup():
         else:
             print("[TERRAPULSE] Model already exists — skipping training")
         _seed_baseline_predictions()
+
     except Exception as e:
         print(f"[TERRAPULSE] Startup warning: {e}")
         init_db()

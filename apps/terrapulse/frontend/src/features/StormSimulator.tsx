@@ -299,6 +299,7 @@ export function StormSimulator({ cells = [], mapCells = [], historicalEvents = [
                 infrastructure={infrastructure}
                 nh10Route={nh10Route}
                 routeSafety={routeSafety}
+                dynamicRoute={true}
                 initialSelectedCellId={selectedCellId}
                 onCellClick={(cell) => onCellSelect?.(cell?.location_id || null)}
               />

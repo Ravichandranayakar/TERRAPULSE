@@ -8,7 +8,11 @@
 ## Overview
 TerraPulse.ai is a next-generation predictive intelligence platform designed for the complex geological terrain of the North Eastern Region (NER) of India, specifically focusing on the critical NH-10 highway corridor in North Sikkim.
 
-By leveraging real-time antecedent rainfall accumulation, soil moisture indices, and high-resolution slope telemetry, our Gradient Boosting machine learning engine accurately predicts landslide susceptibility *before* failure occurs.
+A LightGBM susceptibility model, trained on 17,092 points derived from the GSI landslide
+inventory, scores each monitoring cell from real terrain, soil, land-cover, distance,
+rainfall-climatology, and GSI/Bhuvan geomorphology and lineament features. On top of that
+ranking, a separate live trigger layer watches measured rainfall and soil moisture and
+raises the alert level when conditions match those recorded against historical events.
 
 ## Key Features
 
@@ -20,8 +24,57 @@ By leveraging real-time antecedent rainfall accumulation, soil moisture indices,
 ## Tech Stack
 * **Frontend:** React, Tailwind CSS, Vite, Lucide-React, Recharts (EOC Control Room Dark Aesthetic)
 * **Backend:** FastAPI, Python 3
-* **Machine Learning:** Scikit-learn (Gradient Boosting Classifier Ensemble), Pandas, NumPy
-* **Database:** SQLite (Migration-ready for PostgreSQL + PostGIS)
+* **Machine Learning:** LightGBM (the active model), XGBoost and scikit-learn Random
+  Forest (measured in the same run), Pandas, NumPy
+* **Geospatial:** rasterio, geopandas, pyogrio, shapely; Copernicus DEM, ESA WorldCover,
+  SoilGrids, OpenStreetMap, Bhuvan (ISRO/NRSC) geomorphology and lineaments
+* **Database:** SQLite for application state, PostgreSQL 16 + PostGIS 3.6 for spatial queries
+
+## How It Works
+
+The operational path runs on a timer and never trains anything:
+
+```text
+live sources
+    -> 01 data ingestion
+    -> 02 data preprocessing
+    -> 03 geo processing
+    -> 04 feature engineering
+    -> 05 load the trained model
+    -> 06 risk engine
+    -> 07 map + alerts
+```
+
+Stages 01-04 assemble a feature vector for each monitoring cell. Stage 05 loads the
+saved artifact. Inference takes about 46 ms per cell.
+
+The whole path is orchestrated by `apps/terrapulse/backend/pipeline.py`:
+
+```bash
+python pipeline.py                  full pipeline, human readable
+python pipeline.py --json           machine readable
+python pipeline.py --stages 01,04   selected stages
+python pipeline.py --live           runtime inference path only
+python pipeline.py --feedback       check/run the retraining cycle
+```
+
+Retraining is **not** part of this path. It is a separate offline process
+(`feedback_loop.py`) that promotes a candidate only when validation does not regress.
+
+### Where the numbers come from
+
+| Feature group | Source | New data arrives |
+|---|---|---|
+| Elevation, slope, curvature, aspect | Copernicus DEM GLO-30 | yearly |
+| Land cover | ESA WorldCover 2021 | yearly |
+| Soil texture | SoilGrids | effectively static |
+| Rainfall climatology | IMD gridded, 1991-2025 | daily |
+| Distance to roads, rivers | OpenStreetMap | continuous |
+| Live rainfall, soil moisture | Open-Meteo | hourly |
+
+No feature value is typed in by hand. Each one is computed from its source file at
+the coordinate being scored, and the pipeline rebuilds them automatically when a
+source dataset is republished.
 
 ## Local Development Setup
 
@@ -40,7 +93,7 @@ cd apps/terrapulse/frontend
 npm run dev
 ```
 
-## Development Risk Predictor
+## Storm Simulator and the Development Predictor
 
 The Storm Simulator currently uses the development risk contract rather than a
 trained or validated machine-learning model. Scenario feature values are sent
@@ -52,9 +105,11 @@ probability or scientifically validated prediction.
 
 The frontend keeps the response in the existing `simulationCells` state, which
 is merged into `displayCells` and consumed by both MapLibre 2D and 3D views.
-When validated Indian environmental and landslide datasets are ready, replace
-the predictor implementation behind the same risk service and API contract;
-the simulator and map consumers should not need to change.
+The trained susceptibility model is served behind the same risk service contract at
+`/api/risk/predict-trained`, and the live cycle uses it for every monitoring cell. The
+simulator still runs on the development predictor. Moving it onto the trained model
+means assembling the same feature vector for scenario cells, and the shared contract
+means the map consumers do not change.
 
 ---
 
