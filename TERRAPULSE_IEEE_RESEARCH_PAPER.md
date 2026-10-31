@@ -41,8 +41,8 @@ Empirical geotechnical studies by the Geological Survey of India (GSI) demonstra
 
 The systematic architecture of TerraPulse is illustrated in Fig. 1. The platform is organized into four loosely coupled tiers: Data Ingestion & Spatial ETL, Dual-Engine Hazard Assessment, Backend Core Services, and Multi-Channel Action Tier.
 
-![Fig. 1. Systematic Architectural Diagram](model_graphs/graph_master_presentation_dashboard.png)
-*Fig. 1. Systematic architecture of the TerraPulse decoupled early warning framework showing data sources, the dual-engine hazard pipeline, FastAPI services, and multi-channel dissemination.*
+![Fig. 1. Systematic Architectural Diagram](model_graphs/system_architecture_diagram.png)
+*Fig. 1. Systematic architecture of the TerraPulse decoupled early warning framework showing data sources, the 7-stage spatial ETL pipeline, dual-engine hazard assessment, FastAPI services, and multi-channel dissemination.*
 
 ### A. Mathematical Formulation of Decoupled Hazard Fusion
 
@@ -188,6 +188,11 @@ The dominant factors align with Himalayan field geology:
 2. `elevation_m` (**Gain: 943.0**): Delineates high-altitude permafrost and glacial debris horizons.
 3. `dist_water_m` & `dist_river_m` (**Gains: 929.0 & 803.0**): Captures toe erosion by energetic Himalayan river currents.
 4. `sand_gkg` & `clay_gkg` (**Gains: 772.0 & 758.0**): Directly influences soil internal friction angles and plasticity slip planes.
+
+Fig. 8 provides a comprehensive multi-panel summary integrating ROC discrimination, precision-recall dynamics, alert threshold bounds, state-by-state LOSO transferability, confusion matrix error reduction, and feature importance rankings.
+
+![Fig. 8. Master Model Evaluation Dashboard](model_graphs/graph_master_presentation_dashboard.png)
+*Fig. 8. Master multi-dimensional model evaluation and comparative validation dashboard summarizing the benchmark suite across 17,092 GSI ground-truth records.*
 
 ---
 
