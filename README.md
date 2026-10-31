@@ -5,6 +5,12 @@
 
 *SIH 2026 Problem Statement: SIH26001*
 
+## System Architecture
+
+TerraPulse decouples static geotechnical slope vulnerability from transient meteorological triggers. The system architecture coordinates data ingestion, spatial ETL, the dual-engine hazard engine, FastAPI services, and multi-channel early warning dispatch:
+
+![TerraPulse System Architecture](model_graphs/system_architecture_diagram.png)
+
 ## Overview
 TerraPulse.ai is a next-generation predictive intelligence platform designed for the complex geological terrain of the North Eastern Region (NER) of India, specifically focusing on the critical NH-10 highway corridor in North Sikkim.
 
@@ -75,6 +81,23 @@ Retraining is **not** part of this path. It is a separate offline process
 No feature value is typed in by hand. Each one is computed from its source file at
 the coordinate being scored, and the pipeline rebuilds them automatically when a
 source dataset is republished.
+
+## Model Performance & Comparative Benchmark
+
+Models were validated over 17,092 ground-truth records from the Geological Survey of India (GSI) using **5-fold Spatial Block Cross-Validation (0.5° blocks, ~56 km)** and **Leave-One-State-Out (LOSO)** evaluation across all eight North-Eastern states:
+
+![TerraPulse Model Evaluation Suite](model_graphs/graph_master_presentation_dashboard.png)
+
+| Model Architecture | Dataset Configuration | F1-Score (Primary) | ROC-AUC (Ranking) | Recall (Detection) | Unseen State Recall | Artifact Size |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| Logistic Regression | v0.2 + Bhuvan | 0.6937 | 0.6689 | 90.28% | 83.61% | 0.05 MB |
+| Random Forest (Incumbent) | v0.2 + Bhuvan | 0.7070 | 0.7354 | 83.19% | 71.86% | 13.9 MB |
+| XGBoost (Benchmark) | v0.2 + Bhuvan | 0.7186 | 0.7424 | 87.52% | 68.69% | 2.1 MB |
+| **LightGBM (Active Shipped)** | **v0.2 + Bhuvan** | **0.7200** | **0.7389** | **88.54%** | **82.11%** | **2.1 MB (6.7x smaller)** |
+
+* **+10.25% Unseen State Detection:** LightGBM achieves 82.11% recall on unobserved mountain territory compared to Random Forest's 71.86%.
+* **305 Fewer Missed Landslides:** Reduces False Negatives from 1,502 down to 1,197 across regional ground truth records.
+* **Edge-Ready Footprint:** Compressed 2.1 MB binary runs in sub-12ms for offline disaster response checkpoints.
 
 ## Local Development Setup
 
