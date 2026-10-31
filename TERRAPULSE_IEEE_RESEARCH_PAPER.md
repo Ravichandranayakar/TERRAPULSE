@@ -33,7 +33,7 @@ Empirical geotechnical studies by the Geological Survey of India (GSI) demonstra
 
 The systematic architecture of TerraPulse is illustrated in Fig. 1. The platform is organized into four loosely coupled tiers: Data Ingestion & Spatial ETL, Dual-Engine Hazard Assessment, Backend Core Services, and Multi-Channel Action Tier.
 
-![Fig. 1. Systematic Architectural Diagram](model_graphs/system_architecture_diagram.png)
+![Fig. 1. Systematic Architectural Diagram](model_graphs/system_architecture_diagram.jpeg)
 *Fig. 1. Systematic architecture of the TerraPulse decoupled early warning framework showing data sources, the 7-stage spatial ETL pipeline, dual-engine hazard assessment, FastAPI services, and multi-channel dissemination.*
 
 ### A. Mathematical Formulation of Decoupled Hazard Fusion

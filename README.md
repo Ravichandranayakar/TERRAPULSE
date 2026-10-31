@@ -9,7 +9,7 @@
 
 TerraPulse decouples static geotechnical slope vulnerability from transient meteorological triggers. The system architecture coordinates data ingestion, spatial ETL, the dual-engine hazard engine, FastAPI services, and multi-channel early warning dispatch:
 
-![TerraPulse System Architecture](model_graphs/system_architecture_diagram.png)
+![TerraPulse System Architecture](model_graphs/system_architecture_diagram.jpeg)
 
 ## Overview
 TerraPulse.ai is a next-generation predictive intelligence platform designed for the complex geological terrain of the North Eastern Region (NER) of India, specifically focusing on the critical NH-10 highway corridor in North Sikkim.
